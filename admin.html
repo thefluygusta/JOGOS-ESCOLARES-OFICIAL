@@ -1,0 +1,176 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADM | Jogos Escolares</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Inter:wght@400;500;700;800&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+ min-height:100vh;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ padding:20px;
+ color:#fff;
+ font-family:Inter,Arial,sans-serif;
+ background:
+ radial-gradient(circle at 15% 15%,#51208a66,transparent 35%),
+ radial-gradient(circle at 85% 85%,#07569a66,transparent 35%),
+ #080b18;
+}
+
+.login{
+ width:100%;
+ max-width:440px;
+ padding:38px;
+ background:linear-gradient(145deg,#1b2140,#101528);
+ border:1px solid #8660c966;
+ border-radius:22px;
+ box-shadow:0 20px 65px #0009,0 0 35px #7538c522;
+}
+
+.logo{
+ text-align:center;
+ font-family:Orbitron,sans-serif;
+ font-size:23px;
+ font-weight:800;
+ margin-bottom:12px;
+}
+
+.logo span{color:#a66aff}
+
+.trophy{
+ text-align:center;
+ font-size:48px;
+ margin-bottom:18px;
+ filter:drop-shadow(0 0 15px #a36aff);
+}
+
+h1{
+ text-align:center;
+ font-family:Orbitron,sans-serif;
+ font-size:19px;
+ margin-bottom:10px;
+}
+
+.subtitle{
+ color:#a6aec9;
+ text-align:center;
+ font-size:13px;
+ line-height:1.6;
+ margin-bottom:30px;
+}
+
+label{
+ display:block;
+ font-size:12px;
+ font-weight:700;
+ margin:17px 0 9px;
+ color:#d8dafa;
+}
+
+input{
+ width:100%;
+ padding:15px;
+ border:1px solid #53628a66;
+ border-radius:10px;
+ outline:none;
+ background:#0b1123;
+ color:#fff;
+ font-size:14px;
+}
+
+input:focus{border-color:#a66aff;box-shadow:0 0 12px #963cff33}
+
+button{
+ width:100%;
+ padding:15px;
+ margin-top:25px;
+ border:0;
+ border-radius:10px;
+ background:linear-gradient(100deg,#923cf0,#247fe9);
+ color:white;
+ font-weight:800;
+ font-size:14px;
+ cursor:pointer;
+ transition:.25s;
+}
+
+button:hover{transform:translateY(-2px);box-shadow:0 8px 25px #743bda66}
+
+.notice{
+ display:none;
+ margin-top:18px;
+ padding:12px;
+ border-radius:9px;
+ background:#30254a;
+ color:#e0caff;
+ font-size:12px;
+ line-height:1.6;
+}
+
+.back{
+ display:block;
+ text-align:center;
+ margin-top:25px;
+ color:#aeb8d4;
+ text-decoration:none;
+ font-size:12px;
+}
+
+.back:hover{color:#fff}
+
+footer{
+ text-align:center;
+ color:#747e9e;
+ font-size:10px;
+ margin-top:25px;
+}
+</style>
+</head>
+<body>
+
+<div class="login">
+ <div class="trophy">🏆</div>
+ <div class="logo">JOGOS <span>ESCOLARES</span></div>
+
+ <h1>PAINEL ADMINISTRATIVO</h1>
+ <p class="subtitle">
+  Área exclusiva de administração.<br>
+  Entre para gerenciar seu campeonato.
+ </p>
+
+ <form id="loginForm">
+  <label for="email">E-MAIL DO ADMINISTRADOR</label>
+  <input id="email" type="email" placeholder="Digite seu e-mail" required>
+
+  <label for="senha">SENHA</label>
+  <input id="senha" type="password" placeholder="Digite sua senha" required>
+
+  <button type="submit">ENTRAR NO PAINEL →</button>
+ </form>
+
+ <div class="notice" id="notice">
+  A tela de login foi criada! A autenticação segura ainda precisa ser configurada.
+  Nenhuma senha foi salva ou verificada.
+ </div>
+
+ <a class="back" href="index.html">← Voltar para o site público</a>
+
+ <footer>JOGOS ESCOLARES · ÁREA ADMINISTRATIVA</footer>
+</div>
+
+<script>
+document.getElementById("loginForm").addEventListener("submit",function(event){
+ event.preventDefault();
+ document.getElementById("notice").style.display="block";
+});
+</script>
+
+</body>
+</html>

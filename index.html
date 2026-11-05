@@ -1,0 +1,270 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JOGOS ESCOLARES | Arena</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg:#080b18;
+  --panel:#11172c;
+  --panel2:#171d38;
+  --purple:#963cff;
+  --blue:#258cff;
+  --gold:#e9bd59;
+  --white:#f5f5ff;
+  --muted:#929bb8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:radial-gradient(ellipse at 15% 0%,#24104b 0,transparent 35%),
+  radial-gradient(ellipse at 90% 20%,#102d59 0,transparent 35%),var(--bg);
+  color:var(--white);
+  font-family:Inter,Arial,sans-serif;
+  min-height:100vh;
+}
+header{
+  position:sticky;top:0;z-index:10;
+  background:#090d1bea;
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid #5264a044;
+}
+.nav{
+  max-width:1250px;margin:auto;padding:17px 22px;
+  display:flex;align-items:center;justify-content:space-between;gap:15px;
+}
+.logo{
+  font-family:Orbitron,sans-serif;font-weight:800;
+  letter-spacing:1px;font-size:18px;
+}
+.logo span{color:#a76aff}
+nav{display:flex;gap:22px;flex-wrap:wrap}
+nav a{color:#c6cbe0;text-decoration:none;font-size:13px;font-weight:600}
+nav a:hover{color:#7bbcff}
+.hero{
+  max-width:1250px;margin:auto;padding:65px 22px 45px;
+  display:grid;grid-template-columns:1.2fr .8fr;gap:35px;align-items:center;
+}
+.tag{
+  display:inline-block;padding:8px 13px;border-radius:30px;
+  background:#923dff20;border:1px solid #a45aff70;
+  color:#c89bff;font-size:11px;font-weight:800;letter-spacing:1px;
+}
+h1{
+  font-family:Orbitron,sans-serif;font-size:clamp(32px,5vw,57px);
+  line-height:1.16;margin:23px 0;
+}
+h1 span{
+  background:linear-gradient(90deg,#a66aff,#40aaff,#f2c76c);
+  background-clip:text;color:transparent;
+}
+.hero p{color:var(--muted);line-height:1.8;max-width:550px}
+.actions{display:flex;gap:12px;margin-top:25px;flex-wrap:wrap}
+.btn{
+  padding:13px 19px;border-radius:10px;text-decoration:none;
+  font-weight:800;font-size:13px;display:inline-block;
+  transition:.25s;border:1px solid #586b9b66;
+  color:white;background:#17213b;cursor:pointer;
+}
+.btn.primary{
+  background:linear-gradient(110deg,#8438e9,#287fe9);
+  border:0;box-shadow:0 7px 28px #6638df55;
+}
+.btn:hover{transform:translateY(-3px);box-shadow:0 8px 25px #398dff55}
+.hero-art{
+  min-height:280px;border-radius:25px;
+  background:linear-gradient(145deg,#26104d,#10294c 60%,#11172c);
+  border:1px solid #7d72d766;
+  box-shadow:0 20px 60px #0008,inset 0 0 40px #6c39bb25;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.hero-art:before,.hero-art:after{
+  content:"";position:absolute;border-radius:50%;
+  border:1px solid #a477ff55;width:240px;height:240px;
+}
+.hero-art:after{width:190px;height:190px;border-color:#36a5ff66}
+.ball{font-size:105px;filter:drop-shadow(0 0 28px #6e9cff);z-index:1}
+.art-label{
+  position:absolute;bottom:20px;font-family:Orbitron;
+  color:#c7d9ff;font-size:12px;letter-spacing:2px;
+}
+main{max-width:1250px;margin:auto;padding:0 22px 65px}
+.section{margin-top:35px;scroll-margin-top:90px}
+.section-title{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:12px;margin-bottom:18px;
+}
+h2{font-family:Orbitron;font-size:19px}
+.section-title small{color:var(--muted)}
+.stats{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:15px;
+}
+.card{
+  background:linear-gradient(145deg,#19203b,#101629);
+  border:1px solid #6574a52c;border-radius:15px;
+  padding:20px;box-shadow:0 12px 30px #0004;
+  transition:.25s;
+}
+.card:hover{transform:translateY(-5px);border-color:#8c66e9;box-shadow:0 15px 35px #552c9c33}
+.stat-number{font-family:Orbitron;font-size:29px;font-weight:800;color:#77baff}
+.stat-label{font-size:12px;color:var(--muted);margin-top:7px}
+.matches{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
+.match-top{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-bottom:20px}
+.match-teams{display:flex;justify-content:space-around;align-items:center;text-align:center}
+.team{font-weight:800;font-size:14px}
+.crest{
+  width:48px;height:48px;border-radius:14px;margin:0 auto 9px;
+  display:grid;place-items:center;font-size:23px;
+  background:linear-gradient(140deg,#6735c7,#167ac8);
+  box-shadow:0 0 18px #438cff55;
+}
+.vs{font-family:Orbitron;color:#a78aff;font-size:13px}
+.score{font-family:Orbitron;font-size:25px;color:#f4d078;margin-top:8px}
+.status{color:#63b9ff;font-size:10px;margin-top:8px}
+.table-wrap{overflow-x:auto;border-radius:15px;border:1px solid #586a9538}
+table{width:100%;border-collapse:collapse;min-width:520px;background:#11172c}
+th,td{padding:15px;text-align:center;font-size:12px;border-bottom:1px solid #52608030}
+th{color:#aeb8d4;background:#1b2340}
+td:first-child,th:first-child{text-align:left;padding-left:20px}
+td{color:#dce1f4}
+.position{color:#70b5ff;font-weight:800}
+.players{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.player{display:flex;align-items:center;gap:15px}
+.avatar{
+  width:48px;height:48px;border-radius:50%;
+  display:grid;place-items:center;font-size:21px;
+  background:linear-gradient(145deg,#743bd0,#1689d7);
+}
+.player-info{flex:1}
+.player-info strong{font-size:13px}
+.player-info small{display:block;color:var(--muted);margin-top:5px}
+.goals{font-family:Orbitron;color:#f1c66c;font-size:20px}
+footer{
+  border-top:1px solid #5d6b9130;text-align:center;
+  padding:28px 15px;color:var(--muted);font-size:12px;
+}
+footer strong{color:#b58aff}
+@media(max-width:750px){
+ .nav{align-items:flex-start;flex-direction:column}
+ nav{gap:15px}
+ .hero{grid-template-columns:1fr;padding-top:40px}
+ .hero-art{min-height:210px}
+ .stats{grid-template-columns:repeat(2,1fr)}
+ .matches{grid-template-columns:1fr}
+ .players{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header>
+ <div class="nav">
+  <div class="logo">🏆 JOGOS <span>ESCOLARES</span></div>
+  <nav>
+   <a href="#inicio">Início</a>
+   <a href="#jogos">Jogos</a>
+   <a href="#classificacao">Classificação</a>
+   <a href="#times">Times</a>
+   <a href="#artilheiros">Artilheiros</a>
+  </nav>
+ </div>
+</header>
+
+<section class="hero" id="inicio">
+ <div>
+  <span class="tag">🏆 PLATAFORMA ESPORTIVA ESCOLAR</span>
+  <h1>O ESPORTE<br>COMEÇA <span>AQUI.</span></h1>
+  <p>Bem-vindo ao JOGOS ESCOLARES. Acompanhe equipes, partidas, resultados, classificações e os grandes talentos do campeonato.</p>
+  <div class="actions">
+   <a class="btn primary" href="#jogos">⚽ Ver partidas</a>
+   <a class="btn" href="#classificacao">🏆 Classificação</a>
+  </div>
+ </div>
+ <div class="hero-art">
+  <div class="ball">⚽</div>
+  <div class="art-label">A PAIXÃO PELO ESPORTE</div>
+ </div>
+</section>
+
+<main>
+ <section class="section">
+  <div class="section-title">
+   <h2>VISÃO GERAL</h2><small>Campeonato escolar</small>
+  </div>
+  <div class="stats">
+   <div class="card"><div class="stat-number">00</div><div class="stat-label">Equipes cadastradas</div></div>
+   <div class="card"><div class="stat-number">00</div><div class="stat-label">Jogadores cadastrados</div></div>
+   <div class="card"><div class="stat-number">00</div><div class="stat-label">Partidas realizadas</div></div>
+   <div class="card"><div class="stat-number">00</div><div class="stat-label">Gols marcados</div></div>
+  </div>
+ </section>
+
+ <section class="section" id="jogos">
+  <div class="section-title"><h2>⚽ PRÓXIMAS PARTIDAS</h2><small>Exemplos demonstrativos</small></div>
+  <div class="matches">
+   <div class="card">
+    <div class="match-top"><span>GRUPO A</span><span>📅 A definir</span></div>
+    <div class="match-teams">
+     <div class="team"><div class="crest">🦁</div>LEÕES</div>
+     <div class="vs">VS</div>
+     <div class="team"><div class="crest">🐺</div>LOBOS</div>
+    </div>
+    <div class="status" style="text-align:center">HORÁRIO A DEFINIR</div>
+   </div>
+   <div class="card">
+    <div class="match-top"><span>GRUPO B</span><span>📅 A definir</span></div>
+    <div class="match-teams">
+     <div class="team"><div class="crest">🔥</div>FÊNIX</div>
+     <div class="vs">VS</div>
+     <div class="team"><div class="crest">⚡</div>RAIOS</div>
+    </div>
+    <div class="status" style="text-align:center">HORÁRIO A DEFINIR</div>
+   </div>
+  </div>
+ </section>
+
+ <section class="section" id="classificacao">
+  <div class="section-title"><h2>🏆 CLASSIFICAÇÃO</h2><small>Grupo A · Demonstração</small></div>
+  <div class="table-wrap">
+   <table>
+    <thead><tr><th>Equipe</th><th>PTS</th><th>J</th><th>V</th><th>E</th><th>D</th><th>SG</th></tr></thead>
+    <tbody>
+     <tr><td><span class="position">01</span> &nbsp; Leões</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+     <tr><td><span class="position">02</span> &nbsp; Lobos</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+     <tr><td><span class="position">03</span> &nbsp; Fênix</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+    </tbody>
+   </table>
+  </div>
+ </section>
+
+ <section class="section" id="times">
+  <div class="section-title"><h2>🛡️ EQUIPES</h2><small>Exemplos de apresentação</small></div>
+  <div class="stats">
+   <div class="card"><div class="crest">🦁</div><strong>LEÕES</strong><p class="stat-label">Equipe participante</p></div>
+   <div class="card"><div class="crest">🐺</div><strong>LOBOS</strong><p class="stat-label">Equipe participante</p></div>
+   <div class="card"><div class="crest">🔥</div><strong>FÊNIX</strong><p class="stat-label">Equipe participante</p></div>
+   <div class="card"><div class="crest">⚡</div><strong>RAIOS</strong><p class="stat-label">Equipe participante</p></div>
+  </div>
+ </section>
+
+ <section class="section" id="artilheiros">
+  <div class="section-title"><h2>🥇 ARTILHEIROS</h2><small>Ranking de gols</small></div>
+  <div class="players">
+   <div class="card player"><div class="avatar">⚽</div><div class="player-info"><strong>Aguardando cadastro</strong><small>Artilheiro do campeonato</small></div><div class="goals">0</div></div>
+   <div class="card player"><div class="avatar">⚽</div><div class="player-info"><strong>Aguardando cadastro</strong><small>Segundo colocado</small></div><div class="goals">0</div></div>
+   <div class="card player"><div class="avatar">⚽</div><div class="player-info"><strong>Aguardando cadastro</strong><small>Terceiro colocado</small></div><div class="goals">0</div></div>
+  </div>
+ </section>
+</main>
+
+<footer>
+ <strong>JOGOS ESCOLARES</strong><br><br>
+ Tecnologia, esporte e educação em um só lugar.<br>
+ © 2026 · Plataforma de campeonatos escolares.
+</footer>
+</body>
+</html>

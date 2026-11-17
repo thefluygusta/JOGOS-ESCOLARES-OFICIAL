@@ -7,18 +7,42 @@
 <title>ADM | Jogos Escolares</title>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Inter:wght@400;500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+ --bg:#080b18;
+ --panel:#11182c;
+ --card:#151e36;
+ --blue:#2788f5;
+ --purple:#994cf5;
+ --text:#f5f6ff;
+ --muted:#8996b5;
+ --border:#293653;
+}
 
 *{box-sizing:border-box;margin:0;padding:0}
 
 body{
+ background:var(--bg);
+ color:var(--text);
+ font-family:Inter,Arial,sans-serif;
+ min-height:100vh;
+}
+
+button,input{font:inherit}
+
+button{cursor:pointer}
+
+.hidden{display:none!important}
+
+/* LOGIN */
+
+.login-area{
  min-height:100vh;
  display:flex;
- align-items:center;
  justify-content:center;
+ align-items:center;
  padding:20px;
- color:#fff;
- font-family:Inter,Arial,sans-serif;
  background:
  radial-gradient(circle at 15% 15%,#51208a66,transparent 35%),
  radial-gradient(circle at 85% 85%,#07569a66,transparent 35%),
@@ -35,27 +59,20 @@ body{
  box-shadow:0 20px 65px #0009,0 0 35px #7538c522;
 }
 
+.trophy{text-align:center;font-size:48px;margin-bottom:18px}
+
 .logo{
  text-align:center;
  font-family:Orbitron,sans-serif;
- font-size:23px;
- font-weight:800;
- margin-bottom:12px;
+ font-size:22px;
+ margin-bottom:15px;
 }
 
 .logo span{color:#a66aff}
 
-.trophy{
+.login h1{
  text-align:center;
- font-size:48px;
- margin-bottom:18px;
- filter:drop-shadow(0 0 15px #a36aff);
-}
-
-h1{
- text-align:center;
- font-family:Orbitron,sans-serif;
- font-size:19px;
+ font-size:18px;
  margin-bottom:10px;
 }
 
@@ -64,60 +81,50 @@ h1{
  text-align:center;
  font-size:13px;
  line-height:1.6;
- margin-bottom:30px;
+ margin-bottom:25px;
 }
 
-label{
+.login label{
  display:block;
  font-size:12px;
  font-weight:700;
  margin:17px 0 9px;
- color:#d8dafa;
 }
 
-input{
+.login input{
  width:100%;
  padding:15px;
  border:1px solid #53628a66;
  border-radius:10px;
- outline:none;
  background:#0b1123;
- color:#fff;
- font-size:14px;
+ color:white;
+ outline:none;
 }
 
-input:focus{
- border-color:#a66aff;
- box-shadow:0 0 12px #963cff33;
-}
+.login input:focus{border-color:#a66aff}
 
-button{
+.primary-btn{
  width:100%;
  padding:15px;
- margin-top:25px;
+ margin-top:24px;
  border:0;
  border-radius:10px;
  background:linear-gradient(100deg,#923cf0,#247fe9);
  color:white;
  font-weight:800;
- font-size:14px;
- cursor:pointer;
  transition:.25s;
 }
 
-button:hover{
+.primary-btn:hover{
  transform:translateY(-2px);
  box-shadow:0 8px 25px #743bda66;
 }
 
-button:disabled{
- opacity:.6;
- cursor:wait;
-}
+.primary-btn:disabled{opacity:.6;cursor:wait}
 
 .notice{
  display:none;
- margin-top:18px;
+ margin-top:16px;
  padding:12px;
  border-radius:9px;
  background:#30254a;
@@ -129,78 +136,488 @@ button:disabled{
 .back{
  display:block;
  text-align:center;
- margin-top:25px;
+ margin-top:22px;
  color:#aeb8d4;
  text-decoration:none;
  font-size:12px;
 }
 
-.back:hover{color:#fff}
+/* PAINEL */
 
-footer{
- text-align:center;
- color:#747e9e;
+.app{
+ display:none;
+ min-height:100vh;
+}
+
+.sidebar{
+ width:255px;
+ position:fixed;
+ inset:0 auto 0 0;
+ background:#101629;
+ border-right:1px solid var(--border);
+ padding:24px 15px;
+ display:flex;
+ flex-direction:column;
+ z-index:10;
+ overflow-y:auto;
+}
+
+.brand{
+ font-family:Orbitron,sans-serif;
+ font-size:16px;
+ font-weight:800;
+ padding:5px 8px 25px;
+}
+
+.brand span{color:#a66aff}
+
+.brand small{
+ display:block;
+ color:var(--muted);
+ font-family:Inter,sans-serif;
+ font-size:9px;
+ margin-top:8px;
+ letter-spacing:2px;
+}
+
+.menu-label{
+ color:#697897;
  font-size:10px;
- margin-top:25px;
+ font-weight:800;
+ letter-spacing:1.5px;
+ padding:15px 10px 10px;
+}
+
+.nav-btn{
+ display:flex;
+ align-items:center;
+ gap:12px;
+ width:100%;
+ padding:12px;
+ margin:3px 0;
+ border:1px solid transparent;
+ border-radius:10px;
+ color:#aebbd7;
+ background:transparent;
+ text-align:left;
+ font-size:13px;
+ font-weight:600;
+ transition:.2s;
+}
+
+.nav-btn:hover,.nav-btn.active{
+ background:linear-gradient(100deg,#6535a944,#247fe933);
+ border-color:#7955bd55;
+ color:white;
+ transform:translateX(3px);
+}
+
+.nav-icon{font-size:17px;width:22px;text-align:center}
+
+.sidebar-bottom{
+ margin-top:auto;
+ border-top:1px solid var(--border);
+ padding-top:15px;
+}
+
+.logout{
+ width:100%;
+ padding:12px;
+ border:1px solid #623f65;
+ border-radius:9px;
+ background:#351d3a55;
+ color:#e4b7ff;
+ font-weight:700;
+}
+
+/* CONTEÚDO */
+
+.main{
+ margin-left:255px;
+ min-height:100vh;
+ padding:28px;
+}
+
+.topbar{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:15px;
+ margin-bottom:32px;
+}
+
+.topbar h1{font-size:22px}
+
+.topbar p{
+ color:var(--muted);
+ font-size:12px;
+ margin-top:6px;
+}
+
+.admin-tag{
+ background:#202c49;
+ color:#bda0ff;
+ padding:9px 13px;
+ border-radius:20px;
+ font-size:11px;
+ font-weight:800;
+}
+
+.welcome{
+ padding:27px;
+ border:1px solid #6950a866;
+ border-radius:17px;
+ background:
+ radial-gradient(circle at 90% 20%,#6536b755,transparent 35%),
+ linear-gradient(120deg,#192444,#17152f);
+ margin-bottom:25px;
+ box-shadow:0 10px 35px #0004;
+}
+
+.welcome h2{
+ font-family:Orbitron,sans-serif;
+ font-size:20px;
+ margin-bottom:10px;
+}
+
+.welcome p{
+ color:#bac5df;
+ font-size:13px;
+ line-height:1.7;
+}
+
+.section-title{
+ font-size:15px;
+ margin-bottom:15px;
+}
+
+.stats{
+ display:grid;
+ grid-template-columns:repeat(4,minmax(0,1fr));
+ gap:15px;
+ margin-bottom:28px;
+}
+
+.stat{
+ padding:20px;
+ border:1px solid var(--border);
+ background:linear-gradient(145deg,#182541,#11182b);
+ border-radius:14px;
+ transition:.25s;
+}
+
+.stat:hover{
+ transform:translateY(-4px);
+ border-color:#8154ce;
+ box-shadow:0 8px 25px #572e9a33;
+}
+
+.stat-icon{font-size:23px;margin-bottom:15px}
+
+.stat-number{
+ font-size:26px;
+ font-weight:800;
+ font-family:Orbitron,sans-serif;
+}
+
+.stat-name{
+ color:var(--muted);
+ font-size:12px;
+ margin-top:8px;
+}
+
+.content-card{
+ background:var(--panel);
+ border:1px solid var(--border);
+ border-radius:14px;
+ padding:22px;
+ margin-bottom:20px;
+}
+
+.content-card p{
+ color:#aab7d2;
+ font-size:13px;
+ line-height:1.8;
+}
+
+.status{
+ display:inline-block;
+ padding:6px 10px;
+ border-radius:20px;
+ color:#8be4b2;
+ background:#16412e55;
+ font-size:10px;
+ font-weight:800;
+ margin-top:12px;
+}
+
+.info-list{
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:12px;
+}
+
+.info-item{
+ background:#18223a;
+ border-radius:10px;
+ padding:15px;
+}
+
+.info-item strong{
+ display:block;
+ font-size:13px;
+ margin-bottom:6px;
+}
+
+.info-item span{
+ color:var(--muted);
+ font-size:11px;
+}
+
+.page-message{
+ padding:25px;
+ border:1px solid var(--border);
+ background:var(--panel);
+ border-radius:14px;
+}
+
+.page-message h2{margin-bottom:12px;font-size:19px}
+
+.page-message p{
+ color:#aab7d2;
+ font-size:13px;
+ line-height:1.8;
+}
+
+.mobile-menu{
+ display:none;
+ background:#202c49;
+ color:white;
+ border:1px solid var(--border);
+ padding:9px 12px;
+ border-radius:8px;
+}
+
+.loading{color:var(--muted);font-size:12px}
+
+@media(max-width:1000px){
+ .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:700px){
+ .sidebar{
+  transform:translateX(-100%);
+  transition:.25s;
+  box-shadow:15px 0 35px #0008;
+ }
+ .sidebar.open{transform:translateX(0)}
+ .main{margin-left:0;padding:19px}
+ .mobile-menu{display:block}
+ .topbar{align-items:flex-start}
+ .topbar h1{font-size:18px}
+ .welcome{padding:21px}
+ .welcome h2{font-size:16px}
+ .stats{gap:10px}
+ .stat{padding:15px}
+ .stat-number{font-size:21px}
+ .info-list{grid-template-columns:1fr}
+}
+
+@media(max-width:370px){
+ .stats{grid-template-columns:1fr}
 }
 </style>
 </head>
 
 <body>
 
-<div class="login">
+<!-- LOGIN -->
 
- <div class="trophy">🏆</div>
+<section class="login-area" id="loginArea">
+ <div class="login">
 
- <div class="logo">
-  JOGOS <span>ESCOLARES</span>
+  <div class="trophy">🏆</div>
+
+  <div class="logo">JOGOS <span>ESCOLARES</span></div>
+
+  <h1>PAINEL ADMINISTRATIVO</h1>
+
+  <p class="subtitle">
+   Área exclusiva de administração.<br>
+   Entre para gerenciar seu campeonato.
+  </p>
+
+  <form id="loginForm">
+   <label for="email">E-MAIL DO ADMINISTRADOR</label>
+   <input id="email" type="email" placeholder="Digite seu e-mail" required autocomplete="username">
+
+   <label for="senha">SENHA</label>
+   <input id="senha" type="password" placeholder="Digite sua senha" required autocomplete="current-password">
+
+   <button class="primary-btn" id="loginButton" type="submit">
+    ENTRAR NO PAINEL →
+   </button>
+  </form>
+
+  <div class="notice" id="notice" role="status"></div>
+
+  <a class="back" href="index.html">← Voltar para o site público</a>
  </div>
+</section>
 
- <h1>PAINEL ADMINISTRATIVO</h1>
+<!-- PAINEL ADM -->
 
- <p class="subtitle">
-  Área exclusiva de administração.<br>
-  Entre para gerenciar seu campeonato.
- </p>
+<div class="app" id="app">
 
- <form id="loginForm">
+ <aside class="sidebar" id="sidebar">
 
-  <label for="email">E-MAIL DO ADMINISTRADOR</label>
+  <div class="brand">
+   JOGOS <span>ESCOLARES</span>
+   <small>ADMINISTRAÇÃO</small>
+  </div>
 
-  <input
-   id="email"
-   type="email"
-   placeholder="Digite seu e-mail"
-   autocomplete="username"
-   required
-  >
+  <div class="menu-label">MENU PRINCIPAL</div>
 
-  <label for="senha">SENHA</label>
-
-  <input
-   id="senha"
-   type="password"
-   placeholder="Digite sua senha"
-   autocomplete="current-password"
-   required
-  >
-
-  <button type="submit">
-   ENTRAR NO PAINEL →
+  <button class="nav-btn active" data-page="dashboard">
+   <span class="nav-icon">◈</span> Dashboard
   </button>
 
- </form>
+  <button class="nav-btn" data-page="campeonatos">
+   <span class="nav-icon">🏆</span> Campeonatos
+  </button>
 
- <div class="notice" id="notice" role="status"></div>
+  <button class="nav-btn" data-page="equipes">
+   <span class="nav-icon">🛡️</span> Equipes
+  </button>
 
- <a class="back" href="index.html">
-  ← Voltar para o site público
- </a>
+  <button class="nav-btn" data-page="jogadores">
+   <span class="nav-icon">👥</span> Jogadores
+  </button>
 
- <footer>
-  JOGOS ESCOLARES · ÁREA ADMINISTRATIVA
- </footer>
+  <button class="nav-btn" data-page="grupos">
+   <span class="nav-icon">⚔️</span> Grupos e chaves
+  </button>
 
+  <button class="nav-btn" data-page="partidas">
+   <span class="nav-icon">⚽</span> Partidas
+  </button>
+
+  <button class="nav-btn" data-page="classificacao">
+   <span class="nav-icon">📊</span> Classificação
+  </button>
+
+  <button class="nav-btn" data-page="artilharia">
+   <span class="nav-icon">🎯</span> Artilharia
+  </button>
+
+  <div class="menu-label">CONTEÚDO</div>
+
+  <button class="nav-btn" data-page="noticias">
+   <span class="nav-icon">📰</span> Notícias
+  </button>
+
+  <button class="nav-btn" data-page="premiacoes">
+   <span class="nav-icon">🥇</span> Premiações
+  </button>
+
+  <button class="nav-btn" data-page="configuracoes">
+   <span class="nav-icon">⚙️</span> Configurações
+  </button>
+
+  <div class="sidebar-bottom">
+   <button class="logout" id="logoutButton">↪ Sair da conta</button>
+  </div>
+
+ </aside>
+
+ <main class="main">
+
+  <header class="topbar">
+   <div style="display:flex;align-items:center;gap:12px">
+    <button class="mobile-menu" id="mobileMenu">☰</button>
+    <div>
+     <h1 id="pageTitle">Dashboard</h1>
+     <p>Gerencie seu campeonato escolar.</p>
+    </div>
+   </div>
+   <div class="admin-tag">● ADMINISTRADOR</div>
+  </header>
+
+  <section id="pageContent">
+
+   <div class="welcome">
+    <h2>🏆 BEM-VINDO AO JOGOS ESCOLARES!</h2>
+    <p>
+     Seu painel administrativo está conectado.
+     Aqui você poderá organizar campeonatos, equipes,
+     jogadores, partidas e muito mais.
+    </p>
+    <span class="status">ACESSO ADMINISTRATIVO AUTORIZADO</span>
+   </div>
+
+   <h3 class="section-title">VISÃO GERAL DO CAMPEONATO</h3>
+
+   <div class="stats">
+    <div class="stat">
+     <div class="stat-icon">🏆</div>
+     <div class="stat-number" id="countCampeonatos">—</div>
+     <div class="stat-name">Campeonatos</div>
+    </div>
+
+    <div class="stat">
+     <div class="stat-icon">🛡️</div>
+     <div class="stat-number" id="countEquipes">—</div>
+     <div class="stat-name">Equipes</div>
+    </div>
+
+    <div class="stat">
+     <div class="stat-icon">👥</div>
+     <div class="stat-number" id="countJogadores">—</div>
+     <div class="stat-name">Jogadores</div>
+    </div>
+
+    <div class="stat">
+     <div class="stat-icon">⚽</div>
+     <div class="stat-number" id="countPartidas">—</div>
+     <div class="stat-name">Partidas</div>
+    </div>
+   </div>
+
+   <h3 class="section-title">SISTEMA</h3>
+
+   <div class="content-card">
+    <h3 style="margin-bottom:10px">Conexão com o Supabase</h3>
+    <p id="connectionStatus" class="loading">
+     Verificando conexão com o banco de dados...
+    </p>
+   </div>
+
+   <h3 class="section-title">ÁREAS DO SISTEMA</h3>
+
+   <div class="content-card">
+    <div class="info-list">
+     <div class="info-item">
+      <strong>🏆 Campeonatos</strong>
+      <span>Organização dos torneios</span>
+     </div>
+     <div class="info-item">
+      <strong>🛡️ Equipes</strong>
+      <span>Cadastro de times e escudos</span>
+     </div>
+     <div class="info-item">
+      <strong>👥 Jogadores</strong>
+      <span>Atletas e informações</span>
+     </div>
+     <div class="info-item">
+      <strong>⚽ Partidas</strong>
+      <span>Calendário e resultados</span>
+     </div>
+    </div>
+   </div>
+
+  </section>
+
+ </main>
 </div>
 
 <script type="module">
@@ -219,69 +636,237 @@ const supabase = createClient(
  SUPABASE_KEY
 );
 
+const loginArea = document.getElementById('loginArea');
+const app = document.getElementById('app');
 const form = document.getElementById('loginForm');
 const notice = document.getElementById('notice');
-const button = form.querySelector('button');
+const loginButton = document.getElementById('loginButton');
+const pageContent = document.getElementById('pageContent');
 
-form.addEventListener('submit', async function(event){
+const titles = {
+ dashboard:'Dashboard',
+ campeonatos:'Campeonatos',
+ equipes:'Equipes',
+ jogadores:'Jogadores',
+ grupos:'Grupos e chaves',
+ partidas:'Partidas',
+ classificacao:'Classificação',
+ artilharia:'Artilharia',
+ noticias:'Notícias',
+ premiacoes:'Premiações',
+ configuracoes:'Configurações'
+};
+
+function showNotice(message){
+ notice.style.display='block';
+ notice.textContent=message;
+}
+
+function showLogin(){
+ app.style.display='none';
+ loginArea.style.display='flex';
+}
+
+function showApp(){
+ loginArea.style.display='none';
+ app.style.display='block';
+ loadDashboard();
+}
+
+async function checkAdmin(){
+ const {data,error} = await supabase.rpc('is_admin');
+
+ if(error) throw error;
+
+ if(data !== true){
+  await supabase.auth.signOut();
+  throw new Error('Este usuário não possui autorização administrativa.');
+ }
+
+ return true;
+}
+
+async function loadDashboard(){
+
+ const connection = document.getElementById('connectionStatus');
+ connection.textContent='Consultando o banco de dados...';
+
+ const tables = [
+  {table:'campeonatos',element:'countCampeonatos'},
+  {table:'equipes',element:'countEquipes'},
+  {table:'jogadores',element:'countJogadores'},
+  {table:'partidas',element:'countPartidas'}
+ ];
+
+ const results = await Promise.all(
+  tables.map(async item=>{
+   const {count,error} = await supabase
+    .from(item.table)
+    .select('*',{count:'exact',head:true});
+
+   return {...item,count,error};
+  })
+ );
+
+ let errors=0;
+
+ results.forEach(result=>{
+  const element=document.getElementById(result.element);
+
+  if(result.error){
+   element.textContent='—';
+   errors++;
+  }else{
+   element.textContent=result.count ?? 0;
+  }
+ });
+
+ if(errors===0){
+  connection.textContent='Conexão estabelecida. Indicadores carregados com sucesso.';
+  connection.style.color='#8be4b2';
+ }else{
+  connection.textContent=
+   'Painel conectado, mas não foi possível consultar todos os indicadores. Vamos conferir as permissões e políticas dessas tabelas.';
+  connection.style.color='#f2c47a';
+ }
+}
+
+form.addEventListener('submit',async event=>{
 
  event.preventDefault();
 
- button.disabled = true;
- notice.style.display = 'block';
- notice.textContent = 'Verificando acesso...';
+ loginButton.disabled=true;
+ loginButton.textContent='VERIFICANDO...';
+ showNotice('Verificando seu acesso...');
 
- const email =
- document.getElementById('email').value.trim();
+ const email=document.getElementById('email').value.trim();
+ const senha=document.getElementById('senha').value;
 
- const senha =
- document.getElementById('senha').value;
+ try{
 
- try {
-
-  const { error: loginError } =
-  await supabase.auth.signInWithPassword({
-   email: email,
-   password: senha
+  const {error}=await supabase.auth.signInWithPassword({
+   email,
+   password:senha
   });
 
-  if(loginError){
-   throw loginError;
-  }
+  if(error) throw error;
 
-  const { data: autorizado, error: adminError } =
-  await supabase.rpc('is_admin');
+  await checkAdmin();
 
-  if(adminError){
-   await supabase.auth.signOut();
-   throw adminError;
-  }
+  showApp();
 
-  if(autorizado !== true){
+ }catch(error){
 
-   await supabase.auth.signOut();
+  showLogin();
+  showNotice('Não foi possível entrar: '+error.message);
 
-   throw new Error(
-    'Este usuário não possui autorização administrativa.'
-   );
+ }finally{
 
-  }
-
-  notice.textContent =
-  'Acesso autorizado! Administrador confirmado com sucesso.';
-
- } catch(error){
-
-  notice.textContent =
-  'Não foi possível entrar: ' + error.message;
-
- } finally {
-
-  button.disabled = false;
+  loginButton.disabled=false;
+  loginButton.textContent='ENTRAR NO PAINEL →';
 
  }
 
 });
+
+function openPage(page){
+
+ if(!titles[page]) return;
+
+ document.querySelectorAll('.nav-btn').forEach(button=>{
+  button.classList.toggle('active',button.dataset.page===page);
+ });
+
+ document.getElementById('pageTitle').textContent=titles[page];
+
+ const sidebar=document.getElementById('sidebar');
+ sidebar.classList.remove('open');
+
+ if(page==='dashboard'){
+  pageContent.innerHTML=`
+   <div class="welcome">
+    <h2>🏆 BEM-VINDO AO JOGOS ESCOLARES!</h2>
+    <p>Seu painel administrativo está conectado. Gerencie seu campeonato por aqui.</p>
+    <span class="status">ACESSO ADMINISTRATIVO AUTORIZADO</span>
+   </div>
+   <h3 class="section-title">VISÃO GERAL DO CAMPEONATO</h3>
+   <div class="stats">
+    <div class="stat"><div class="stat-icon">🏆</div><div class="stat-number" id="countCampeonatos">—</div><div class="stat-name">Campeonatos</div></div>
+    <div class="stat"><div class="stat-icon">🛡️</div><div class="stat-number" id="countEquipes">—</div><div class="stat-name">Equipes</div></div>
+    <div class="stat"><div class="stat-icon">👥</div><div class="stat-number" id="countJogadores">—</div><div class="stat-name">Jogadores</div></div>
+    <div class="stat"><div class="stat-icon">⚽</div><div class="stat-number" id="countPartidas">—</div><div class="stat-name">Partidas</div></div>
+   </div>
+   <h3 class="section-title">SISTEMA</h3>
+   <div class="content-card"><h3 style="margin-bottom:10px">Conexão com o Supabase</h3><p id="connectionStatus">Verificando...</p></div>
+  `;
+  loadDashboard();
+  return;
+ }
+
+ const descriptions={
+  campeonatos:'Cadastro, edição e organização dos campeonatos escolares.',
+  equipes:'Gerenciamento dos times, nomes e escudos.',
+  jogadores:'Cadastro de atletas, fotos, números e informações.',
+  grupos:'Organização das chaves e grupos do campeonato.',
+  partidas:'Calendário de jogos, placares e resultados.',
+  classificacao:'Tabela de classificação das equipes.',
+  artilharia:'Gols e estatísticas dos jogadores.',
+  noticias:'Publicação de notícias e comunicados.',
+  premiacoes:'Organização das premiações do campeonato.',
+  configuracoes:'Configurações e informações administrativas.'
+ };
+
+ pageContent.innerHTML=`
+  <div class="page-message">
+   <h2>${titles[page]}</h2>
+   <p>${descriptions[page]}</p>
+   <br>
+   <span class="status">ÁREA PREPARADA</span>
+   <br><br>
+   <p>Esta seção será conectada às tabelas do Supabase na próxima etapa. Nenhuma informação do banco será alterada nesta tela.</p>
+  </div>
+ `;
+}
+
+document.querySelectorAll('.nav-btn').forEach(button=>{
+ button.addEventListener('click',()=>{
+  openPage(button.dataset.page);
+ });
+});
+
+document.getElementById('mobileMenu').addEventListener('click',()=>{
+ document.getElementById('sidebar').classList.toggle('open');
+});
+
+document.getElementById('logoutButton').addEventListener('click',async()=>{
+ await supabase.auth.signOut();
+ showLogin();
+ notice.style.display='none';
+ form.reset();
+});
+
+async function restoreSession(){
+
+ try{
+  const {data,error}=await supabase.auth.getSession();
+
+  if(error) throw error;
+
+  if(data.session){
+   await checkAdmin();
+   showApp();
+  }else{
+   showLogin();
+  }
+
+ }catch(error){
+  await supabase.auth.signOut();
+  showLogin();
+  showNotice('Sessão encerrada ou acesso não autorizado. Entre novamente.');
+ }
+}
+
+restoreSession();
 
 </script>
 

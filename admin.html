@@ -1,874 +1,1416 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ADM | Jogos Escolares</title>
-
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Inter:wght@400;500;600;700;800&display=swap');
-
-:root {
- --bg:#080b18;
- --panel:#11182c;
- --card:#151e36;
- --blue:#2788f5;
- --purple:#994cf5;
- --text:#f5f6ff;
- --muted:#8996b5;
- --border:#293653;
-}
-
-*{box-sizing:border-box;margin:0;padding:0}
-
-body{
- background:var(--bg);
- color:var(--text);
- font-family:Inter,Arial,sans-serif;
- min-height:100vh;
-}
-
-button,input{font:inherit}
-
-button{cursor:pointer}
-
-.hidden{display:none!important}
-
-/* LOGIN */
-
-.login-area{
- min-height:100vh;
- display:flex;
- justify-content:center;
- align-items:center;
- padding:20px;
- background:
- radial-gradient(circle at 15% 15%,#51208a66,transparent 35%),
- radial-gradient(circle at 85% 85%,#07569a66,transparent 35%),
- #080b18;
-}
-
-.login{
- width:100%;
- max-width:440px;
- padding:38px;
- background:linear-gradient(145deg,#1b2140,#101528);
- border:1px solid #8660c966;
- border-radius:22px;
- box-shadow:0 20px 65px #0009,0 0 35px #7538c522;
-}
-
-.trophy{text-align:center;font-size:48px;margin-bottom:18px}
-
-.logo{
- text-align:center;
- font-family:Orbitron,sans-serif;
- font-size:22px;
- margin-bottom:15px;
-}
-
-.logo span{color:#a66aff}
-
-.login h1{
- text-align:center;
- font-size:18px;
- margin-bottom:10px;
-}
-
-.subtitle{
- color:#a6aec9;
- text-align:center;
- font-size:13px;
- line-height:1.6;
- margin-bottom:25px;
-}
-
-.login label{
- display:block;
- font-size:12px;
- font-weight:700;
- margin:17px 0 9px;
-}
-
-.login input{
- width:100%;
- padding:15px;
- border:1px solid #53628a66;
- border-radius:10px;
- background:#0b1123;
- color:white;
- outline:none;
-}
-
-.login input:focus{border-color:#a66aff}
-
-.primary-btn{
- width:100%;
- padding:15px;
- margin-top:24px;
- border:0;
- border-radius:10px;
- background:linear-gradient(100deg,#923cf0,#247fe9);
- color:white;
- font-weight:800;
- transition:.25s;
-}
-
-.primary-btn:hover{
- transform:translateY(-2px);
- box-shadow:0 8px 25px #743bda66;
-}
-
-.primary-btn:disabled{opacity:.6;cursor:wait}
-
-.notice{
- display:none;
- margin-top:16px;
- padding:12px;
- border-radius:9px;
- background:#30254a;
- color:#e0caff;
- font-size:12px;
- line-height:1.6;
-}
-
-.back{
- display:block;
- text-align:center;
- margin-top:22px;
- color:#aeb8d4;
- text-decoration:none;
- font-size:12px;
-}
-
-/* PAINEL */
-
-.app{
- display:none;
- min-height:100vh;
-}
-
-.sidebar{
- width:255px;
- position:fixed;
- inset:0 auto 0 0;
- background:#101629;
- border-right:1px solid var(--border);
- padding:24px 15px;
- display:flex;
- flex-direction:column;
- z-index:10;
- overflow-y:auto;
-}
-
-.brand{
- font-family:Orbitron,sans-serif;
- font-size:16px;
- font-weight:800;
- padding:5px 8px 25px;
-}
-
-.brand span{color:#a66aff}
-
-.brand small{
- display:block;
- color:var(--muted);
- font-family:Inter,sans-serif;
- font-size:9px;
- margin-top:8px;
- letter-spacing:2px;
-}
-
-.menu-label{
- color:#697897;
- font-size:10px;
- font-weight:800;
- letter-spacing:1.5px;
- padding:15px 10px 10px;
-}
-
-.nav-btn{
- display:flex;
- align-items:center;
- gap:12px;
- width:100%;
- padding:12px;
- margin:3px 0;
- border:1px solid transparent;
- border-radius:10px;
- color:#aebbd7;
- background:transparent;
- text-align:left;
- font-size:13px;
- font-weight:600;
- transition:.2s;
-}
-
-.nav-btn:hover,.nav-btn.active{
- background:linear-gradient(100deg,#6535a944,#247fe933);
- border-color:#7955bd55;
- color:white;
- transform:translateX(3px);
-}
-
-.nav-icon{font-size:17px;width:22px;text-align:center}
-
-.sidebar-bottom{
- margin-top:auto;
- border-top:1px solid var(--border);
- padding-top:15px;
-}
-
-.logout{
- width:100%;
- padding:12px;
- border:1px solid #623f65;
- border-radius:9px;
- background:#351d3a55;
- color:#e4b7ff;
- font-weight:700;
-}
-
-/* CONTEÚDO */
-
-.main{
- margin-left:255px;
- min-height:100vh;
- padding:28px;
-}
-
-.topbar{
- display:flex;
- align-items:center;
- justify-content:space-between;
- gap:15px;
- margin-bottom:32px;
-}
-
-.topbar h1{font-size:22px}
-
-.topbar p{
- color:var(--muted);
- font-size:12px;
- margin-top:6px;
-}
-
-.admin-tag{
- background:#202c49;
- color:#bda0ff;
- padding:9px 13px;
- border-radius:20px;
- font-size:11px;
- font-weight:800;
-}
-
-.welcome{
- padding:27px;
- border:1px solid #6950a866;
- border-radius:17px;
- background:
- radial-gradient(circle at 90% 20%,#6536b755,transparent 35%),
- linear-gradient(120deg,#192444,#17152f);
- margin-bottom:25px;
- box-shadow:0 10px 35px #0004;
-}
-
-.welcome h2{
- font-family:Orbitron,sans-serif;
- font-size:20px;
- margin-bottom:10px;
-}
-
-.welcome p{
- color:#bac5df;
- font-size:13px;
- line-height:1.7;
-}
-
-.section-title{
- font-size:15px;
- margin-bottom:15px;
-}
-
-.stats{
- display:grid;
- grid-template-columns:repeat(4,minmax(0,1fr));
- gap:15px;
- margin-bottom:28px;
-}
-
-.stat{
- padding:20px;
- border:1px solid var(--border);
- background:linear-gradient(145deg,#182541,#11182b);
- border-radius:14px;
- transition:.25s;
-}
-
-.stat:hover{
- transform:translateY(-4px);
- border-color:#8154ce;
- box-shadow:0 8px 25px #572e9a33;
-}
-
-.stat-icon{font-size:23px;margin-bottom:15px}
-
-.stat-number{
- font-size:26px;
- font-weight:800;
- font-family:Orbitron,sans-serif;
-}
-
-.stat-name{
- color:var(--muted);
- font-size:12px;
- margin-top:8px;
-}
-
-.content-card{
- background:var(--panel);
- border:1px solid var(--border);
- border-radius:14px;
- padding:22px;
- margin-bottom:20px;
-}
-
-.content-card p{
- color:#aab7d2;
- font-size:13px;
- line-height:1.8;
-}
-
-.status{
- display:inline-block;
- padding:6px 10px;
- border-radius:20px;
- color:#8be4b2;
- background:#16412e55;
- font-size:10px;
- font-weight:800;
- margin-top:12px;
-}
-
-.info-list{
- display:grid;
- grid-template-columns:repeat(2,minmax(0,1fr));
- gap:12px;
-}
-
-.info-item{
- background:#18223a;
- border-radius:10px;
- padding:15px;
-}
-
-.info-item strong{
- display:block;
- font-size:13px;
- margin-bottom:6px;
-}
-
-.info-item span{
- color:var(--muted);
- font-size:11px;
-}
-
-.page-message{
- padding:25px;
- border:1px solid var(--border);
- background:var(--panel);
- border-radius:14px;
-}
-
-.page-message h2{margin-bottom:12px;font-size:19px}
-
-.page-message p{
- color:#aab7d2;
- font-size:13px;
- line-height:1.8;
-}
-
-.mobile-menu{
- display:none;
- background:#202c49;
- color:white;
- border:1px solid var(--border);
- padding:9px 12px;
- border-radius:8px;
-}
-
-.loading{color:var(--muted);font-size:12px}
-
-@media(max-width:1000px){
- .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
-
-@media(max-width:700px){
- .sidebar{
-  transform:translateX(-100%);
-  transition:.25s;
-  box-shadow:15px 0 35px #0008;
- }
- .sidebar.open{transform:translateX(0)}
- .main{margin-left:0;padding:19px}
- .mobile-menu{display:block}
- .topbar{align-items:flex-start}
- .topbar h1{font-size:18px}
- .welcome{padding:21px}
- .welcome h2{font-size:16px}
- .stats{gap:10px}
- .stat{padding:15px}
- .stat-number{font-size:21px}
- .info-list{grid-template-columns:1fr}
-}
-
-@media(max-width:370px){
- .stats{grid-template-columns:1fr}
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel ADM | JOGOS ESCOLARES</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #060812;
+      --bg-panel: #0d1224;
+      --bg-card: #131a33;
+      --bg-input: #090d1c;
+      --blue: #2563eb;
+      --blue-glow: #3b82f6;
+      --purple: #7c3aed;
+      --purple-glow: #a855f7;
+      --cyan: #06b6d4;
+      --green: #10b981;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --border: rgba(139, 92, 246, 0.25);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: radial-gradient(circle at top right, #1e1042 0%, #090d1f 45%, #04060d 100%);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* TELA DE LOGIN */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 430px;
+      background: linear-gradient(145deg, rgba(19, 26, 51, 0.95), rgba(10, 14, 30, 0.98));
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      border-radius: 24px;
+      padding: 38px 32px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(124, 58, 237, 0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+      transform: perspective(1000px) rotateX(1deg);
+    }
+
+    .brand-title {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 1.55rem;
+      text-align: center;
+      background: linear-gradient(90deg, #60a5fa, #c084fc, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .brand-sub {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 28px;
+    }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--purple-glow);
+      box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25);
+    }
+
+    .btn-3d {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: #fff;
+      border: none;
+      padding: 13px 22px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #1e1b4b, 0 12px 24px rgba(124, 58, 237, 0.4);
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+
+    .btn-3d:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 #1e1b4b, 0 16px 30px rgba(59, 130, 246, 0.55);
+      filter: brightness(1.08);
+    }
+
+    .btn-3d:active {
+      transform: translateY(3px);
+      box-shadow: 0 3px 0 #1e1b4b, 0 6px 12px rgba(124, 58, 237, 0.4);
+    }
+
+    .btn-sm { padding: 8px 13px; font-size: 0.8rem; border-radius: 10px; box-shadow: 0 3px 0 #1e1b4b; }
+    .btn-danger { background: linear-gradient(135deg, #dc2626, #991b1b); box-shadow: 0 3px 0 #450a0a; }
+    .btn-edit { background: linear-gradient(135deg, #0284c7, #1d4ed8); box-shadow: 0 3px 0 #172554; }
+    .btn-success { background: linear-gradient(135deg, #059669, #047857); box-shadow: 0 3px 0 #022c22; }
+    .btn-secondary { background: #1e293b; box-shadow: 0 3px 0 #0f172a; }
+
+    .alert-box {
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      margin-top: 14px;
+      display: none;
+      font-weight: 600;
+    }
+    .alert-error { background: rgba(239, 68, 68, 0.18); border: 1px solid #ef4444; color: #fca5a5; }
+    .alert-success { background: rgba(16, 185, 129, 0.18); border: 1px solid #10b981; color: #6ee7b7; }
+
+    /* PAINEL PRINCIPAL */
+    #admin-app { display: none; min-height: 100vh; }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 265px;
+      background: linear-gradient(180deg, #0b0f22 0%, #070a17 100%);
+      border-right: 1px solid var(--border);
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; bottom: 0; left: 0;
+      z-index: 100;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 8px 10px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      margin-bottom: 14px;
+    }
+
+    .nav-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 11px 14px;
+      margin-bottom: 6px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: rgba(124, 58, 237, 0.15);
+      color: #fff;
+      transform: translateX(3px);
+    }
+
+    .nav-btn.active {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.35), rgba(124, 58, 237, 0.35));
+      border-color: rgba(168, 85, 247, 0.5);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.25);
+    }
+
+    .main-content {
+      flex: 1;
+      margin-left: 265px;
+      padding: 24px 28px;
+      max-width: 100%;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: rgba(19, 26, 51, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      padding: 14px 20px;
+      border-radius: 18px;
+      margin-bottom: 24px;
+    }
+
+    .mobile-toggle {
+      display: none;
+      background: var(--purple);
+      border: none;
+      color: #fff;
+      padding: 9px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .section { display: none; animation: fadeIn 0.25s ease; }
+    .section.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.35rem;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* CARDS 3D */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 16px;
+      margin-bottom: 26px;
+    }
+
+    .stat-card {
+      background: linear-gradient(145deg, #161f3d, #0d1326);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 30px rgba(124, 58, 237, 0.3);
+      border-color: var(--purple-glow);
+    }
+
+    .stat-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, #60a5fa, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-label { color: var(--muted); font-size: 0.85rem; font-weight: 700; margin-top: 4px; }
+
+    .card-box {
+      background: linear-gradient(145deg, rgba(19, 26, 51, 0.9), rgba(11, 16, 33, 0.95));
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      margin-bottom: 22px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    }
+
+    .card-box h3 {
+      font-size: 1.05rem;
+      margin-bottom: 16px;
+      color: #e2e8f0;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding-bottom: 10px;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+
+    /* TABELAS */
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    th, td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    th {
+      background: rgba(37, 99, 235, 0.15);
+      color: #93c5fd;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.76rem;
+      letter-spacing: 0.5px;
+    }
+    tr:hover td { background: rgba(124, 58, 237, 0.08); }
+
+    .avatar-sm {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #1e293b;
+      border: 1px solid var(--purple-glow);
+      vertical-align: middle;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: inline-block;
+    }
+    .badge-blue { background: rgba(37,99,235,0.25); color: #93c5fd; border: 1px solid #3b82f6; }
+    .badge-green { background: rgba(16,185,129,0.25); color: #6ee7b7; border: 1px solid #10b981; }
+    .badge-yellow { background: rgba(245,158,11,0.25); color: #fcd34d; border: 1px solid #f59e0b; }
+    .badge-red { background: rgba(239,68,68,0.25); color: #fca5a5; border: 1px solid #ef4444; }
+
+    /* TOAST */
+    #toast {
+      position: fixed;
+      bottom: 22px;
+      right: 22px;
+      background: linear-gradient(135deg, #1e1b4b, #311042);
+      border: 1px solid var(--purple-glow);
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+      font-weight: 700;
+      z-index: 9999;
+      display: none;
+    }
+
+    @media (max-width: 860px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main-content { margin-left: 0; padding: 16px; }
+      .mobile-toggle { display: inline-block; }
+    }
+  </style>
 </head>
-
 <body>
 
-<!-- LOGIN -->
+  <!-- TELA DE LOGIN -->
+  <div id="login-screen">
+    <div class="login-card">
+      <div style="text-align:center; font-size:2.6rem; margin-bottom:6px;">⚽🏆</div>
+      <div class="brand-title">JOGOS ESCOLARES</div>
+      <div class="brand-sub">Acesso Restrito • Painel Administrativo</div>
 
-<section class="login-area" id="loginArea">
- <div class="login">
+      <form id="login-form">
+        <div class="form-group">
+          <label>E-mail do Administrador</label>
+          <input type="email" id="login-email" placeholder="seuemail@exemplo.com" required />
+        </div>
+        <div class="form-group">
+          <label>Senha</label>
+          <input type="password" id="login-password" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn-3d" style="width:100%; margin-top:8px;" id="btn-login">
+          🔐 Entrar no Painel
+        </button>
+      </form>
 
-  <div class="trophy">🏆</div>
-
-  <div class="logo">JOGOS <span>ESCOLARES</span></div>
-
-  <h1>PAINEL ADMINISTRATIVO</h1>
-
-  <p class="subtitle">
-   Área exclusiva de administração.<br>
-   Entre para gerenciar seu campeonato.
-  </p>
-
-  <form id="loginForm">
-   <label for="email">E-MAIL DO ADMINISTRADOR</label>
-   <input id="email" type="email" placeholder="Digite seu e-mail" required autocomplete="username">
-
-   <label for="senha">SENHA</label>
-   <input id="senha" type="password" placeholder="Digite sua senha" required autocomplete="current-password">
-
-   <button class="primary-btn" id="loginButton" type="submit">
-    ENTRAR NO PAINEL →
-   </button>
-  </form>
-
-  <div class="notice" id="notice" role="status"></div>
-
-  <a class="back" href="index.html">← Voltar para o site público</a>
- </div>
-</section>
-
-<!-- PAINEL ADM -->
-
-<div class="app" id="app">
-
- <aside class="sidebar" id="sidebar">
-
-  <div class="brand">
-   JOGOS <span>ESCOLARES</span>
-   <small>ADMINISTRAÇÃO</small>
+      <div id="login-msg" class="alert-box"></div>
+      <div style="text-align:center; margin-top:18px;">
+        <a href="index.html" style="color:#93c5fd; font-size:0.85rem; text-decoration:none;">← Voltar para o site público</a>
+      </div>
+    </div>
   </div>
 
-  <div class="menu-label">MENU PRINCIPAL</div>
+  <!-- PAINEL ADMINISTRATIVO -->
+  <div id="admin-app">
+    <div class="layout">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="brand-title" style="font-size:1.15rem; text-align:left;">⚽ JOGOS ESCOLARES</div>
+          <div style="font-size:0.75rem; color:#a855f7; font-weight:700;">PAINEL ADM OFICIAL</div>
+        </div>
 
-  <button class="nav-btn active" data-page="dashboard">
-   <span class="nav-icon">◈</span> Dashboard
-  </button>
+        <button class="nav-btn active" onclick="showTab('dashboard', this)">📊 Dashboard</button>
+        <button class="nav-btn" onclick="showTab('campeonatos', this)">🏆 Campeonatos</button>
+        <button class="nav-btn" onclick="showTab('equipes', this)">🛡️ Equipes & Escudos</button>
+        <button class="nav-btn" onclick="showTab('jogadores', this)">🏃 Jogadores & Fotos</button>
+        <button class="nav-btn" onclick="showTab('grupos', this)">🗂️ Grupos & Chaves</button>
+        <button class="nav-btn" onclick="showTab('partidas', this)">📅 Partidas & Placares</button>
+        <button class="nav-btn" onclick="showTab('eventos', this)">⚽ Gols & Cartões</button>
+        <button class="nav-btn" onclick="showTab('classificacao', this)">📈 Classificação & Artilharia</button>
+        <button class="nav-btn" onclick="showTab('noticias', this)">📰 Notícias</button>
+        <button class="nav-btn" onclick="showTab('premiacoes', this)">🏅 Premiações</button>
+        <button class="nav-btn" onclick="showTab('admins', this)">🛡️ Administradores (Máx 3)</button>
 
-  <button class="nav-btn" data-page="campeonatos">
-   <span class="nav-icon">🏆</span> Campeonatos
-  </button>
+        <div style="margin-top:auto; padding-top:14px; border-top:1px solid rgba(255,255,255,0.08);">
+          <a href="index.html" target="_blank" class="nav-btn" style="color:#60a5fa;">🌐 Ver Site Público</a>
+          <button class="nav-btn" style="color:#f87171;" onclick="logout()">🚪 Sair da Conta</button>
+        </div>
+      </aside>
 
-  <button class="nav-btn" data-page="equipes">
-   <span class="nav-icon">🛡️</span> Equipes
-  </button>
+      <main class="main-content">
+        <div class="topbar">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰ Menu</button>
+            <div>
+              <div style="font-weight:800; font-size:1rem;">Bem-vindo, Administrador!</div>
+              <div id="admin-email-display" style="font-size:0.8rem; color:var(--muted);">Carregando...</div>
+            </div>
+          </div>
+          <button class="btn-3d btn-sm" onclick="carregarTudo()">🔄 Atualizar Dados</button>
+        </div>
 
-  <button class="nav-btn" data-page="jogadores">
-   <span class="nav-icon">👥</span> Jogadores
-  </button>
+        <!-- 1. DASHBOARD -->
+        <section id="tab-dashboard" class="section active">
+          <div class="section-title">📊 Visão Geral do Sistema</div>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value" id="stat-camp">0</div><div class="stat-label">🏆 Campeonatos</div></div>
+            <div class="stat-card"><div class="stat-value" id="stat-eq">0</div><div class="stat-label">🛡️ Equipes</div></div>
+            <div class="stat-card"><div class="stat-value" id="stat-jog">0</div><div class="stat-label">🏃 Jogadores</div></div>
+            <div class="stat-card"><div class="stat-value" id="stat-part">0</div><div class="stat-label">📅 Partidas</div></div>
+            <div class="stat-card"><div class="stat-value" id="stat-gols">0</div><div class="stat-label">⚽ Gols Marcados</div></div>
+            <div class="stat-card"><div class="stat-value" id="stat-cart">0</div><div class="stat-label">🟨 Cartões</div></div>
+          </div>
 
-  <button class="nav-btn" data-page="grupos">
-   <span class="nav-icon">⚔️</span> Grupos e chaves
-  </button>
+          <div class="card-box">
+            <h3>⚡ Próximas Partidas & Últimos Resultados</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Campeonato</th><th>Confronto</th><th>Placar</th><th>Data/Hora</th><th>Local</th><th>Status</th></tr></thead>
+                <tbody id="dash-partidas"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
 
-  <button class="nav-btn" data-page="partidas">
-   <span class="nav-icon">⚽</span> Partidas
-  </button>
+        <!-- 2. CAMPEONATOS -->
+        <section id="tab-campeonatos" class="section">
+          <div class="section-title">🏆 Gerenciar Campeonatos & Regulamento</div>
+          <div class="card-box">
+            <h3 id="camp-form-title">➕ Novo Campeonato</h3>
+            <form id="form-campeonato">
+              <input type="hidden" id="camp-id">
+              <div class="grid-3">
+                <div class="form-group"><label>Nome do Campeonato *</label><input type="text" id="camp-nome" required placeholder="Ex: Interclasse Futsal 2026"></div>
+                <div class="form-group"><label>Modalidade</label><input type="text" id="camp-modalidade" value="Futsal"></div>
+                <div class="form-group"><label>Categoria</label><input type="text" id="camp-categoria" placeholder="Ex: Sub-15 / Ensino Médio"></div>
+                <div class="form-group"><label>Data Início</label><input type="date" id="camp-inicio"></div>
+                <div class="form-group"><label>Data Fim</label><input type="date" id="camp-fim"></div>
+                <div class="form-group"><label>Local Principal</label><input type="text" id="camp-local" placeholder="Ginásio Poliesportivo"></div>
+                <div class="form-group">
+                  <label>Status</label>
+                  <select id="camp-status">
+                    <option value="Em andamento">Em andamento</option>
+                    <option value="Inscrições abertas">Inscrições abertas</option>
+                    <option value="Em breve">Em breve</option>
+                    <option value="Finalizado">Finalizado</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group"><label>Descrição</label><textarea id="camp-descricao" rows="2" placeholder="Resumo do torneio..."></textarea></div>
+              <div class="form-group"><label>📜 Regulamento Oficial</label><textarea id="camp-regulamento" rows="4" placeholder="Cole aqui as regras e regulamento completo do campeonato..."></textarea></div>
+              <button type="submit" class="btn-3d">💾 Salvar Campeonato</button>
+              <button type="button" class="btn-3d btn-secondary" onclick="resetForm('form-campeonato','camp-id','camp-form-title','➕ Novo Campeonato')">Cancelar</button>
+            </form>
+          </div>
 
-  <button class="nav-btn" data-page="classificacao">
-   <span class="nav-icon">📊</span> Classificação
-  </button>
+          <div class="card-box">
+            <h3>📋 Campeonatos Cadastrados</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Nome</th><th>Categoria</th><th>Local</th><th>Período</th><th>Status</th><th>Ações</th></tr></thead>
+                <tbody id="lista-campeonatos"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
 
-  <button class="nav-btn" data-page="artilharia">
-   <span class="nav-icon">🎯</span> Artilharia
-  </button>
+        <!-- 3. EQUIPES -->
+        <section id="tab-equipes" class="section">
+          <div class="section-title">🛡️ Equipes & Escudos</div>
+          <div class="card-box">
+            <h3 id="eq-form-title">➕ Nova Equipe</h3>
+            <form id="form-equipe">
+              <input type="hidden" id="eq-id">
+              <div class="grid-3">
+                <div class="form-group"><label>Nome da Equipe *</label><input type="text" id="eq-nome" required placeholder="Ex: 3º Ano A / Atlético Escolar"></div>
+                <div class="form-group"><label>Categoria</label><input type="text" id="eq-categoria" placeholder="Ex: Sub-17"></div>
+                <div class="form-group"><label>Modalidade</label><input type="text" id="eq-modalidade" value="Futsal"></div>
+              </div>
+              <div class="form-group"><label>Link (URL) do Escudo</label><input type="url" id="eq-escudo" placeholder="https://..."></div>
+              <div class="form-group"><label>Descrição / Turma / Técnico</label><input type="text" id="eq-descricao" placeholder="Informações da equipe"></div>
+              <button type="submit" class="btn-3d">💾 Salvar Equipe</button>
+              <button type="button" class="btn-3d btn-secondary" onclick="resetForm('form-equipe','eq-id','eq-form-title','➕ Nova Equipe')">Cancelar</button>
+            </form>
+          </div>
 
-  <div class="menu-label">CONTEÚDO</div>
+          <div class="card-box">
+            <h3>📋 Equipes Cadastradas</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Escudo</th><th>Nome</th><th>Categoria</th><th>Descrição</th><th>Ações</th></tr></thead>
+                <tbody id="lista-equipes"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
 
-  <button class="nav-btn" data-page="noticias">
-   <span class="nav-icon">📰</span> Notícias
-  </button>
+        <!-- 4. JOGADORES -->
+        <section id="tab-jogadores" class="section">
+          <div class="section-title">🏃 Jogadores & Fotos</div>
+          <div class="card-box">
+            <h3 id="jog-form-title">➕ Novo Jogador</h3>
+            <form id="form-jogador">
+              <input type="hidden" id="jog-id">
+              <div class="grid-3">
+                <div class="form-group"><label>Nome Completo *</label><input type="text" id="jog-nome" required placeholder="Nome do atleta"></div>
+                <div class="form-group"><label>Equipe *</label><select id="jog-equipe" required></select></div>
+                <div class="form-group"><label>Nº da Camisa</label><input type="number" id="jog-camisa" placeholder="10"></div>
+                <div class="form-group">
+                  <label>Posição</label>
+                  <select id="jog-posicao">
+                    <option value="Goleiro">Goleiro</option>
+                    <option value="Fixo">Fixo</option>
+                    <option value="Ala">Ala</option>
+                    <option value="Pivô">Pivô</option>
+                  </select>
+                </div>
+                <div class="form-group"><label>Idade</label><input type="number" id="jog-idade" placeholder="16"></div>
+                <div class="form-group"><label>Turma / Série</label><input type="text" id="jog-turma" placeholder="Ex: 2º B"></div>
+              </div>
+              <div class="form-group"><label>Link (URL) da Foto</label><input type="url" id="jog-foto" placeholder="https://..."></div>
+              <button type="submit" class="btn-3d">💾 Salvar Jogador</button>
+              <button type="button" class="btn-3d btn-secondary" onclick="resetForm('form-jogador','jog-id','jog-form-title','➕ Novo Jogador')">Cancelar</button>
+            </form>
+          </div>
 
-  <button class="nav-btn" data-page="premiacoes">
-   <span class="nav-icon">🥇</span> Premiações
-  </button>
+          <div class="card-box">
+            <h3>📋 Elenco Cadastrado</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Foto</th><th>Nome</th><th>Camisa</th><th>Posição</th><th>Equipe</th><th>Turma</th><th>Ações</th></tr></thead>
+                <tbody id="lista-jogadores"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
 
-  <button class="nav-btn" data-page="configuracoes">
-   <span class="nav-icon">⚙️</span> Configurações
-  </button>
+        <!-- 5. GRUPOS E CHAVES -->
+        <section id="tab-grupos" class="section">
+          <div class="section-title">🗂️ Grupos & Chaves</div>
+          <div class="grid-2">
+            <div class="card-box">
+              <h3>➕ Criar Grupo</h3>
+              <form id="form-grupo">
+                <div class="form-group"><label>Campeonato *</label><select id="grp-camp" required></select></div>
+                <div class="form-group"><label>Nome do Grupo *</label><input type="text" id="grp-nome" required placeholder="Ex: Grupo A"></div>
+                <button type="submit" class="btn-3d">💾 Criar Grupo</button>
+              </form>
+            </div>
 
-  <div class="sidebar-bottom">
-   <button class="logout" id="logoutButton">↪ Sair da conta</button>
+            <div class="card-box">
+              <h3>🔗 Adicionar Equipe ao Grupo</h3>
+              <form id="form-grupo-equipe">
+                <div class="form-group"><label>Grupo *</label><select id="ge-grupo" required></select></div>
+                <div class="form-group"><label>Equipe *</label><select id="ge-equipe" required></select></div>
+                <button type="submit" class="btn-3d">➕ Vincular Equipe</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="card-box">
+            <h3>📋 Grupos e Equipes Vinculadas</h3>
+            <div id="lista-grupos-detalhes"></div>
+          </div>
+        </section>
+
+        <!-- 6. PARTIDAS E PLACARES -->
+        <section id="tab-partidas" class="section">
+          <div class="section-title">📅 Calendário de Partidas & Placares</div>
+          <div class="card-box">
+            <h3 id="part-form-title">➕ Agendar / Editar Partida</h3>
+            <form id="form-partida">
+              <input type="hidden" id="part-id">
+              <div class="grid-3">
+                <div class="form-group"><label>Campeonato *</label><select id="part-camp" required></select></div>
+                <div class="form-group"><label>Grupo (opcional)</label><select id="part-grupo"></select></div>
+                <div class="form-group">
+                  <label>Fase</label>
+                  <select id="part-fase">
+                    <option value="Fase de Grupos">Fase de Grupos</option>
+                    <option value="Oitavas de Final">Oitavas de Final</option>
+                    <option value="Quartas de Final">Quartas de Final</option>
+                    <option value="Semifinal">Semifinal</option>
+                    <option value="Disputa de 3º Lugar">Disputa de 3º Lugar</option>
+                    <option value="Final">Final</option>
+                  </select>
+                </div>
+                <div class="form-group"><label>Equipe Casa *</label><select id="part-casa" required></select></div>
+                <div class="form-group"><label>Equipe Visitante *</label><select id="part-fora" required></select></div>
+                <div class="form-group"><label>Data e Hora</label><input type="datetime-local" id="part-data"></div>
+                <div class="form-group"><label>Local da Partida</label><input type="text" id="part-local" placeholder="Quadra 1"></div>
+                <div class="form-group"><label>Gols Casa</label><input type="number" id="part-gols-casa" value="0" min="0"></div>
+                <div class="form-group"><label>Gols Visitante</label><input type="number" id="part-gols-fora" value="0" min="0"></div>
+                <div class="form-group">
+                  <label>Status da Partida</label>
+                  <select id="part-status">
+                    <option value="Agendada">Agendada</option>
+                    <option value="Ao Vivo">Ao Vivo</option>
+                    <option value="Finalizada">Finalizada</option>
+                    <option value="Adiada">Adiada</option>
+                  </select>
+                </div>
+              </div>
+              <button type="submit" class="btn-3d">💾 Salvar Partida / Placar</button>
+              <button type="button" class="btn-3d btn-secondary" onclick="resetForm('form-partida','part-id','part-form-title','➕ Agendar / Editar Partida')">Cancelar</button>
+            </form>
+          </div>
+
+          <div class="card-box">
+            <h3>📋 Tabela de Jogos</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Fase</th><th>Casa</th><th>Placar</th><th>Visitante</th><th>Data/Local</th><th>Status</th><th>Ações</th></tr></thead>
+                <tbody id="lista-partidas"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. GOLS E CARTÕES -->
+        <section id="tab-eventos" class="section">
+          <div class="section-title">⚽ Registrar Gols & Cartões</div>
+          <div class="grid-2">
+            <div class="card-box">
+              <h3>⚽ Registrar Gol</h3>
+              <form id="form-gol">
+                <div class="form-group"><label>Partida *</label><select id="gol-partida" required></select></div>
+                <div class="form-group"><label>Equipe *</label><select id="gol-equipe" required></select></div>
+                <div class="form-group"><label>Jogador *</label><select id="gol-jogador" required></select></div>
+                <div class="form-group"><label>Minuto do Gol</label><input type="number" id="gol-minuto" placeholder="Ex: 14"></div>
+                <button type="submit" class="btn-3d btn-success">⚽ Adicionar Gol</button>
+              </form>
+            </div>
+
+            <div class="card-box">
+              <h3>🟨🟥 Registrar Cartão</h3>
+              <form id="form-cartao">
+                <div class="form-group"><label>Partida *</label><select id="cart-partida" required></select></div>
+                <div class="form-group"><label>Equipe *</label><select id="cart-equipe" required></select></div>
+                <div class="form-group"><label>Jogador *</label><select id="cart-jogador" required></select></div>
+                <div class="grid-2">
+                  <div class="form-group">
+                    <label>Tipo de Cartão</label>
+                    <select id="cart-tipo">
+                      <option value="Amarelo">🟨 Amarelo</option>
+                      <option value="Vermelho">🟥 Vermelho</option>
+                    </select>
+                  </div>
+                  <div class="form-group"><label>Minuto</label><input type="number" id="cart-minuto" placeholder="Ex: 22"></div>
+                </div>
+                <div class="form-group"><label>Observação</label><input type="text" id="cart-obs" placeholder="Motivo da infração"></div>
+                <button type="submit" class="btn-3d">🟨 Adicionar Cartão</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card-box">
+              <h3>📋 Últimos Gols</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Jogador</th><th>Equipe</th><th>Min</th><th>Ação</th></tr></thead>
+                  <tbody id="lista-gols"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="card-box">
+              <h3>📋 Últimos Cartões</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Jogador</th><th>Tipo</th><th>Min</th><th>Ação</th></tr></thead>
+                  <tbody id="lista-cartoes"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8. CLASSIFICAÇÃO & ARTILHARIA -->
+        <section id="tab-classificacao" class="section">
+          <div class="section-title">📈 Classificação & Artilharia Automática</div>
+          <div class="card-box">
+            <h3>🏆 Tabela de Classificação (Baseada em Partidas Finalizadas)</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>#</th><th>Equipe</th><th>P</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th><th>SG</th></tr></thead>
+                <tbody id="tabela-classificacao"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card-box">
+            <h3>👟 Ranking de Artilharia</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>#</th><th>Jogador</th><th>Equipe</th><th>Gols</th></tr></thead>
+                <tbody id="tabela-artilharia"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 9. NOTÍCIAS -->
+        <section id="tab-noticias" class="section">
+          <div class="section-title">📰 Portal de Notícias</div>
+          <div class="card-box">
+            <h3 id="not-form-title">➕ Publicar Notícia</h3>
+            <form id="form-noticia">
+              <input type="hidden" id="not-id">
+              <div class="form-group"><label>Título *</label><input type="text" id="not-titulo" required placeholder="Título da matéria"></div>
+              <div class="form-group"><label>Link (URL) da Imagem</label><input type="url" id="not-imagem" placeholder="https://..."></div>
+              <div class="form-group"><label>Conteúdo *</label><textarea id="not-conteudo" rows="4" required placeholder="Escreva a notícia completa..."></textarea></div>
+              <div class="form-group">
+                <label>Status de Publicação</label>
+                <select id="not-publicado">
+                  <option value="true">✅ Publicada (Visível no site)</option>
+                  <option value="false">📝 Rascunho (Oculta)</option>
+                </select>
+              </div>
+              <button type="submit" class="btn-3d">💾 Salvar Notícia</button>
+              <button type="button" class="btn-3d btn-secondary" onclick="resetForm('form-noticia','not-id','not-form-title','➕ Publicar Notícia')">Cancelar</button>
+            </form>
+          </div>
+
+          <div class="card-box">
+            <h3>📋 Notícias Cadastradas</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Título</th><th>Status</th><th>Ações</th></tr></thead>
+                <tbody id="lista-noticias"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 10. PREMIAÇÕES -->
+        <section id="tab-premiacoes" class="section">
+          <div class="section-title">🏅 Premiações & Destaques</div>
+          <div class="card-box">
+            <h3>➕ Registrar Premiação</h3>
+            <form id="form-premiacao">
+              <div class="grid-2">
+                <div class="form-group"><label>Campeonato *</label><select id="prem-camp" required></select></div>
+                <div class="form-group"><label>Categoria do Prêmio *</label><input type="text" id="prem-categoria" required placeholder="Ex: Campeão / Artilheiro / Melhor Goleiro"></div>
+                <div class="form-group"><label>Equipe Premiada (opcional)</label><select id="prem-equipe"></select></div>
+                <div class="form-group"><label>Jogador Premiado (opcional)</label><select id="prem-jogador"></select></div>
+              </div>
+              <div class="form-group"><label>Descrição</label><input type="text" id="prem-descricao" placeholder="Detalhes da premiação"></div>
+              <button type="submit" class="btn-3d">🏅 Salvar Premiação</button>
+            </form>
+          </div>
+
+          <div class="card-box">
+            <h3>📋 Galeria de Premiações</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Prêmio</th><th>Campeonato</th><th>Equipe</th><th>Jogador</th><th>Ação</th></tr></thead>
+                <tbody id="lista-premiacoes"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 11. ADMINISTRADORES -->
+        <section id="tab-admins" class="section">
+          <div class="section-title">🛡️ Controle de Administradores (Limite: 3)</div>
+          <div class="card-box">
+            <h3>ℹ️ Segurança do Sistema</h3>
+            <p style="color:var(--muted); font-size:0.9rem; line-height:1.6;">
+              O banco de dados possui uma trava automática (trigger) que permite <strong>no máximo 3 administradores</strong> simultâneos.<br>
+              Para adicionar um 2º ou 3º administrador: crie o usuário em <strong>Supabase → Authentication → Users</strong>, copie o <strong>User UID</strong> e cadastre abaixo (ou diretamente na tabela <code>administradores</code>).
+            </p>
+            <div style="margin-top:14px; padding:12px; background:rgba(37,99,235,0.15); border-radius:12px; border:1px solid #3b82f6;">
+              <strong>Seu User UID atual:</strong> <code id="my-uid" style="color:#93c5fd;">...</code>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
   </div>
 
- </aside>
-
- <main class="main">
-
-  <header class="topbar">
-   <div style="display:flex;align-items:center;gap:12px">
-    <button class="mobile-menu" id="mobileMenu">☰</button>
-    <div>
-     <h1 id="pageTitle">Dashboard</h1>
-     <p>Gerencie seu campeonato escolar.</p>
-    </div>
-   </div>
-   <div class="admin-tag">● ADMINISTRADOR</div>
-  </header>
-
-  <section id="pageContent">
-
-   <div class="welcome">
-    <h2>🏆 BEM-VINDO AO JOGOS ESCOLARES!</h2>
-    <p>
-     Seu painel administrativo está conectado.
-     Aqui você poderá organizar campeonatos, equipes,
-     jogadores, partidas e muito mais.
-    </p>
-    <span class="status">ACESSO ADMINISTRATIVO AUTORIZADO</span>
-   </div>
-
-   <h3 class="section-title">VISÃO GERAL DO CAMPEONATO</h3>
-
-   <div class="stats">
-    <div class="stat">
-     <div class="stat-icon">🏆</div>
-     <div class="stat-number" id="countCampeonatos">—</div>
-     <div class="stat-name">Campeonatos</div>
-    </div>
-
-    <div class="stat">
-     <div class="stat-icon">🛡️</div>
-     <div class="stat-number" id="countEquipes">—</div>
-     <div class="stat-name">Equipes</div>
-    </div>
-
-    <div class="stat">
-     <div class="stat-icon">👥</div>
-     <div class="stat-number" id="countJogadores">—</div>
-     <div class="stat-name">Jogadores</div>
-    </div>
-
-    <div class="stat">
-     <div class="stat-icon">⚽</div>
-     <div class="stat-number" id="countPartidas">—</div>
-     <div class="stat-name">Partidas</div>
-    </div>
-   </div>
-
-   <h3 class="section-title">SISTEMA</h3>
-
-   <div class="content-card">
-    <h3 style="margin-bottom:10px">Conexão com o Supabase</h3>
-    <p id="connectionStatus" class="loading">
-     Verificando conexão com o banco de dados...
-    </p>
-   </div>
-
-   <h3 class="section-title">ÁREAS DO SISTEMA</h3>
-
-   <div class="content-card">
-    <div class="info-list">
-     <div class="info-item">
-      <strong>🏆 Campeonatos</strong>
-      <span>Organização dos torneios</span>
-     </div>
-     <div class="info-item">
-      <strong>🛡️ Equipes</strong>
-      <span>Cadastro de times e escudos</span>
-     </div>
-     <div class="info-item">
-      <strong>👥 Jogadores</strong>
-      <span>Atletas e informações</span>
-     </div>
-     <div class="info-item">
-      <strong>⚽ Partidas</strong>
-      <span>Calendário e resultados</span>
-     </div>
-    </div>
-   </div>
-
-  </section>
-
- </main>
-</div>
-
-<script type="module">
-
-import { createClient } from
-'https://esm.sh/@supabase/supabase-js@2';
-
-const SUPABASE_URL =
-'https://rqbcqpewvyjplqnjbkxd.supabase.co';
-
-const SUPABASE_KEY =
-'sb_publishable_Y2OWwCA0x1kpJRPezdgrCw_YvShp5BJ';
-
-const supabase = createClient(
- SUPABASE_URL,
- SUPABASE_KEY
-);
-
-const loginArea = document.getElementById('loginArea');
-const app = document.getElementById('app');
-const form = document.getElementById('loginForm');
-const notice = document.getElementById('notice');
-const loginButton = document.getElementById('loginButton');
-const pageContent = document.getElementById('pageContent');
-
-const titles = {
- dashboard:'Dashboard',
- campeonatos:'Campeonatos',
- equipes:'Equipes',
- jogadores:'Jogadores',
- grupos:'Grupos e chaves',
- partidas:'Partidas',
- classificacao:'Classificação',
- artilharia:'Artilharia',
- noticias:'Notícias',
- premiacoes:'Premiações',
- configuracoes:'Configurações'
-};
-
-function showNotice(message){
- notice.style.display='block';
- notice.textContent=message;
-}
-
-function showLogin(){
- app.style.display='none';
- loginArea.style.display='flex';
-}
-
-function showApp(){
- loginArea.style.display='none';
- app.style.display='block';
- loadDashboard();
-}
-
-async function checkAdmin(){
- const {data,error} = await supabase.rpc('is_admin');
-
- if(error) throw error;
-
- if(data !== true){
-  await supabase.auth.signOut();
-  throw new Error('Este usuário não possui autorização administrativa.');
- }
-
- return true;
-}
-
-async function loadDashboard(){
-
- const connection = document.getElementById('connectionStatus');
- connection.textContent='Consultando o banco de dados...';
-
- const tables = [
-  {table:'campeonatos',element:'countCampeonatos'},
-  {table:'equipes',element:'countEquipes'},
-  {table:'jogadores',element:'countJogadores'},
-  {table:'partidas',element:'countPartidas'}
- ];
-
- const results = await Promise.all(
-  tables.map(async item=>{
-   const {count,error} = await supabase
-    .from(item.table)
-    .select('*',{count:'exact',head:true});
-
-   return {...item,count,error};
-  })
- );
-
- let errors=0;
-
- results.forEach(result=>{
-  const element=document.getElementById(result.element);
-
-  if(result.error){
-   element.textContent='—';
-   errors++;
-  }else{
-   element.textContent=result.count ?? 0;
-  }
- });
-
- if(errors===0){
-  connection.textContent='Conexão estabelecida. Indicadores carregados com sucesso.';
-  connection.style.color='#8be4b2';
- }else{
-  connection.textContent=
-   'Painel conectado, mas não foi possível consultar todos os indicadores. Vamos conferir as permissões e políticas dessas tabelas.';
-  connection.style.color='#f2c47a';
- }
-}
-
-form.addEventListener('submit',async event=>{
-
- event.preventDefault();
-
- loginButton.disabled=true;
- loginButton.textContent='VERIFICANDO...';
- showNotice('Verificando seu acesso...');
-
- const email=document.getElementById('email').value.trim();
- const senha=document.getElementById('senha').value;
-
- try{
-
-  const {error}=await supabase.auth.signInWithPassword({
-   email,
-   password:senha
-  });
-
-  if(error) throw error;
-
-  await checkAdmin();
-
-  showApp();
-
- }catch(error){
-
-  showLogin();
-  showNotice('Não foi possível entrar: '+error.message);
-
- }finally{
-
-  loginButton.disabled=false;
-  loginButton.textContent='ENTRAR NO PAINEL →';
-
- }
-
-});
-
-function openPage(page){
-
- if(!titles[page]) return;
-
- document.querySelectorAll('.nav-btn').forEach(button=>{
-  button.classList.toggle('active',button.dataset.page===page);
- });
-
- document.getElementById('pageTitle').textContent=titles[page];
-
- const sidebar=document.getElementById('sidebar');
- sidebar.classList.remove('open');
-
- if(page==='dashboard'){
-  pageContent.innerHTML=`
-   <div class="welcome">
-    <h2>🏆 BEM-VINDO AO JOGOS ESCOLARES!</h2>
-    <p>Seu painel administrativo está conectado. Gerencie seu campeonato por aqui.</p>
-    <span class="status">ACESSO ADMINISTRATIVO AUTORIZADO</span>
-   </div>
-   <h3 class="section-title">VISÃO GERAL DO CAMPEONATO</h3>
-   <div class="stats">
-    <div class="stat"><div class="stat-icon">🏆</div><div class="stat-number" id="countCampeonatos">—</div><div class="stat-name">Campeonatos</div></div>
-    <div class="stat"><div class="stat-icon">🛡️</div><div class="stat-number" id="countEquipes">—</div><div class="stat-name">Equipes</div></div>
-    <div class="stat"><div class="stat-icon">👥</div><div class="stat-number" id="countJogadores">—</div><div class="stat-name">Jogadores</div></div>
-    <div class="stat"><div class="stat-icon">⚽</div><div class="stat-number" id="countPartidas">—</div><div class="stat-name">Partidas</div></div>
-   </div>
-   <h3 class="section-title">SISTEMA</h3>
-   <div class="content-card"><h3 style="margin-bottom:10px">Conexão com o Supabase</h3><p id="connectionStatus">Verificando...</p></div>
-  `;
-  loadDashboard();
-  return;
- }
-
- const descriptions={
-  campeonatos:'Cadastro, edição e organização dos campeonatos escolares.',
-  equipes:'Gerenciamento dos times, nomes e escudos.',
-  jogadores:'Cadastro de atletas, fotos, números e informações.',
-  grupos:'Organização das chaves e grupos do campeonato.',
-  partidas:'Calendário de jogos, placares e resultados.',
-  classificacao:'Tabela de classificação das equipes.',
-  artilharia:'Gols e estatísticas dos jogadores.',
-  noticias:'Publicação de notícias e comunicados.',
-  premiacoes:'Organização das premiações do campeonato.',
-  configuracoes:'Configurações e informações administrativas.'
- };
-
- pageContent.innerHTML=`
-  <div class="page-message">
-   <h2>${titles[page]}</h2>
-   <p>${descriptions[page]}</p>
-   <br>
-   <span class="status">ÁREA PREPARADA</span>
-   <br><br>
-   <p>Esta seção será conectada às tabelas do Supabase na próxima etapa. Nenhuma informação do banco será alterada nesta tela.</p>
-  </div>
- `;
-}
-
-document.querySelectorAll('.nav-btn').forEach(button=>{
- button.addEventListener('click',()=>{
-  openPage(button.dataset.page);
- });
-});
-
-document.getElementById('mobileMenu').addEventListener('click',()=>{
- document.getElementById('sidebar').classList.toggle('open');
-});
-
-document.getElementById('logoutButton').addEventListener('click',async()=>{
- await supabase.auth.signOut();
- showLogin();
- notice.style.display='none';
- form.reset();
-});
-
-async function restoreSession(){
-
- try{
-  const {data,error}=await supabase.auth.getSession();
-
-  if(error) throw error;
-
-  if(data.session){
-   await checkAdmin();
-   showApp();
-  }else{
-   showLogin();
-  }
-
- }catch(error){
-  await supabase.auth.signOut();
-  showLogin();
-  showNotice('Sessão encerrada ou acesso não autorizado. Entre novamente.');
- }
-}
-
-restoreSession();
-
-</script>
-
+  <div id="toast"></div>
+
+  <script>
+    const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_Y2OWwCA0x1kpJRPezdgrCw_YvShp5BJ';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let DB = {
+      campeonatos: [], equipes: [], jogadores: [], grupos: [],
+      grupo_equipes: [], partidas: [], gols: [], cartoes: [],
+      noticias: [], premiacoes: []
+    };
+
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.display = 'block';
+      setTimeout(() => t.style.display = 'none', 3200);
+    }
+
+    function showTab(tabId, btn) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('active');
+      if (btn) btn.classList.add('active');
+      document.getElementById('sidebar').classList.remove('open');
+    }
+
+    function resetForm(formId, hiddenId, titleId, defaultTitle) {
+      document.getElementById(formId).reset();
+      if (hiddenId) document.getElementById(hiddenId).value = '';
+      if (titleId) document.getElementById(titleId).textContent = defaultTitle;
+    }
+
+    // VERIFICAR SESSÃO AO ABRIR
+    async function verificarSessao() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        const { data: isAdm } = await sb.rpc('is_admin');
+        if (isAdm) {
+          entrarNoPainel(session.user);
+          return;
+        }
+      }
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('admin-app').style.display = 'none';
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const msg = document.getElementById('login-msg');
+      const btn = document.getElementById('btn-login');
+
+      msg.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = '⏳ Verificando...';
+
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        msg.className = 'alert-box alert-error';
+        msg.textContent = '❌ E-mail ou senha inválidos.';
+        msg.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = '🔐 Entrar no Painel';
+        return;
+      }
+
+      const { data: isAdm, error: rpcErr } = await sb.rpc('is_admin');
+
+      if (rpcErr || !isAdm) {
+        await sb.auth.signOut();
+        msg.className = 'alert-box alert-error';
+        msg.textContent = '🚫 Acesso negado: este usuário não está autorizado como administrador.';
+        msg.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = '🔐 Entrar no Painel';
+        return;
+      }
+
+      entrarNoPainel(data.user);
+    });
+
+    function entrarNoPainel(user) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-app').style.display = 'block';
+      document.getElementById('admin-email-display').textContent = user.email;
+      document.getElementById('my-uid').textContent = user.id;
+      carregarTudo();
+    }
+
+    async function logout() {
+      await sb.auth.signOut();
+      location.reload();
+    }
+
+    // CARREGAR TODOS OS DADOS
+    async function carregarTudo() {
+      const tabelas = ['campeonatos','equipes','jogadores','grupos','grupo_equipes','partidas','gols','cartoes','noticias','premiacoes'];
+      await Promise.all(tabelas.map(async (tb) => {
+        const { data } = await sb.from(tb).select('*').order('id', { ascending: false });
+        DB[tb] = data || [];
+      }));
+
+      preencherSelects();
+      renderDashboard();
+      renderCampeonatos();
+      renderEquipes();
+      renderJogadores();
+      renderGrupos();
+      renderPartidas();
+      renderEventos();
+      renderClassificacaoEArtilharia();
+      renderNoticias();
+      renderPremiacoes();
+      toast('✅ Dados atualizados!');
+    }
+
+    const nomeEquipe = id => (DB.equipes.find(e => e.id == id) || {}).nome || '—';
+    const nomeJogador = id => (DB.jogadores.find(j => j.id == id) || {}).nome || '—';
+    const nomeCamp = id => (DB.campeonatos.find(c => c.id == id) || {}).nome || '—';
+    const nomeGrupo = id => (DB.grupos.find(g => g.id == id) || {}).nome || '—';
+
+    function preencherSelects() {
+      const optCamp = DB.campeonatos.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+      const optEq = DB.equipes.map(e => `<option value="${e.id}">${e.nome}</option>`).join('');
+      const optJog = DB.jogadores.map(j => `<option value="${j.id}">${j.nome} (${nomeEquipe(j.equipe_id)})</option>`).join('');
+      const optGrp = DB.grupos.map(g => `<option value="${g.id}">${g.nome} - ${nomeCamp(g.campeonato_id)}</option>`).join('');
+      const optPart = DB.partidas.map(p => `<option value="${p.id}">${nomeEquipe(p.equipe_casa_id)} ${p.gols_casa ?? 0}x${p.gols_fora ?? 0} ${nomeEquipe(p.equipe_fora_id)}</option>`).join('');
+
+      ['grp-camp','part-camp','prem-camp'].forEach(id => document.getElementById(id).innerHTML = optCamp);
+      ['jog-equipe','ge-equipe','part-casa','part-fora','gol-equipe','cart-equipe'].forEach(id => document.getElementById(id).innerHTML = optEq);
+      document.getElementById('prem-equipe').innerHTML = '<option value="">-- Nenhuma --</option>' + optEq;
+      ['gol-jogador','cart-jogador'].forEach(id => document.getElementById(id).innerHTML = optJog);
+      document.getElementById('prem-jogador').innerHTML = '<option value="">-- Nenhum --</option>' + optJog;
+      document.getElementById('ge-grupo').innerHTML = optGrp;
+      document.getElementById('part-grupo').innerHTML = '<option value="">-- Sem grupo --</option>' + optGrp;
+      ['gol-partida','cart-partida'].forEach(id => document.getElementById(id).innerHTML = optPart);
+    }
+
+    // DASHBOARD
+    function renderDashboard() {
+      document.getElementById('stat-camp').textContent = DB.campeonatos.length;
+      document.getElementById('stat-eq').textContent = DB.equipes.length;
+      document.getElementById('stat-jog').textContent = DB.jogadores.length;
+      document.getElementById('stat-part').textContent = DB.partidas.length;
+      document.getElementById('stat-gols').textContent = DB.gols.length;
+      document.getElementById('stat-cart').textContent = DB.cartoes.length;
+
+      document.getElementById('dash-partidas').innerHTML = DB.partidas.slice(0, 8).map(p => `
+        <tr>
+          <td>${nomeCamp(p.campeonato_id)}</td>
+          <td><strong>${nomeEquipe(p.equipe_casa_id)}</strong> vs <strong>${nomeEquipe(p.equipe_fora_id)}</strong></td>
+          <td><span class="badge badge-blue">${p.gols_casa ?? 0} x ${p.gols_fora ?? 0}</span></td>
+          <td>${p.data_hora ? new Date(p.data_hora).toLocaleString('pt-BR') : 'A definir'}</td>
+          <td>${p.local || '—'}</td>
+          <td><span class="badge ${p.status === 'Finalizada' ? 'badge-green' : 'badge-yellow'}">${p.status || 'Agendada'}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    // CRUD CAMPEONATOS
+    document.getElementById('form-campeonato').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('camp-id').value;
+      const payload = {
+        nome: document.getElementById('camp-nome').value,
+        modalidade: document.getElementById('camp-modalidade').value,
+        categoria: document.getElementById('camp-categoria').value,
+        data_inicio: document.getElementById('camp-inicio').value || null,
+        data_fim: document.getElementById('camp-fim').value || null,
+        local: document.getElementById('camp-local').value,
+        status: document.getElementById('camp-status').value,
+        descricao: document.getElementById('camp-descricao').value,
+        regulamento: document.getElementById('camp-regulamento').value
+      };
+      const res = id ? await sb.from('campeonatos').update(payload).eq('id', id) : await sb.from('campeonatos').insert(payload);
+      if (res.error) return toast('❌ Erro: ' + res.error.message);
+      resetForm('form-campeonato','camp-id','camp-form-title','➕ Novo Campeonato');
+      carregarTudo();
+    });
+
+    function editarCamp(id) {
+      const c = DB.campeonatos.find(x => x.id == id);
+      document.getElementById('camp-id').value = c.id;
+      document.getElementById('camp-nome').value = c.nome || '';
+      document.getElementById('camp-modalidade').value = c.modalidade || '';
+      document.getElementById('camp-categoria').value = c.categoria || '';
+      document.getElementById('camp-inicio').value = c.data_inicio || '';
+      document.getElementById('camp-fim').value = c.data_fim || '';
+      document.getElementById('camp-local').value = c.local || '';
+      document.getElementById('camp-status').value = c.status || 'Em andamento';
+      document.getElementById('camp-descricao').value = c.descricao || '';
+      document.getElementById('camp-regulamento').value = c.regulamento || '';
+      document.getElementById('camp-form-title').textContent = '✏️ Editando Campeonato';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderCampeonatos() {
+      document.getElementById('lista-campeonatos').innerHTML = DB.campeonatos.map(c => `
+        <tr>
+          <td><strong>${c.nome}</strong></td>
+          <td>${c.categoria || '—'}</td>
+          <td>${c.local || '—'}</td>
+          <td>${c.data_inicio || '?'} até ${c.data_fim || '?'}</td>
+          <td><span class="badge badge-blue">${c.status || 'Ativo'}</span></td>
+          <td>
+            <button class="btn-3d btn-sm btn-edit" onclick="editarCamp(${c.id})">✏️</button>
+            <button class="btn-3d btn-sm btn-danger" onclick="excluir('campeonatos', ${c.id})">🗑️</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // CRUD EQUIPES
+    document.getElementById('form-equipe').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('eq-id').value;
+      const payload = {
+        nome: document.getElementById('eq-nome').value,
+        categoria: document.getElementById('eq-categoria').value,
+        modalidade: document.getElementById('eq-modalidade').value,
+        escudo_url: document.getElementById('eq-escudo').value,
+        descricao: document.getElementById('eq-descricao').value
+      };
+      const res = id ? await sb.from('equipes').update(payload).eq('id', id) : await sb.from('equipes').insert(payload);
+      if (res.error) return toast('❌ Erro: ' + res.error.message);
+      resetForm('form-equipe','eq-id','eq-form-title','➕ Nova Equipe');
+      carregarTudo();
+    });
+
+    function editarEq(id) {
+      const eq = DB.equipes.find(x => x.id == id);
+      document.getElementById('eq-id').value = eq.id;
+      document.getElementById('eq-nome').value = eq.nome || '';
+      document.getElementById('eq-categoria').value = eq.categoria || '';
+      document.getElementById('eq-modalidade').value = eq.modalidade || '';
+      document.getElementById('eq-escudo').value = eq.escudo_url || '';
+      document.getElementById('eq-descricao').value = eq.descricao || '';
+      document.getElementById('eq-form-title').textContent = '✏️ Editando Equipe';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderEquipes() {
+      document.getElementById('lista-equipes').innerHTML = DB.equipes.map(e => `
+        <tr>
+          <td><img src="${e.escudo_url || 'https://via.placeholder.com/40?text=⚽'}" class="avatar-sm"></td>
+          <td><strong>${e.nome}</strong></td>
+          <td>${e.categoria || '—'}</td>
+          <td>${e.descricao || '—'}</td>
+          <td>
+            <button class="btn-3d btn-sm btn-edit" onclick="editarEq(${e.id})">✏️</button>
+            <button class="btn-3d btn-sm btn-danger" onclick="excluir('equipes', ${e.id})">🗑️</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // CRUD JOGADORES
+    document.getElementById('form-jogador').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('jog-id').value;
+      const payload = {
+        nome: document.getElementById('jog-nome').value,
+        equipe_id: Number(document.getElementById('jog-equipe').value),
+        numero_camisa: document.getElementById('jog-camisa').value ? Number(document.getElementById('jog-camisa').value) : null,
+        posicao: document.getElementById('jog-posicao').value,
+        idade: document.getElementById('jog-idade').value ? Number(document.getElementById('jog-idade').value) : null,
+        turma: document.getElementById('jog-turma').value,
+        foto_url: document.getElementById('jog-foto').value
+      };
+      const res = id ? await sb.from('jogadores').update(payload).eq('id', id) : await sb.from('jogadores').insert(payload);
+      if (res.error) return toast('❌ Erro: ' + res.error.message);
+      resetForm('form-jogador','jog-id','jog-form-title','➕ Novo Jogador');
+      carregarTudo();
+    });
+
+    function editarJog(id) {
+      const j = DB.jogadores.find(x => x.id == id);
+      document.getElementById('jog-id').value = j.id;
+      document.getElementById('jog-nome').value = j.nome || '';
+      document.getElementById('jog-equipe').value = j.equipe_id || '';
+      document.getElementById('jog-camisa').value = j.numero_camisa || '';
+      document.getElementById('jog-posicao').value = j.posicao || 'Ala';
+      document.getElementById('jog-idade').value = j.idade || '';
+      document.getElementById('jog-turma').value = j.turma || '';
+      document.getElementById('jog-foto').value = j.foto_url || '';
+      document.getElementById('jog-form-title').textContent = '✏️ Editando Jogador';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderJogadores() {
+      document.getElementById('lista-jogadores').innerHTML = DB.jogadores.map(j => `
+        <tr>
+          <td><img src="${j.foto_url || 'https://via.placeholder.com/40?text=🏃'}" class="avatar-sm"></td>
+          <td><strong>${j.nome}</strong></td>
+          <td>#${j.numero_camisa ?? '—'}</td>
+          <td>${j.posicao || '—'}</td>
+          <td>${nomeEquipe(j.equipe_id)}</td>
+          <td>${j.turma || '—'}</td>
+          <td>
+            <button class="btn-3d btn-sm btn-edit" onclick="editarJog(${j.id})">✏️</button>
+            <button class="btn-3d btn-sm btn-danger" onclick="excluir('jogadores', ${j.id})">🗑️</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // GRUPOS
+    document.getElementById('form-grupo').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const { error } = await sb.from('grupos').insert({
+        campeonato_id: Number(document.getElementById('grp-camp').value),
+        nome: document.getElementById('grp-nome').value
+      });
+      if (error) return toast('❌ Erro: ' + error.message);
+      e.target.reset();
+      carregarTudo();
+    });
+
+    document.getElementById('form-grupo-equipe').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const { error } = await sb.from('grupo_equipes').insert({
+        grupo_id: Number(document.getElementById('ge-grupo').value),
+        equipe_id: Number(document.getElementById('ge-equipe').value)
+      });
+      if (error) return toast('❌ Erro: ' + error.message);
+      carregarTudo();
+    });
+
+    function renderGrupos() {
+      document.getElementById('lista-grupos-detalhes').innerHTML = DB.grupos.map(g => {
+        const vinculadas = DB.grupo_equipes.filter(ge => ge.grupo_id == g.id);
+        return `
+          <div style="padding:14px; background:rgba(255,255,255,0.03); border-radius:14px; margin-bottom:12px; border:1px solid rgba(255,255,255,0.08);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <strong>${g.nome} <span style="color:var(--muted); font-weight:400;">(${nomeCamp(g.campeonato_id)})</span></strong>
+              <button class="btn-3d btn-sm btn-danger" onclick="excluir('grupos', ${g.id})">🗑️ Grupo</button>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+              ${vinculadas.map(v => `
+                <span class="badge badge-blue">
+                  ${nomeEquipe(v.equipe_id)}
+                  <a href="#" onclick="excluir('grupo_equipes', ${v.id}); return false;" style="color:#fca5a5; margin-left:6px; text-decoration:none;">×</a>
+                </span>
+              `).join('') || '<span style="color:var(--muted); font-size:0.82rem;">Nenhuma equipe vinculada</span>'}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // PARTIDAS
+    document.getElementById('form-partida').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('part-id').value;
+      const payload = {
+        campeonato_id: Number(document.getElementById('part-camp').value),
+        grupo_id: document.getElementById('part-grupo').value ? Number(document.getElementById('part-grupo').value) : null,
+        fase: document.getElementById('part-fase').value,
+        equipe_casa_id: Number(document.getElementById('part-casa').value),
+        equipe_fora_id: Number(document.getElementById('part-fora').value),
+        data_hora: document.getElementById('part-data').value || null,
+        local: document.getElementById('part-local').value,
+        gols_casa: Number(document.getElementById('part-gols-casa').value || 0),
+        gols_fora: Number(document.getElementById('part-gols-fora').value || 0),
+        status: document.getElementById('part-status').value
+      };
+      const res = id ? await sb.from('partidas').update(payload).eq('id', id) : await sb.from('partidas').insert(payload);
+      if (res.error) return toast('❌ Erro: ' + res.error.message);
+      resetForm('form-partida','part-id','part-form-title','➕ Agendar / Editar Partida');
+      carregarTudo();
+    });
+
+    function editarPart(id) {
+      const p = DB.partidas.find(x => x.id == id);
+      document.getElementById('part-id').value = p.id;
+      document.getElementById('part-camp').value = p.campeonato_id || '';
+      document.getElementById('part-grupo').value = p.grupo_id || '';
+      document.getElementById('part-fase').value = p.fase || 'Fase de Grupos';
+      document.getElementById('part-casa').value = p.equipe_casa_id || '';
+      document.getElementById('part-fora').value = p.equipe_fora_id || '';
+      document.getElementById('part-data').value = p.data_hora ? p.data_hora.slice(0,16) : '';
+      document.getElementById('part-local').value = p.local || '';
+      document.getElementById('part-gols-casa').value = p.gols_casa ?? 0;
+      document.getElementById('part-gols-fora').value = p.gols_fora ?? 0;
+      document.getElementById('part-status').value = p.status || 'Agendada';
+      document.getElementById('part-form-title').textContent = '✏️ Editando Partida / Placar';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderPartidas() {
+      document.getElementById('lista-partidas').innerHTML = DB.partidas.map(p => `
+        <tr>
+          <td>${p.fase || '—'}</td>
+          <td><strong>${nomeEquipe(p.equipe_casa_id)}</strong></td>
+          <td><span class="badge badge-blue">${p.gols_casa ?? 0} x ${p.gols_fora ?? 0}</span></td>
+          <td><strong>${nomeEquipe(p.equipe_fora_id)}</strong></td>
+          <td>${p.data_hora ? new Date(p.data_hora).toLocaleString('pt-BR') : '—'}<br><small style="color:var(--muted)">${p.local || ''}</small></td>
+          <td><span class="badge ${p.status === 'Finalizada' ? 'badge-green' : 'badge-yellow'}">${p.status}</span></td>
+          <td>
+            <button class="btn-3d btn-sm btn-edit" onclick="editarPart(${p.id})">✏️</button>
+            <button class="btn-3d btn-sm btn-danger" onclick="excluir('partidas', ${p.id})">🗑️</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // GOLS E CARTÕES
+    document.getElementById('form-gol').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const { error } = await sb.from('gols').insert({
+        partida_id: Number(document.getElementById('gol-partida').value),
+        equipe_id: Number(document.getElementById('gol-equipe').value),
+        jogador_id: Number(document.getElementById('gol-jogador').value),
+        minuto: document.getElementById('gol-minuto').value ? Number(document.getElementById('gol-minuto').value) : null
+      });
+      if (error) return toast('❌ Erro: ' + error.message);
+      e.target.reset();
+      carregarTudo();
+    });
+
+    document.getElementById('form-cartao').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const { error } = await sb.from('cartoes').insert({
+        partida_id: Number(document.getElementById('cart-partida').value),
+        equipe_id: Number(document.getElementById('cart-equipe').value),
+        jogador_id: Number(document.getElementById('cart-jogador').value),
+        tipo: document.getElementById('cart-tipo').value,
+        minuto: document.getElementById('cart-minuto').value ? Number(document.getElementById('cart-minuto').value) : null,
+        observacao: document.getElementById('cart-obs').value
+      });
+      if (error) return toast('❌ Erro: ' + error.message);
+      e.target.reset();
+      carregarTudo();
+    });
+
+    function renderEventos() {
+      document.getElementById('lista-gols').innerHTML = DB.gols.map(g => `
+        <tr>
+          <td><strong>${nomeJogador(g.jogador_id)}</strong></td>
+          <td>${nomeEquipe(g.equipe_id)}</td>
+          <td>${g.minuto ? g.minuto + "'" : '—'}</td>
+          <td><button class="btn-3d btn-sm btn-danger" onclick="excluir('gols', ${g.id})">🗑️</button></td>
+        </tr>
+      `).join('');
+
+      document.getElementById('lista-cartoes').innerHTML = DB.cartoes.map(c => `
+        <tr>
+          <td><strong>${nomeJogador(c.jogador_id)}</strong></td>
+          <td><span class="badge ${c.tipo === 'Vermelho' ? 'badge-red' : 'badge-yellow'}">${c.tipo}</span></td>
+          <td>${c.minuto ? c.minuto + "'" : '—'}</td>
+          <td><button class="btn-3d btn-sm btn-danger" onclick="excluir('cartoes', ${c.id})">🗑️</button></td>
+        </tr>
+      `).join('');
+    }
+
+    // CLASSIFICAÇÃO & ARTILHARIA
+    function renderClassificacaoEArtilharia() {
+      const tabela = {};
+      DB.equipes.forEach(eq => {
+        tabela[eq.id] = { nome: eq.nome, p:0, j:0, v:0, e:0, d:0, gp:0, gc:0 };
+      });
+
+      DB.partidas.filter(p => p.status === 'Finalizada').forEach(p => {
+        const casa = tabela[p.equipe_casa_id];
+        const fora = tabela[p.equipe_fora_id];
+        if (!casa || !fora) return;
+        const gc = Number(p.gols_casa || 0);
+        const gf = Number(p.gols_fora || 0);
+        casa.j++; fora.j++;
+        casa.gp += gc; casa.gc += gf;
+        fora.gp += gf; fora.gc += gc;
+        if (gc > gf) { casa.v++; casa.p += 3; fora.d++; }
+        else if (gf > gc) { fora.v++; fora.p += 3; casa.d++; }
+        else { casa.e++; fora.e++; casa.p += 1; fora.p += 1; }
+      });
+
+      const ranking = Object.values(tabela).sort((a,b) => b.p - a.p || (b.gp - b.gc) - (a.gp - a.gc) || b.gp - a.gp);
+      document.getElementById('tabela-classificacao').innerHTML = ranking.map((r, i) => `
+        <tr>
+          <td><strong>${i+1}º</strong></td>
+          <td><strong>${r.nome}</strong></td>
+          <td><span class="badge badge-blue">${r.p}</span></td>
+          <td>${r.j}</td><td>${r.v}</td><td>${r.e}</td><td>${r.d}</td>
+          <td>${r.gp}</td><td>${r.gc}</td><td>${r.gp - r.gc}</td>
+        </tr>
+      `).join('');
+
+      const art = {};
+      DB.gols.forEach(g => {
+        if (!art[g.jogador_id]) art[g.jogador_id] = { jogador: nomeJogador(g.jogador_id), equipe: nomeEquipe(g.equipe_id), gols: 0 };
+        art[g.jogador_id].gols++;
+      });
+      const topArt = Object.values(art).sort((a,b) => b.gols - a.gols);
+      document.getElementById('tabela-artilharia').innerHTML = topArt.map((a, i) => `
+        <tr>
+          <td><strong>${i+1}º</strong></td>
+          <td><strong>${a.jogador}</strong></td>
+          <td>${a.equipe}</td>
+          <td><span class="badge badge-green">⚽ ${a.gols}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    // NOTÍCIAS
+    document.getElementById('form-noticia').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('not-id').value;
+      const payload = {
+        titulo: document.getElementById('not-titulo').value,
+        url_da_imagem: document.getElementById('not-imagem').value,
+        conteudo: document.getElementById('not-conteudo').value,
+        publicado: document.getElementById('not-publicado').value === 'true'
+      };
+      const res = id ? await sb.from('noticias').update(payload).eq('id', id) : await sb.from('noticias').insert(payload);
+      if (res.error) return toast('❌ Erro: ' + res.error.message);
+      resetForm('form-noticia','not-id','not-form-title','➕ Publicar Notícia');
+      carregarTudo();
+    });
+
+    function editarNot(id) {
+      const n = DB.noticias.find(x => x.id == id);
+      document.getElementById('not-id').value = n.id;
+      document.getElementById('not-titulo').value = n.titulo || '';
+      document.getElementById('not-imagem').value = n.url_da_imagem || '';
+      document.getElementById('not-conteudo').value = n.conteudo || '';
+      document.getElementById('not-publicado').value = n.publicado ? 'true' : 'false';
+      document.getElementById('not-form-title').textContent = '✏️ Editando Notícia';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderNoticias() {
+      document.getElementById('lista-noticias').innerHTML = DB.noticias.map(n => `
+        <tr>
+          <td><strong>${n.titulo}</strong></td>
+          <td><span class="badge ${n.publicado ? 'badge-green' : 'badge-yellow'}">${n.publicado ? 'Publicada' : 'Rascunho'}</span></td>
+          <td>
+            <button class="btn-3d btn-sm btn-edit" onclick="editarNot(${n.id})">✏️</button>
+            <button class="btn-3d btn-sm btn-danger" onclick="excluir('noticias', ${n.id})">🗑️</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // PREMIAÇÕES
+    document.getElementById('form-premiacao').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const { error } = await sb.from('premiacoes').insert({
+        campeonato_id: Number(document.getElementById('prem-camp').value),
+        categoria: document.getElementById('prem-categoria').value,
+        equipe_id: document.getElementById('prem-equipe').value ? Number(document.getElementById('prem-equipe').value) : null,
+        jogador_id: document.getElementById('prem-jogador').value ? Number(document.getElementById('prem-jogador').value) : null,
+        descricao: document.getElementById('prem-descricao').value
+      });
+      if (error) return toast('❌ Erro: ' + error.message);
+      e.target.reset();
+      carregarTudo();
+    });
+
+    function renderPremiacoes() {
+      document.getElementById('lista-premiacoes').innerHTML = DB.premiacoes.map(p => `
+        <tr>
+          <td><strong>${p.categoria}</strong><br><small style="color:var(--muted)">${p.descricao || ''}</small></td>
+          <td>${nomeCamp(p.campeonato_id)}</td>
+          <td>${nomeEquipe(p.equipe_id)}</td>
+          <td>${nomeJogador(p.jogador_id)}</td>
+          <td><button class="btn-3d btn-sm btn-danger" onclick="excluir('premiacoes', ${p.id})">🗑️</button></td>
+        </tr>
+      `).join('');
+    }
+
+    // EXCLUIR GENÉRICO
+    async function excluir(tabela, id) {
+      if (!confirm('Tem certeza que deseja excluir este registro?')) return;
+      const { error } = await sb.from(tabela).delete().eq('id', id);
+      if (error) return toast('❌ Erro ao excluir: ' + error.message);
+      carregarTudo();
+    }
+
+    verificarSessao();
+  </script>
 </body>
 </html>

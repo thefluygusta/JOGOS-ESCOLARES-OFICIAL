@@ -1,270 +1,696 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JOGOS ESCOLARES | Arena</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JOGOS ESCOLARES | Escola Estadual Professora Isaura Baia</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #060812;
+      --bg-panel: #0d1224;
+      --bg-card: #131a33;
+      --blue: #2563eb;
+      --blue-glow: #3b82f6;
+      --purple: #7c3aed;
+      --purple-glow: #a855f7;
+      --cyan: #06b6d4;
+      --green: #10b981;
+      --red: #ef4444;
+      --gold: #fbbf24;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --border: rgba(139, 92, 246, 0.28);
+    }
 
-:root {
-  --bg:#080b18;
-  --panel:#11172c;
-  --panel2:#171d38;
-  --purple:#963cff;
-  --blue:#258cff;
-  --gold:#e9bd59;
-  --white:#f5f5ff;
-  --muted:#929bb8;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{
-  background:radial-gradient(ellipse at 15% 0%,#24104b 0,transparent 35%),
-  radial-gradient(ellipse at 90% 20%,#102d59 0,transparent 35%),var(--bg);
-  color:var(--white);
-  font-family:Inter,Arial,sans-serif;
-  min-height:100vh;
-}
-header{
-  position:sticky;top:0;z-index:10;
-  background:#090d1bea;
-  backdrop-filter:blur(18px);
-  border-bottom:1px solid #5264a044;
-}
-.nav{
-  max-width:1250px;margin:auto;padding:17px 22px;
-  display:flex;align-items:center;justify-content:space-between;gap:15px;
-}
-.logo{
-  font-family:Orbitron,sans-serif;font-weight:800;
-  letter-spacing:1px;font-size:18px;
-}
-.logo span{color:#a76aff}
-nav{display:flex;gap:22px;flex-wrap:wrap}
-nav a{color:#c6cbe0;text-decoration:none;font-size:13px;font-weight:600}
-nav a:hover{color:#7bbcff}
-.hero{
-  max-width:1250px;margin:auto;padding:65px 22px 45px;
-  display:grid;grid-template-columns:1.2fr .8fr;gap:35px;align-items:center;
-}
-.tag{
-  display:inline-block;padding:8px 13px;border-radius:30px;
-  background:#923dff20;border:1px solid #a45aff70;
-  color:#c89bff;font-size:11px;font-weight:800;letter-spacing:1px;
-}
-h1{
-  font-family:Orbitron,sans-serif;font-size:clamp(32px,5vw,57px);
-  line-height:1.16;margin:23px 0;
-}
-h1 span{
-  background:linear-gradient(90deg,#a66aff,#40aaff,#f2c76c);
-  background-clip:text;color:transparent;
-}
-.hero p{color:var(--muted);line-height:1.8;max-width:550px}
-.actions{display:flex;gap:12px;margin-top:25px;flex-wrap:wrap}
-.btn{
-  padding:13px 19px;border-radius:10px;text-decoration:none;
-  font-weight:800;font-size:13px;display:inline-block;
-  transition:.25s;border:1px solid #586b9b66;
-  color:white;background:#17213b;cursor:pointer;
-}
-.btn.primary{
-  background:linear-gradient(110deg,#8438e9,#287fe9);
-  border:0;box-shadow:0 7px 28px #6638df55;
-}
-.btn:hover{transform:translateY(-3px);box-shadow:0 8px 25px #398dff55}
-.hero-art{
-  min-height:280px;border-radius:25px;
-  background:linear-gradient(145deg,#26104d,#10294c 60%,#11172c);
-  border:1px solid #7d72d766;
-  box-shadow:0 20px 60px #0008,inset 0 0 40px #6c39bb25;
-  display:flex;align-items:center;justify-content:center;
-  position:relative;overflow:hidden;
-}
-.hero-art:before,.hero-art:after{
-  content:"";position:absolute;border-radius:50%;
-  border:1px solid #a477ff55;width:240px;height:240px;
-}
-.hero-art:after{width:190px;height:190px;border-color:#36a5ff66}
-.ball{font-size:105px;filter:drop-shadow(0 0 28px #6e9cff);z-index:1}
-.art-label{
-  position:absolute;bottom:20px;font-family:Orbitron;
-  color:#c7d9ff;font-size:12px;letter-spacing:2px;
-}
-main{max-width:1250px;margin:auto;padding:0 22px 65px}
-.section{margin-top:35px;scroll-margin-top:90px}
-.section-title{
-  display:flex;justify-content:space-between;align-items:center;
-  gap:12px;margin-bottom:18px;
-}
-h2{font-family:Orbitron;font-size:19px}
-.section-title small{color:var(--muted)}
-.stats{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:15px;
-}
-.card{
-  background:linear-gradient(145deg,#19203b,#101629);
-  border:1px solid #6574a52c;border-radius:15px;
-  padding:20px;box-shadow:0 12px 30px #0004;
-  transition:.25s;
-}
-.card:hover{transform:translateY(-5px);border-color:#8c66e9;box-shadow:0 15px 35px #552c9c33}
-.stat-number{font-family:Orbitron;font-size:29px;font-weight:800;color:#77baff}
-.stat-label{font-size:12px;color:var(--muted);margin-top:7px}
-.matches{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
-.match-top{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-bottom:20px}
-.match-teams{display:flex;justify-content:space-around;align-items:center;text-align:center}
-.team{font-weight:800;font-size:14px}
-.crest{
-  width:48px;height:48px;border-radius:14px;margin:0 auto 9px;
-  display:grid;place-items:center;font-size:23px;
-  background:linear-gradient(140deg,#6735c7,#167ac8);
-  box-shadow:0 0 18px #438cff55;
-}
-.vs{font-family:Orbitron;color:#a78aff;font-size:13px}
-.score{font-family:Orbitron;font-size:25px;color:#f4d078;margin-top:8px}
-.status{color:#63b9ff;font-size:10px;margin-top:8px}
-.table-wrap{overflow-x:auto;border-radius:15px;border:1px solid #586a9538}
-table{width:100%;border-collapse:collapse;min-width:520px;background:#11172c}
-th,td{padding:15px;text-align:center;font-size:12px;border-bottom:1px solid #52608030}
-th{color:#aeb8d4;background:#1b2340}
-td:first-child,th:first-child{text-align:left;padding-left:20px}
-td{color:#dce1f4}
-.position{color:#70b5ff;font-weight:800}
-.players{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
-.player{display:flex;align-items:center;gap:15px}
-.avatar{
-  width:48px;height:48px;border-radius:50%;
-  display:grid;place-items:center;font-size:21px;
-  background:linear-gradient(145deg,#743bd0,#1689d7);
-}
-.player-info{flex:1}
-.player-info strong{font-size:13px}
-.player-info small{display:block;color:var(--muted);margin-top:5px}
-.goals{font-family:Orbitron;color:#f1c66c;font-size:20px}
-footer{
-  border-top:1px solid #5d6b9130;text-align:center;
-  padding:28px 15px;color:var(--muted);font-size:12px;
-}
-footer strong{color:#b58aff}
-@media(max-width:750px){
- .nav{align-items:flex-start;flex-direction:column}
- nav{gap:15px}
- .hero{grid-template-columns:1fr;padding-top:40px}
- .hero-art{min-height:210px}
- .stats{grid-template-columns:repeat(2,1fr)}
- .matches{grid-template-columns:1fr}
- .players{grid-template-columns:1fr}
-}
-</style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(circle at 18% 12%, rgba(37, 99, 235, 0.26), transparent 44%),
+        radial-gradient(circle at 82% 85%, rgba(124, 58, 237, 0.26), transparent 46%),
+        linear-gradient(rgba(139, 92, 246, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37, 99, 235, 0.045) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+      color: var(--text);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* BRASÃO DA ESCOLA COMO MARCA-D'ÁGUA NA TEXTURA DO FUNDO */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 52%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(78vw, 560px);
+      height: min(78vw, 560px);
+      background-image: url('logo.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      opacity: 0.075;
+      filter: drop-shadow(0 0 35px rgba(59, 130, 246, 0.45));
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* HEADER HERO 3D */
+    header {
+      background: linear-gradient(180deg, rgba(13, 18, 36, 0.92), rgba(6, 8, 18, 0.85));
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      padding: 22px 0;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.55);
+    }
+
+    .hero-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .school-crest {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: #fff;
+      padding: 3px;
+      object-fit: contain;
+      box-shadow: 0 0 24px rgba(59, 130, 246, 0.6), 0 0 10px rgba(251, 191, 36, 0.4);
+      flex-shrink: 0;
+    }
+
+    .site-title {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: clamp(1.2rem, 3vw, 1.85rem);
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, #60a5fa, #c084fc, #fbbf24);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
+    }
+
+    .school-sub {
+      font-size: 0.84rem;
+      color: #cbd5e1;
+      font-weight: 600;
+    }
+
+    /* FILTROS DE MODALIDADE E NAIPE */
+    .filter-strip {
+      background: rgba(19, 26, 51, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px 20px;
+      margin: 22px 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      box-shadow: 0 14px 35px rgba(0,0,0,0.45);
+    }
+
+    .pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill-btn {
+      padding: 9px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(9, 13, 28, 0.85);
+      color: var(--muted);
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.86rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .pill-btn:hover { color: #fff; border-color: var(--blue-glow); }
+    .pill-btn.active {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.45);
+    }
+    .pill-btn.gold.active {
+      background: linear-gradient(135deg, #d97706, #fbbf24);
+      color: #060812;
+      box-shadow: 0 4px 16px rgba(251, 191, 36, 0.4);
+    }
+
+    /* NAVEGAÇÃO PRINCIPAL */
+    .main-tabs {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 22px;
+    }
+
+    .tab-btn {
+      padding: 11px 18px;
+      border-radius: 13px;
+      border: 1px solid var(--border);
+      background: rgba(13, 18, 36, 0.9);
+      color: #cbd5e1;
+      font-weight: 800;
+      font-size: 0.88rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.35), rgba(124, 58, 237, 0.35));
+      border-color: var(--cyan);
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.25);
+    }
+
+    /* CARDS 3D */
+    .card {
+      background: linear-gradient(160deg, rgba(19, 26, 51, 0.88), rgba(13, 18, 36, 0.92));
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      margin-bottom: 22px;
+      box-shadow: 0 15px 38px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07);
+    }
+
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+    }
+
+    /* TABELA CLASSIFICAÇÃO */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    th, td {
+      padding: 13px 10px;
+      text-align: left;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.16);
+    }
+    th {
+      color: var(--cyan);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .b-blue { background: rgba(37, 99, 235, 0.22); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); }
+    .b-purple { background: rgba(124, 58, 237, 0.24); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.4); }
+    .b-green { background: rgba(16, 185, 129, 0.22); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .b-red { background: rgba(239, 68, 68, 0.22); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .b-gold { background: rgba(251, 191, 36, 0.2); color: #fde68a; border: 1px solid rgba(251, 191, 36, 0.45); }
+
+    /* GRID DE JOGOS */
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .match-card {
+      background: rgba(9, 13, 28, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      transition: transform 0.2s;
+    }
+    .match-card:hover { transform: translateY(-3px); border-color: var(--purple-glow); }
+
+    .scoreboard {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 14px 0;
+      text-align: center;
+    }
+
+    .team-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .team-col img {
+      width: 48px; height: 48px; border-radius: 50%; object-fit: cover;
+      border: 2px solid var(--border); background: #131a33;
+    }
+
+    .score-pill {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 900;
+      padding: 8px 14px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(124, 58, 237, 0.25));
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      color: var(--gold);
+    }
+
+    /* CARDS DAS MISS */
+    .miss-card {
+      background: linear-gradient(155deg, rgba(19, 26, 51, 0.94), rgba(13, 18, 36, 0.96));
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      border-radius: 18px;
+      overflow: hidden;
+      text-align: center;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+    }
+    .miss-photo {
+      width: 100%;
+      height: 230px;
+      object-fit: cover;
+      background: #090d1c;
+    }
+
+    .avatar-sm {
+      width: 34px; height: 34px; border-radius: 50%; object-fit: cover;
+      border: 1px solid var(--border); background: #090d1c;
+    }
+
+    .pane { display: none; }
+    .pane.active { display: block; }
+
+    /* RODAPÉ COM CRÉDITO GUSTAVO NUNES */
+    footer {
+      margin-top: 44px;
+      border-top: 1px solid var(--border);
+      background: rgba(6, 8, 18, 0.92);
+      padding: 26px 18px;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .creator-sign {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(251, 191, 36, 0.08);
+      border: 1px solid rgba(251, 191, 36, 0.25);
+      color: #fde68a;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+  </style>
 </head>
 <body>
-<header>
- <div class="nav">
-  <div class="logo">🏆 JOGOS <span>ESCOLARES</span></div>
-  <nav>
-   <a href="#inicio">Início</a>
-   <a href="#jogos">Jogos</a>
-   <a href="#classificacao">Classificação</a>
-   <a href="#times">Times</a>
-   <a href="#artilheiros">Artilheiros</a>
-  </nav>
- </div>
-</header>
 
-<section class="hero" id="inicio">
- <div>
-  <span class="tag">🏆 PLATAFORMA ESPORTIVA ESCOLAR</span>
-  <h1>O ESPORTE<br>COMEÇA <span>AQUI.</span></h1>
-  <p>Bem-vindo ao JOGOS ESCOLARES. Acompanhe equipes, partidas, resultados, classificações e os grandes talentos do campeonato.</p>
-  <div class="actions">
-   <a class="btn primary" href="#jogos">⚽ Ver partidas</a>
-   <a class="btn" href="#classificacao">🏆 Classificação</a>
-  </div>
- </div>
- <div class="hero-art">
-  <div class="ball">⚽</div>
-  <div class="art-label">A PAIXÃO PELO ESPORTE</div>
- </div>
-</section>
+  <header>
+    <div class="container hero-bar">
+      <div class="brand-box">
+        <img src="logo.png" alt="Brasão Escola Estadual Professora Isaura Baia" class="school-crest" onerror="this.style.display='none'">
+        <div>
+          <h1 class="site-title">JOGOS ESCOLARES</h1>
+          <div class="school-sub">Escola Estadual Professora Isaura Baia • Mocajuba - Pará</div>
+        </div>
+      </div>
 
-<main>
- <section class="section">
-  <div class="section-title">
-   <h2>VISÃO GERAL</h2><small>Campeonato escolar</small>
-  </div>
-  <div class="stats">
-   <div class="card"><div class="stat-number">00</div><div class="stat-label">Equipes cadastradas</div></div>
-   <div class="card"><div class="stat-number">00</div><div class="stat-label">Jogadores cadastrados</div></div>
-   <div class="card"><div class="stat-number">00</div><div class="stat-label">Partidas realizadas</div></div>
-   <div class="card"><div class="stat-number">00</div><div class="stat-label">Gols marcados</div></div>
-  </div>
- </section>
-
- <section class="section" id="jogos">
-  <div class="section-title"><h2>⚽ PRÓXIMAS PARTIDAS</h2><small>Exemplos demonstrativos</small></div>
-  <div class="matches">
-   <div class="card">
-    <div class="match-top"><span>GRUPO A</span><span>📅 A definir</span></div>
-    <div class="match-teams">
-     <div class="team"><div class="crest">🦁</div>LEÕES</div>
-     <div class="vs">VS</div>
-     <div class="team"><div class="crest">🐺</div>LOBOS</div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <select id="pubCampSelect" onchange="selecionarCamp(this.value)" style="padding:10px 14px; border-radius:12px; background:#090d1c; color:#fff; border:1px solid var(--border); font-weight:700;"></select>
+        <a href="admin.html" style="padding:10px 14px; border-radius:12px; background:rgba(255,255,255,0.07); color:#cbd5e1; text-decoration:none; font-size:0.82rem; font-weight:700; border:1px solid var(--border);">🔐 ADM</a>
+      </div>
     </div>
-    <div class="status" style="text-align:center">HORÁRIO A DEFINIR</div>
-   </div>
-   <div class="card">
-    <div class="match-top"><span>GRUPO B</span><span>📅 A definir</span></div>
-    <div class="match-teams">
-     <div class="team"><div class="crest">🔥</div>FÊNIX</div>
-     <div class="vs">VS</div>
-     <div class="team"><div class="crest">⚡</div>RAIOS</div>
+  </header>
+
+  <main class="container">
+    <!-- BARRA DE FILTROS: MODALIDADE + MASCULINO/FEMININO -->
+    <div class="filter-strip">
+      <div>
+        <div style="font-size:0.74rem; color:var(--cyan); font-weight:800; margin-bottom:6px;">MODALIDADE</div>
+        <div class="pill-group" id="modFilters">
+          <button class="pill-btn active" onclick="setMod('Futsal', this)">⚽ Futsal</button>
+          <button class="pill-btn" onclick="setMod('Handebol', this)">🤾 Handebol</button>
+          <button class="pill-btn" onclick="setMod('Vôlei', this)">🏐 Vôlei</button>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:0.74rem; color:var(--gold); font-weight:800; margin-bottom:6px;">CATEGORIA</div>
+        <div class="pill-group" id="catFilters">
+          <button class="pill-btn gold active" onclick="setCat('Masculino', this)">👨 Masculino</button>
+          <button class="pill-btn gold" onclick="setCat('Feminino', this)">👩 Feminino</button>
+        </div>
+      </div>
     </div>
-    <div class="status" style="text-align:center">HORÁRIO A DEFINIR</div>
-   </div>
-  </div>
- </section>
 
- <section class="section" id="classificacao">
-  <div class="section-title"><h2>🏆 CLASSIFICAÇÃO</h2><small>Grupo A · Demonstração</small></div>
-  <div class="table-wrap">
-   <table>
-    <thead><tr><th>Equipe</th><th>PTS</th><th>J</th><th>V</th><th>E</th><th>D</th><th>SG</th></tr></thead>
-    <tbody>
-     <tr><td><span class="position">01</span> &nbsp; Leões</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-     <tr><td><span class="position">02</span> &nbsp; Lobos</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-     <tr><td><span class="position">03</span> &nbsp; Fênix</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-    </tbody>
-   </table>
-  </div>
- </section>
+    <!-- ABAS PRINCIPAIS DO PÚBLICO -->
+    <div class="main-tabs">
+      <button class="tab-btn active" onclick="openPane('classificacao', this)">📈 Classificação</button>
+      <button class="tab-btn" onclick="openPane('jogos', this)">⚽ Jogos & Placares</button>
+      <button class="tab-btn" onclick="openPane('miss', this)">👑 Área das MISS</button>
+      <button class="tab-btn" onclick="openPane('equipes', this)">🛡️ Equipes & Atletas</button>
+      <button class="tab-btn" onclick="openPane('noticias', this)">📰 Notícias & Premiações</button>
+    </div>
 
- <section class="section" id="times">
-  <div class="section-title"><h2>🛡️ EQUIPES</h2><small>Exemplos de apresentação</small></div>
-  <div class="stats">
-   <div class="card"><div class="crest">🦁</div><strong>LEÕES</strong><p class="stat-label">Equipe participante</p></div>
-   <div class="card"><div class="crest">🐺</div><strong>LOBOS</strong><p class="stat-label">Equipe participante</p></div>
-   <div class="card"><div class="crest">🔥</div><strong>FÊNIX</strong><p class="stat-label">Equipe participante</p></div>
-   <div class="card"><div class="crest">⚡</div><strong>RAIOS</strong><p class="stat-label">Equipe participante</p></div>
-  </div>
- </section>
+    <!-- PANE 1: CLASSIFICAÇÃO -->
+    <section id="pane-classificacao" class="pane active">
+      <div class="card">
+        <div class="section-title">
+          <span>🏆 Tabela Oficial — <span id="lblFiltroAtual" style="color:var(--gold);">Futsal • Masculino</span></span>
+        </div>
+        <p style="font-size:0.83rem; color:var(--muted); margin-bottom:14px;">
+          ⚠️ <strong>Regra Oficial:</strong> Equipes sem <strong>MISS</strong> cadastrada iniciam com penalidade de <strong>-3 pontos</strong> na tabela.
+        </p>
 
- <section class="section" id="artilheiros">
-  <div class="section-title"><h2>🥇 ARTILHEIROS</h2><small>Ranking de gols</small></div>
-  <div class="players">
-   <div class="card player"><div class="avatar">⚽</div><div class="player-info"><strong>Aguardando cadastro</strong><small>Artilheiro do campeonato</small></div><div class="goals">0</div></div>
-   <div class="card player"><div class="avatar">⚽</div><div class="player-info"><strong>Aguardando cadastro</strong><small>Segundo colocado</small></div><div class="goals">0</div></div>
-   <div class="card player"><div class="avatar">⚽</div><div class="player-info"><strong>Aguardando cadastro</strong><small>Terceiro colocado</small></div><div class="goals">0</div></div>
-  </div>
- </section>
-</main>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Pos</th>
+                <th>Equipe</th>
+                <th>MISS</th>
+                <th>PTS</th>
+                <th>J</th>
+                <th>V</th>
+                <th>E</th>
+                <th>D</th>
+                <th>GP</th>
+                <th>GC</th>
+                <th>SG</th>
+              </tr>
+            </thead>
+            <tbody id="pubTbClass"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
 
-<footer>
- <strong>JOGOS ESCOLARES</strong><br><br>
- Tecnologia, esporte e educação em um só lugar.<br>
- © 2026 · Plataforma de campeonatos escolares.
-</footer>
+    <!-- PANE 2: JOGOS & PLACARES -->
+    <section id="pane-jogos" class="pane">
+      <div class="card">
+        <div class="section-title">⚽ Tabela de Jogos & Resultados</div>
+        <div id="pubPartidasGrid" class="grid-cards"></div>
+      </div>
+    </section>
+
+    <!-- PANE 3: ÁREA DAS MISS -->
+    <section id="pane-miss" class="pane">
+      <div class="card">
+        <div class="section-title" style="color:var(--gold);">👑 Candidatas & Representantes MISS dos Jogos Escolares</div>
+        <p style="font-size:0.86rem; color:#cbd5e1; margin-bottom:18px;">
+          Conheça as representantes oficiais de cada equipe! A presença da Miss garante os +3 pontos na pontuação da turma.
+        </p>
+        <div id="pubMissGrid" class="grid-cards"></div>
+      </div>
+    </section>
+
+    <!-- PANE 4: EQUIPES E ATLETAS -->
+    <section id="pane-equipes" class="pane">
+      <div class="card">
+        <div class="section-title">🛡️ Equipes & Elencos Inscritos</div>
+        <div id="pubEquipesGrid" class="grid-cards"></div>
+      </div>
+    </section>
+
+    <!-- PANE 5: NOTÍCIAS & PREMIAÇÕES -->
+    <section id="pane-noticias" class="pane">
+      <div class="card">
+        <div class="section-title" style="color:var(--gold);">🥇 Quadro de Premiações</div>
+        <div id="pubPremGrid" class="grid-cards"></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">📰 Últimas Notícias & Avisos</div>
+        <div id="pubNotGrid" class="grid-cards"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <img src="logo.png" alt="Brasão" style="width:52px; height:52px; border-radius:50%; background:#fff; padding:2px; margin-bottom:8px;" onerror="this.style.display='none'">
+      <div style="font-weight:800; font-size:0.95rem;">JOGOS ESCOLARES — Escola Estadual Professora Isaura Baia</div>
+      <div style="color:var(--muted); font-size:0.82rem; margin-top:4px;">Mocajuba - Pará • Futsal • Handebol • Vôlei</div>
+      <div class="creator-sign">⚡ Plataforma criada por <strong>Gustavo Nunes</strong></div>
+    </div>
+  </footer>
+
+  <script>
+    const SUPABASE_URL = 'https://zsluzqemvobvabkftjrn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzbHV6cWVtdm9idmFia2Z0anJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNzQ2NTIsImV4cCI6MjA5MTk1MDY1Mn0.V7K79n45c3K7iU6r3D0sR-7-d7U661q14H7tV2l8m2g';
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let pubState = {
+      campId: '',
+      mod: 'Futsal',
+      cat: 'Masculino',
+      equipes: [],
+      jogadores: [],
+      partidas: [],
+      noticias: [],
+      premiacoes: []
+    };
+
+    function setMod(mod, btn) {
+      pubState.mod = mod;
+      document.querySelectorAll('#modFilters .pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderPublico();
+    }
+
+    function setCat(cat, btn) {
+      pubState.cat = cat;
+      document.querySelectorAll('#catFilters .pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderPublico();
+    }
+
+    function openPane(name, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('pane-' + name).classList.add('active');
+    }
+
+    async function initPublico() {
+      const { data: camps } = await db.from('campeonatos').select('*').order('created_at', { ascending: false });
+      const sel = document.getElementById('pubCampSelect');
+      if (!camps || !camps.length) {
+        sel.innerHTML = '<option>Aguardando cadastro no ADM</option>';
+        return;
+      }
+      sel.innerHTML = camps.map(c => `<option value="${c.id}">${c.nome} (${c.ano || ''})</option>`).join('');
+      pubState.campId = camps[0].id;
+      await carregarDadosPublicos();
+    }
+
+    async function selecionarCamp(id) {
+      pubState.campId = id;
+      await carregarDadosPublicos();
+    }
+
+    async function carregarDadosPublicos() {
+      const cid = pubState.campId;
+      if (!cid) return;
+
+      const [eqR, jogR, partR, notR, premR] = await Promise.all([
+        db.from('equipes').select('*').eq('campeonato_id', cid).order('nome'),
+        db.from('jogadores').select('*').eq('campeonato_id', cid).order('nome'),
+        db.from('partidas').select('*').eq('campeonato_id', cid).order('data_hora', { ascending: true }),
+        db.from('noticias').select('*').eq('campeonato_id', cid).order('created_at', { ascending: false }),
+        db.from('premiacoes').select('*').eq('campeonato_id', cid).order('created_at', { ascending: false })
+      ]);
+
+      pubState.equipes = eqR.data || [];
+      pubState.jogadores = jogR.data || [];
+      pubState.partidas = partR.data || [];
+      pubState.noticias = notR.data || [];
+      pubState.premiacoes = premR.data || [];
+
+      renderPublico();
+    }
+
+    function renderPublico() {
+      document.getElementById('lblFiltroAtual').textContent = `${pubState.mod} • ${pubState.cat}`;
+
+      const eqFiltradas = pubState.equipes.filter(e =>
+        (e.modalidade || 'Futsal') === pubState.mod &&
+        (e.categoria || 'Masculino') === pubState.cat
+      );
+
+      // 1. CLASSIFICAÇÃO COM REGRA DA MISS (-3 PTS)
+      const tabela = eqFiltradas.map(e => {
+        const temMiss = e.miss_nome && e.miss_nome.trim() !== '';
+        const pen = temMiss ? 0 : -3;
+        return { ...e, temMiss, pts: pen, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 };
+      });
+
+      const map = Object.fromEntries(tabela.map(t => [t.id, t]));
+      pubState.partidas.filter(p => p.status === 'finalizada').forEach(p => {
+        const c = map[p.equipe_casa_id];
+        const f = map[p.equipe_fora_id];
+        if (!c || !f) return;
+        const gc = p.gols_casa ?? 0;
+        const gf = p.gols_fora ?? 0;
+        c.j++; f.j++;
+        c.gp += gc; c.gc += gf;
+        f.gp += gf; f.gc += gc;
+        if (gc > gf) { c.v++; c.pts += 3; f.d++; }
+        else if (gf > gc) { f.v++; f.pts += 3; c.d++; }
+        else { c.e++; f.e++; c.pts += 1; f.pts += 1; }
+      });
+
+      tabela.forEach(t => t.sg = t.gp - t.gc);
+      tabela.sort((a, b) => b.pts - a.pts || b.v - a.v || b.sg - a.sg || b.gp - a.gp);
+
+      document.getElementById('pubTbClass').innerHTML = tabela.map((t, i) => `
+        <tr>
+          <td><strong>${i + 1}º</strong></td>
+          <td>
+            <div style="display:flex; align-items:center; gap:9px;">
+              <img src="${t.escudo_url || 'logo.png'}" class="avatar-sm" onerror="this.src='logo.png'">
+              <strong>${t.nome}</strong>
+            </div>
+          </td>
+          <td>${t.temMiss ? `<span class="badge b-gold">👑 ${t.miss_nome}</span>` : `<span class="badge b-red">-3 pts (Sem Miss)</span>`}</td>
+          <td><strong style="font-size:1.1rem; color:${t.pts < 0 ? '#fca5a5' : 'var(--gold)'};">${t.pts}</strong></td>
+          <td>${t.j}</td>
+          <td>${t.v}</td>
+          <td>${t.e}</td>
+          <td>${t.d}</td>
+          <td>${t.gp}</td>
+          <td>${t.gc}</td>
+          <td>${t.sg}</td>
+        </tr>
+      `).join('') || '<tr><td colspan="11">Nenhuma equipe cadastrada nesta categoria ainda.</td></tr>';
+
+      // 2. PARTIDAS
+      const eqAllMap = Object.fromEntries(pubState.equipes.map(e => [e.id, e]));
+      const partsFiltradas = pubState.partidas.filter(p =>
+        (p.modalidade || 'Futsal') === pubState.mod &&
+        (p.categoria || 'Masculino') === pubState.cat
+      );
+
+      document.getElementById('pubPartidasGrid').innerHTML = partsFiltradas.map(p => {
+        const casa = eqAllMap[p.equipe_casa_id] || { nome: 'Mandante' };
+        const fora = eqAllMap[p.equipe_fora_id] || { nome: 'Visitante' };
+        return `
+          <div class="match-card">
+            <div style="display:flex; justify-content:space-between; font-size:0.76rem; color:var(--muted);">
+              <span>${p.fase || 'Fase de Grupos'}</span>
+              <span class="badge ${p.status === 'finalizada' ? 'b-green' : p.status === 'ao_vivo' ? 'b-red' : 'b-blue'}">${p.status}</span>
+            </div>
+            <div class="scoreboard">
+              <div class="team-col">
+                <img src="${casa.escudo_url || 'logo.png'}" onerror="this.src='logo.png'">
+                <strong style="font-size:0.86rem;">${casa.nome}</strong>
+              </div>
+              <div class="score-pill">${p.gols_casa ?? 0} x ${p.gols_fora ?? 0}</div>
+              <div class="team-col">
+                <img src="${fora.escudo_url || 'logo.png'}" onerror="this.src='logo.png'">
+                <strong style="font-size:0.86rem;">${fora.nome}</strong>
+              </div>
+            </div>
+            <div style="text-align:center; font-size:0.78rem; color:var(--muted);">
+              📅 ${p.data_hora ? new Date(p.data_hora).toLocaleString('pt-BR') : 'Data a definir'} • 📍 ${p.local || 'Quadra da Escola'}
+            </div>
+          </div>
+        `;
+      }).join('') || '<p style="color:var(--muted);">Nenhuma partida agendada nesta categoria ainda.</p>';
+
+      // 3. ÁREA DAS MISS (TODAS AS EQUIPES COM MISS)
+      const comMiss = pubState.equipes.filter(e => e.miss_nome && e.miss_nome.trim() !== '');
+      document.getElementById('pubMissGrid').innerHTML = comMiss.map(e => `
+        <div class="miss-card">
+          <img src="${e.miss_foto || e.escudo_url || 'logo.png'}" class="miss-photo" onerror="this.src='logo.png'">
+          <div style="padding:16px;">
+            <span class="badge b-gold" style="margin-bottom:8px;">👑 MISS OFICIAL</span>
+            <h3 style="font-size:1.1rem; margin-bottom:4px;">${e.miss_nome}</h3>
+            <div style="color:var(--cyan); font-weight:700; font-size:0.86rem;">${e.nome}</div>
+            <div style="color:var(--muted); font-size:0.78rem; margin-top:4px;">${e.modalidade || 'Futsal'} • ${e.categoria || 'Masculino'}</div>
+          </div>
+        </div>
+      `).join('') || '<p style="color:var(--muted);">Nenhuma Miss cadastrada ainda no painel ADM.</p>';
+
+      // 4. EQUIPES E ELENCOS
+      document.getElementById('pubEquipesGrid').innerHTML = eqFiltradas.map(e => {
+        const jogs = pubState.jogadores.filter(j => j.equipe_id === e.id);
+        return `
+          <div class="match-card">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+              <img src="${e.escudo_url || 'logo.png'}" class="avatar-sm" style="width:46px; height:46px;" onerror="this.src='logo.png'">
+              <div>
+                <strong>${e.nome}</strong>
+                <div style="font-size:0.78rem; color:var(--gold);">
+                  ${e.miss_nome ? `👑 Miss: ${e.miss_nome}` : '⚠️ Sem Miss (-3 pts)'}
+                </div>
+              </div>
+            </div>
+            <div style="font-size:0.8rem; color:var(--cyan); font-weight:700; margin-bottom:6px;">Atletas Inscritos (${jogs.length}):</div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;">
+              ${jogs.map(j => `<span class="badge b-blue">${j.numero ? '#'+j.numero+' ' : ''}${j.nome}</span>`).join('') || '<span style="color:var(--muted); font-size:0.8rem;">Elenco em atualização</span>'}
+            </div>
+          </div>
+        `;
+      }).join('') || '<p style="color:var(--muted);">Nenhuma equipe nesta modalidade e categoria.</p>';
+
+      // 5. PREMIAÇÕES E NOTÍCIAS
+      document.getElementById('pubPremGrid').innerHTML = pubState.premiacoes.map(pr => `
+        <div class="match-card" style="border-color:rgba(251,191,36,0.4);">
+          <div style="color:var(--gold); font-weight:800; font-size:1rem;">🏆 ${pr.titulo}</div>
+          <div style="margin-top:6px; font-weight:700;">${pr.equipe_id && eqAllMap[pr.equipe_id] ? eqAllMap[pr.equipe_id].nome : ''}</div>
+          <div style="color:var(--muted); font-size:0.84rem; margin-top:4px;">${pr.descricao || ''}</div>
+        </div>
+      `).join('') || '<p style="color:var(--muted);">Premiações serão divulgadas em breve.</p>';
+
+      document.getElementById('pubNotGrid').innerHTML = pubState.noticias.map(n => `
+        <div class="match-card">
+          ${n.imagem_url ? `<img src="${n.imagem_url}" style="width:100%; height:160px; object-fit:cover; border-radius:12px; margin-bottom:10px;">` : ''}
+          <h4 style="margin-bottom:6px;">${n.titulo}</h4>
+          <p style="color:var(--muted); font-size:0.86rem; line-height:1.5;">${n.conteudo}</p>
+        </div>
+      `).join('') || '<p style="color:var(--muted);">Nenhuma notícia publicada ainda.</p>';
+    }
+
+    initPublico();
+  </script>
 </body>
 </html>

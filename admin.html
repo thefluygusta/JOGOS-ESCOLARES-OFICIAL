@@ -1346,16 +1346,18 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       if (!state.campeonatoId) return toast('Crie ou selecione um campeonato primeiro!', 'error');
 
       const editId = $('eqEditId').value;
-      const payload = {
-        campeonato_id: state.campeonatoId,
-        nome: $('eqNome').value.trim(),
-        sigla: $('eqSigla').value.trim().toUpperCase(),
-        modalidade: $('eqModalidade').value,
-        categoria: $('eqCategoria').value,
-        escudo_url: $('eqEscudoUrl').value || null,
-        miss_nome: $('eqMissNome').value.trim() || null,
-        miss_foto: $('eqMissFotoUrl').value || null
-      };
+   const modalidade = $('eqModalidade').value;
+    const isFutsal = modalidade.toLowerCase() === 'futsal';
+    const payload = {
+      campeonato_id: state.campeonatoId,
+      nome: $('eqNome').value.trim(),
+      sigla: $('eqSigla').value.trim().toUpperCase(),
+      modalidade: modalidade,
+      categoria: $('eqCategoria').value,
+      escudo_url: $('eqEscudoUrl').value || null,
+      miss_nome: isFutsal ? ($('eqMissNome').value.trim() || null) : null,
+      miss_foto: isFutsal ? ($('eqMissFotoUrl').value || null) : null
+    };
 
       let res;
       if (editId) {
@@ -1396,8 +1398,7 @@ function editarEquipe(id) {
       $('prevEqMiss').src = 'logo.png';
       $('btnSalvarEquipe').textContent = '💾 Salvar Equipe';
     }
-
-    function renderEquipesTable() {
+function renderEquipesTable() {
       const fMod = $('filtroEqMod').value;
       const fCat = $('filtroEqCat').value;
       const list = state.equipes.filter(e =>
@@ -1405,28 +1406,35 @@ function editarEquipe(id) {
         (!fCat || (e.categoria || 'Masculino') === fCat)
       );
 
+      const placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36'><rect width='100%' height='100%' fill='%231e293b'/></svg>";
+
       $('tbEquipes').innerHTML = list.map(e => {
-        const temMiss = e.miss_nome && e.miss_nome.trim() !== '';
+        const isFutsal = (e.modalidade || 'Futsal').toLowerCase() === 'futsal';
+        const temMiss = isFutsal && e.miss_nome && e.miss_nome.trim() !== '';
         return `
           <tr>
-            <td><img src="${e.escudo_url || 'logo.png'}" class="avatar-sm" onerror="this.src='logo.png'"></td>
+            <td><img src="${e.escudo_url || placeholderImg}" class="avatar-sm" onerror="this.src='${placeholderImg}'"></td>
             <td><strong>${e.nome}</strong> <span style="color:var(--muted); font-size:0.8rem;">${e.sigla ? '('+e.sigla+')' : ''}</span></td>
             <td>
               <span class="badge b-blue">${e.modalidade || 'Futsal'}</span>
               <span class="badge b-purple">${e.categoria || 'Masculino'}</span>
             </td>
             <td>
-              ${temMiss
-                ? `<div style="display:flex; align-items:center; gap:8px;">
-                     <img src="${e.miss_foto || 'logo.png'}" class="avatar-sm" style="border-color:var(--gold);" onerror="this.src='logo.png'">
-                     <span>👑 ${e.miss_nome}</span>
-                   </div>`
-                : '<span style="color:#fca5a5;">Sem Miss cadastrada</span>'}
+              ${!isFutsal
+                ? '<span style="color:var(--muted); font-size:0.85rem;">Não exige Miss</span>'
+                : temMiss
+                  ? `<div style="display:flex; align-items:center; gap:8px;">
+                      <img src="${e.miss_foto || e.miss_foto_url || placeholderImg}" class="avatar-sm" style="border-color:var(--gold);" onerror="this.src='${placeholderImg}'">
+                      <span>👑 ${e.miss_nome}</span>
+                    </div>`
+                  : '<span style="color:#fca5a5;">Sem Miss cadastrada</span>'}
             </td>
             <td>
-              ${temMiss
-                ? '<span class="badge b-green">OK (0 pen.)</span>'
-                : '<span class="badge b-red">⚠️ -3 PONTOS</span>'}
+              ${!isFutsal
+                ? '<span class="badge" style="background:rgba(148,163,184,0.15); color:#94a3b8;">Isento (0 pen.)</span>'
+                : temMiss
+                  ? '<span class="badge b-green">OK (0 pen.)</span>'
+                  : '<span class="badge b-red">⚠️ -3 PONTOS</span>'}
             </td>
             <td style="display:flex; gap:6px;">
               <button class="btn btn-ghost btn-sm" onclick="editarEquipe('${e.id}')">✏️ Editar</button>
@@ -1614,10 +1622,10 @@ function editarEquipe(id) {
       const eqs = state.equipes.filter(e =>
         (e.modalidade || 'Futsal') === mod && (e.categoria || 'Masculino') === cat
       );
-
-      const tabela = eqs.map(e => {
+const tabela = eqs.map(e => {
+        const isFutsal = (e.modalidade || 'Futsal').toLowerCase() === 'futsal';
         const temMiss = e.miss_nome && e.miss_nome.trim() !== '';
-        const penalidade = temMiss ? 0 : -3;
+        const penalidade = isFutsal ? (temMiss ? 0 : -3) : 0;
         return {
           ...e,
           temMiss,

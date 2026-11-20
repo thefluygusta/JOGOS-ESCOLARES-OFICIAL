@@ -557,10 +557,11 @@
       );
 
       // 1. CLASSIFICAÇÃO COM REGRA DA MISS (-3 PTS)
-      const tabela = eqFiltradas.map(e => {
+const tabela = eqFiltradas.map(e => {
+        const isFutsal = (e.modalidade || 'Futsal').toLowerCase() === 'futsal';
         const temMiss = e.miss_nome && e.miss_nome.trim() !== '';
-        const pen = temMiss ? 0 : -3;
-        return { ...e, temMiss, pts: pen, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 };
+        const pen = isFutsal ? (temMiss ? 0 : -3) : 0;
+        return { ...e, isFutsal, temMiss, pts: pen, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 };
       });
 
       const map = Object.fromEntries(tabela.map(t => [t.id, t]));
@@ -590,7 +591,7 @@
               <strong>${t.nome}</strong>
             </div>
           </td>
-          <td>${t.temMiss ? `<span class="badge b-gold">👑 ${t.miss_nome}</span>` : `<span class="badge b-red">-3 pts (Sem Miss)</span>`}</td>
+         <td>${!t.isFutsal ? `<span style="color:var(--muted); font-size:0.85rem;">Isento</span>` : t.temMiss ? `<span class="badge b-gold">👑 ${t.miss_nome}</span>` : `<span class="badge b-red">-3 pts (Sem Miss)</span>`}</td>
           <td><strong style="font-size:1.1rem; color:${t.pts < 0 ? '#fca5a5' : 'var(--gold)'};">${t.pts}</strong></td>
           <td>${t.j}</td>
           <td>${t.v}</td>
@@ -660,7 +661,7 @@
               <div>
                 <strong>${e.nome}</strong>
                 <div style="font-size:0.78rem; color:var(--gold);">
-                  ${e.miss_nome ? `👑 Miss: ${e.miss_nome}` : '⚠️ Sem Miss (-3 pts)'}
+           ${(e.modalidade || 'Futsal').toLowerCase() === 'futsal' ? (e.miss_nome ? `👑 Miss: ${e.miss_nome}` : '⚠️ Sem Miss (-3 pts)') : ''}
                 </div>
               </div>
             </div>

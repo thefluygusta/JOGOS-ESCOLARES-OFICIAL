@@ -484,6 +484,46 @@
       background: #090d1c;
     }
 
+    /* CHAVEAMENTO VISUAL (ESTILO COPA) */
+    .bk-scroll { overflow: auto; padding: 8px 0 18px; }
+    .bk-canvas { position: relative; margin: 0 auto; }
+    .bk-lines { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 1; }
+    .bk-lines path { fill: none; stroke: rgba(168, 85, 247, 0.65); stroke-width: 2; }
+    .bk-box {
+      position: absolute; z-index: 2; cursor: pointer;
+      background: rgba(9, 13, 28, 0.96);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .bk-box:hover { border-color: var(--cyan); transform: translateY(-2px); }
+    .bk-box.bk-final { border-color: var(--gold); box-shadow: 0 0 22px rgba(251, 191, 36, 0.28); }
+    .bk-tag { position: absolute; top: -16px; left: 2px; font-size: 0.66rem; color: var(--muted); white-space: nowrap; }
+    .bk-row {
+      display: flex; justify-content: space-between; align-items: center; gap: 6px;
+      height: 50%; padding: 0 10px; font-size: 0.78rem; color: #cbd5e1;
+    }
+    .bk-row + .bk-row { border-top: 1px solid rgba(139, 92, 246, 0.2); }
+    .bk-n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bk-tbd .bk-n { color: var(--gold); font-style: italic; }
+    .bk-win .bk-n { color: #fff; font-weight: 800; }
+    .bk-win .bk-s { color: var(--gold); }
+    .bk-s { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; }
+    .bk-head {
+      position: absolute; top: 0; height: 44px; z-index: 2;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      font-weight: 800; font-size: 0.85rem; color: #e2e8f0;
+      background: rgba(37, 99, 235, 0.14); border: 1px solid var(--border); border-radius: 12px;
+    }
+    .bk-head img { width: 32px; height: 32px; border-radius: 50%; object-fit: contain; background: #fff; }
+    .bk-centro-top {
+      position: absolute; z-index: 2; text-align: center;
+      font-family: 'Orbitron', sans-serif; font-size: 0.78rem; font-weight: 800; color: var(--gold);
+    }
+    .bk-trofeu { position: absolute; z-index: 2; text-align: center; font-size: 3rem; line-height: 1.1; }
+    .bk-trofeu div { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.78rem; color: #fde68a; font-weight: 700; margin-top: 4px; }
+    .bk-trofeu b { color: #fff; font-size: 0.95rem; }
+
     @media (max-width: 900px) {
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); }
@@ -544,6 +584,7 @@
         <button class="nav-btn" data-tab="jogadores">🏃 Jogadores / Atletas</button>
         <button class="nav-btn" data-tab="grupos">🗂️ Grupos / Chaves</button>
         <button class="nav-btn" data-tab="partidas">⚽ Jogos & Resultados</button>
+        <button class="nav-btn" data-tab="chaveamento">🏆 Chaveamento (Mata-mata)</button>
         <button class="nav-btn" data-tab="classificacao">📈 Classificação (Regra Miss)</button>
         <button class="nav-btn" data-tab="noticias">📰 Notícias & Avisos</button>
         <button class="nav-btn" data-tab="premiacoes">🥇 Premiações</button>
@@ -956,7 +997,16 @@
               </div>
               <div class="form-group">
                 <label>Fase / Rodada</label>
-                <input type="text" id="partFase" value="Fase de Grupos" />
+                <input type="text" id="partFase" value="Fase de Grupos" list="listaFases" />
+                <datalist id="listaFases">
+                  <option value="Fase de Grupos"></option>
+                  <option value="Oitavas de Final"></option>
+                  <option value="Quartas de Final"></option>
+                  <option value="Semifinal"></option>
+                  <option value="Final da Escola"></option>
+                  <option value="Disputa de 3º Lugar"></option>
+                  <option value="Final Interescolar"></option>
+                </datalist>
               </div>
             </div>
             <p style="font-size:0.8rem; color:var(--muted); margin:4px 0 12px;">
@@ -1007,6 +1057,68 @@
               <tbody id="tbPartidas"></tbody>
             </table>
           </div>
+        </div>
+      </section>
+
+      <!-- TAB: CHAVEAMENTO (MATA-MATA VISUAL) -->
+      <section id="tab-chaveamento" class="tab-pane">
+        <div class="card">
+          <h3 style="margin-bottom:6px;">🏆 Chaveamento do Mata-mata</h3>
+          <p style="font-size:0.85rem; color:var(--muted); margin-bottom:14px; line-height:1.55;">
+            Cada escola tem a sua chave (lados esquerdo e direito) e os dois campeões se encontram na <strong>Final Interescolar</strong>, no centro.
+            Escolha a modalidade e o naipe e clique em <strong>Gerar mata-mata</strong>: o sistema cria todos os jogos já ligados
+            (ex.: "Vencedor do 1º Jogo"). Depois é só ajustar dia, hora e local em <strong>Jogos & Resultados → Editar</strong>.
+          </p>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Modalidade</label>
+              <select id="chMod" onchange="renderChave()">
+                <option value="Futsal">Futsal</option>
+                <option value="Handebol">Handebol</option>
+                <option value="Vôlei">Vôlei</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Naipe</label>
+              <select id="chCat" onchange="renderChave()">
+                <option value="Masculino">Masculino</option>
+                <option value="Feminino">Feminino</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Confrontos da 1ª rodada</label>
+              <select id="genOrdem">
+                <option value="cadastro">Pela ordem de cadastro</option>
+                <option value="sorteio">Sorteio</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Turno padrão</label>
+              <select id="genTurno">
+                <option value="Manhã">Manhã</option>
+                <option value="Tarde">Tarde</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Local / Quadra padrão</label>
+              <input type="text" id="genLocal" value="Quadra Poliesportiva Isaura Baia" />
+            </div>
+            <div class="form-group">
+              <label>Final Interescolar</label>
+              <label style="display:flex; align-items:center; gap:8px; font-weight:600;">
+                <input type="checkbox" id="genFinal" checked style="width:auto;"> Gerar também a final entre as escolas
+              </label>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;">
+            <button type="button" id="btnGerarChave" class="btn btn-gold" onclick="gerarMataMata()">⚡ Gerar mata-mata</button>
+            <button type="button" class="btn btn-ghost" onclick="sincronizarChaveamento()">🔁 Sincronizar vencedores</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <p style="font-size:0.8rem; color:var(--muted); margin-bottom:6px;">💡 Clique em um jogo da chave para lançar o placar. Ao finalizar, o vencedor avança sozinho.</p>
+          <div id="chaveWrap"></div>
         </div>
       </section>
 
@@ -1455,6 +1567,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       renderJogadoresTable();
       renderGrupos();
       renderPartidasTable();
+      renderChave();
       renderClassificacao();
       renderNoticias();
       renderPremiacoes();

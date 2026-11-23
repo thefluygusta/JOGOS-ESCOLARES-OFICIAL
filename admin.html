@@ -369,6 +369,32 @@
       flex-shrink: 0;
     }
 
+    /* FOTOS INTEIRAS, SEM CORTAR (MISS E NOTÍCIAS) */
+    .img-contain {
+      object-fit: contain !important;
+      background: #090d1c;
+    }
+
+    .brasao-mini {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      object-fit: contain;
+      background: #fff;
+      vertical-align: middle;
+      margin-right: 5px;
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .filter-row select { width: auto; min-width: 160px; }
+
+    .acoes-cell { display: flex; gap: 6px; flex-wrap: wrap; }
+
     /* TABELAS */
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
@@ -593,6 +619,7 @@
         <div class="card">
           <h3 style="margin-bottom:14px;">🏆 Criar Novo Campeonato / Edição</h3>
           <form id="formCamp" class="form-grid">
+            <input type="hidden" id="campEditId" />
             <div class="form-group">
               <label>Nome do Evento / Campeonato</label>
               <input type="text" id="campNome" required placeholder="Ex: Jogos Escolares Isaura Baia 2026" />
@@ -627,7 +654,10 @@
               </select>
             </div>
             <div class="form-group" style="justify-content:flex-end;">
-              <button type="submit" class="btn btn-primary">+ Criar Campeonato</button>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button type="submit" id="btnSalvarCamp" class="btn btn-primary">+ Criar Campeonato</button>
+                <button type="button" id="btnCancelCamp" class="btn btn-ghost" style="display:none;" onclick="resetFormCamp()">Cancelar edição</button>
+              </div>
             </div>
           </form>
         </div>
@@ -653,7 +683,12 @@
         <div class="card">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
             <h3>🛡️ Cadastrar Equipe & Miss</h3>
-            <div style="display:flex; gap:8px;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <select id="filtroEqEscola" onchange="renderEquipesTable()">
+                <option value="">Todas as Escolas</option>
+                <option value="E. E. Profª Isaura Baia">E. E. Profª Isaura Baia</option>
+                <option value="E. E. Benedita Marilda da Silva Braga">E. E. Benedita Marilda da Silva Braga</option>
+              </select>
               <select id="filtroEqMod" onchange="renderEquipesTable()">
                 <option value="">Todas Modalidades</option>
                 <option value="Futsal">Futsal</option>
@@ -671,6 +706,13 @@
           <form id="formEquipe">
             <input type="hidden" id="eqEditId" />
             <div class="form-grid">
+              <div class="form-group">
+                <label>Escola *</label>
+                <select id="eqEscola" required>
+                  <option value="E. E. Profª Isaura Baia">E. E. Profª Isaura Baia</option>
+                  <option value="E. E. Benedita Marilda da Silva Braga">E. E. Benedita Marilda da Silva Braga</option>
+                </select>
+              </div>
               <div class="form-group">
                 <label>Nome da Equipe / Turma *</label>
                 <input type="text" id="eqNome" required placeholder="Ex: 3º Ano A - Manhã" />
@@ -716,7 +758,7 @@
               <div class="form-group">
                 <label>👑 Foto da MISS (Galeria)</label>
                 <div class="upload-box">
-                  <img id="prevEqMiss" src="logo.png" class="upload-preview" />
+                  <img id="prevEqMiss" src="logo.png" class="upload-preview img-contain" />
                   <div style="flex:1;">
                     <input type="file" id="fileEqMiss" accept="image/*" onchange="uploadFotoGaleria(this, 'eqMissFotoUrl', 'prevEqMiss')" />
                     <input type="hidden" id="eqMissFotoUrl" />
@@ -738,6 +780,7 @@
               <tr>
                 <th>Escudo</th>
                 <th>Equipe</th>
+                <th>Escola</th>
                 <th>Modalidade / Naipe</th>
                 <th>MISS Representante</th>
                 <th>Status Miss</th>
@@ -754,6 +797,7 @@
         <div class="card">
           <h3 style="margin-bottom:14px;">🏃 Cadastrar Atleta / Jogador</h3>
           <form id="formJogador" class="form-grid">
+            <input type="hidden" id="jogEditId" />
             <div class="form-group">
               <label>Nome do Jogador *</label>
               <input type="text" id="jogNome" required placeholder="Nome completo ou apelido" />
@@ -779,7 +823,10 @@
               </div>
             </div>
             <div class="form-group" style="justify-content:flex-end;">
-              <button type="submit" class="btn btn-primary">+ Cadastrar Jogador</button>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button type="submit" id="btnSalvarJog" class="btn btn-primary">+ Cadastrar Jogador</button>
+                <button type="button" id="btnCancelJog" class="btn btn-ghost" style="display:none;" onclick="resetFormJogador()">Cancelar edição</button>
+              </div>
             </div>
           </form>
         </div>
@@ -806,12 +853,16 @@
         <div class="card">
           <h3 style="margin-bottom:14px;">🗂️ Criar Grupo / Chave</h3>
           <form id="formGrupo" class="form-grid">
+            <input type="hidden" id="grpEditId" />
             <div class="form-group">
               <label>Nome do Grupo</label>
               <input type="text" id="grpNome" required placeholder="Ex: Grupo A - Futsal Masculino" />
             </div>
             <div class="form-group" style="justify-content:flex-end;">
-              <button type="submit" class="btn btn-primary">+ Criar Grupo</button>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button type="submit" id="btnSalvarGrp" class="btn btn-primary">+ Criar Grupo</button>
+                <button type="button" id="btnCancelGrp" class="btn btn-ghost" style="display:none;" onclick="resetFormGrupo()">Cancelar edição</button>
+              </div>
             </div>
           </form>
         </div>
@@ -839,62 +890,123 @@
       <!-- TAB 6: PARTIDAS -->
       <section id="tab-partidas" class="tab-pane">
         <div class="card">
-          <h3 style="margin-bottom:14px;">⚽ Agendar Nova Partida</h3>
-          <form id="formPartida" class="form-grid">
-            <div class="form-group">
-              <label>Modalidade *</label>
-              <select id="partModalidade" onchange="filtrarEquipesPartida()">
-                <option value="Futsal">Futsal</option>
-                <option value="Handebol">Handebol</option>
-                <option value="Vôlei">Vôlei</option>
-              </select>
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+            <h3 id="tituloFormPartida">⚽ Agendar Nova Partida</h3>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="sincronizarChaveamento()">🔁 Sincronizar Chaveamento</button>
+              <button type="button" class="btn btn-gold btn-sm" onclick="gerarBoletimPDF()">📄 Gerar Boletim PDF</button>
             </div>
-            <div class="form-group">
-              <label>Naipe *</label>
-              <select id="partCategoria" onchange="filtrarEquipesPartida()">
-                <option value="Masculino">Masculino</option>
-                <option value="Feminino">Feminino</option>
-              </select>
+          </div>
+          <form id="formPartida">
+            <input type="hidden" id="partEditId" />
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Escola / Chave *</label>
+                <select id="partEscola" onchange="aoMudarEscolaPartida()">
+                  <option value="E. E. Profª Isaura Baia">E. E. Profª Isaura Baia</option>
+                  <option value="E. E. Benedita Marilda da Silva Braga">E. E. Benedita Marilda da Silva Braga</option>
+                  <option value="Final Interescolar">🏆 Final Interescolar</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Modalidade *</label>
+                <select id="partModalidade" onchange="filtrarEquipesPartida()">
+                  <option value="Futsal">Futsal</option>
+                  <option value="Handebol">Handebol</option>
+                  <option value="Vôlei">Vôlei</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Naipe *</label>
+                <select id="partCategoria" onchange="filtrarEquipesPartida()">
+                  <option value="Masculino">Masculino</option>
+                  <option value="Feminino">Feminino</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Ordem do Jogo (1º, 2º, 3º...) *</label>
+                <input type="number" id="partOrdem" min="1" required placeholder="Ex: 1" />
+              </div>
+              <div class="form-group">
+                <label>Turno *</label>
+                <select id="partTurno">
+                  <option value="Manhã">Manhã</option>
+                  <option value="Tarde">Tarde</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Dia</label>
+                <input type="date" id="partDia" />
+              </div>
+              <div class="form-group">
+                <label>Horário (Belém)</label>
+                <input type="time" id="partHora" />
+              </div>
+              <div class="form-group">
+                <label>Equipe Mandante (Casa) *</label>
+                <select id="partCasa" required></select>
+              </div>
+              <div class="form-group">
+                <label>Equipe Visitante (Fora) *</label>
+                <select id="partFora" required></select>
+              </div>
+              <div class="form-group">
+                <label>Local / Quadra</label>
+                <input type="text" id="partLocal" value="Quadra Poliesportiva Isaura Baia" />
+              </div>
+              <div class="form-group">
+                <label>Fase / Rodada</label>
+                <input type="text" id="partFase" value="Fase de Grupos" />
+              </div>
             </div>
-            <div class="form-group">
-              <label>Equipe Mandante (Casa) *</label>
-              <select id="partCasa" required></select>
-            </div>
-            <div class="form-group">
-              <label>Equipe Visitante (Fora) *</label>
-              <select id="partFora" required></select>
-            </div>
-            <div class="form-group">
-              <label>Data e Hora</label>
-              <input type="datetime-local" id="partData" />
-            </div>
-            <div class="form-group">
-              <label>Local / Quadra</label>
-              <input type="text" id="partLocal" value="Quadra Poliesportiva Isaura Baia" />
-            </div>
-            <div class="form-group">
-              <label>Fase / Rodada</label>
-              <input type="text" id="partFase" value="Fase de Grupos" />
-            </div>
-            <div class="form-group" style="justify-content:flex-end;">
-              <button type="submit" class="btn btn-primary">+ Agendar Jogo</button>
+            <p style="font-size:0.8rem; color:var(--muted); margin:4px 0 12px;">
+              💡 Para jogos futuros (semifinal, final), escolha <strong>"🏆 Vencedor do Nº Jogo"</strong> nas listas de equipes.
+              Ao salvar o placar como <strong>Finalizada</strong>, o vencedor entra sozinho no jogo seguinte.
+            </p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button type="submit" id="btnSalvarPartida" class="btn btn-primary">+ Agendar Jogo</button>
+              <button type="button" id="btnCancelPartida" class="btn btn-ghost" style="display:none;" onclick="resetFormPartida()">Cancelar edição</button>
             </div>
           </form>
         </div>
 
-        <div class="card table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Modalidade / Naipe</th>
-                <th>Confronto & Placar</th>
-                <th>Data / Local</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="tbPartidas"></tbody>
-          </table>
+        <div class="card">
+          <div class="filter-row">
+            <select id="fpEscola" onchange="renderPartidasTable()">
+              <option value="">Todas as Escolas / Chaves</option>
+              <option value="E. E. Profª Isaura Baia">E. E. Profª Isaura Baia</option>
+              <option value="E. E. Benedita Marilda da Silva Braga">E. E. Benedita Marilda da Silva Braga</option>
+              <option value="Final Interescolar">🏆 Final Interescolar</option>
+            </select>
+            <select id="fpMod" onchange="renderPartidasTable()">
+              <option value="">Todas Modalidades</option>
+              <option value="Futsal">Futsal</option>
+              <option value="Handebol">Handebol</option>
+              <option value="Vôlei">Vôlei</option>
+            </select>
+            <select id="fpCat" onchange="renderPartidasTable()">
+              <option value="">Masc. e Fem.</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Feminino">Feminino</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Jogo / Turno</th>
+                  <th>Dia / Horário</th>
+                  <th>Escola</th>
+                  <th>Modalidade / Naipe</th>
+                  <th>Confronto & Placar</th>
+                  <th>Local</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tbPartidas"></tbody>
+            </table>
+          </div>
         </div>
       </section>
 
@@ -904,9 +1016,14 @@
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
             <div>
               <h3>📈 Tabela de Classificação Oficial</h3>
-              <p style="font-size:0.82rem; color:var(--muted);">Vitória: 3 pts | Empate: 1 pt | Sem Miss: <strong>-3 pts automáticos</strong></p>
+              <p style="font-size:0.82rem; color:var(--muted);">Vitória: 3 pts | Empate: 1 pt | Sem Miss (Futsal): <strong>-3 pts automáticos</strong></p>
+              <div id="classEscolaTitulo" style="margin-top:6px; font-weight:700; color:var(--gold); font-size:0.9rem;"></div>
             </div>
-            <div style="display:flex; gap:8px;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <select id="classEscola" onchange="renderClassificacao()">
+                <option value="E. E. Profª Isaura Baia">E. E. Profª Isaura Baia</option>
+                <option value="E. E. Benedita Marilda da Silva Braga">E. E. Benedita Marilda da Silva Braga</option>
+              </select>
               <select id="classMod" onchange="renderClassificacao()">
                 <option value="Futsal">Futsal</option>
                 <option value="Handebol">Handebol</option>
@@ -947,6 +1064,7 @@
         <div class="card">
           <h3 style="margin-bottom:14px;">📰 Publicar Notícia ou Comunicado</h3>
           <form id="formNoticia">
+            <input type="hidden" id="notEditId" />
             <div class="form-grid">
               <div class="form-group">
                 <label>Título da Notícia *</label>
@@ -955,7 +1073,7 @@
               <div class="form-group">
                 <label>Imagem de Capa (Galeria)</label>
                 <div class="upload-box">
-                  <img id="prevNotImg" src="logo.png" class="upload-preview" />
+                  <img id="prevNotImg" src="logo.png" class="upload-preview img-contain" />
                   <input type="file" accept="image/*" onchange="uploadFotoGaleria(this, 'notImgUrl', 'prevNotImg')" />
                   <input type="hidden" id="notImgUrl" />
                 </div>
@@ -965,7 +1083,10 @@
               <label>Conteúdo *</label>
               <textarea id="notConteudo" rows="3" required placeholder="Escreva os detalhes aqui..."></textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Publicar no Site Público</button>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button type="submit" id="btnSalvarNot" class="btn btn-primary">Publicar no Site Público</button>
+              <button type="button" id="btnCancelNot" class="btn btn-ghost" style="display:none;" onclick="resetFormNoticia()">Cancelar edição</button>
+            </div>
           </form>
         </div>
 
@@ -977,6 +1098,7 @@
         <div class="card">
           <h3 style="margin-bottom:14px;">🥇 Registrar Premiação / Destaque</h3>
           <form id="formPremiacao" class="form-grid">
+            <input type="hidden" id="premEditId" />
             <div class="form-group">
               <label>Título do Prêmio *</label>
               <input type="text" id="premTitulo" required placeholder="Ex: Campeão Futsal Masculino / Miss Simpatia" />
@@ -990,7 +1112,10 @@
               <input type="text" id="premDescricao" placeholder="Nome do destaque (opcional)" />
             </div>
             <div class="form-group" style="justify-content:flex-end;">
-              <button type="submit" class="btn btn-gold">🏆 Salvar Premiação</button>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button type="submit" id="btnSalvarPrem" class="btn btn-gold">🏆 Salvar Premiação</button>
+                <button type="button" id="btnCancelPrem" class="btn btn-ghost" style="display:none;" onclick="resetFormPremiacao()">Cancelar edição</button>
+              </div>
             </div>
           </form>
         </div>
@@ -1007,6 +1132,13 @@
           </p>
 
           <div class="form-grid">
+            <div class="form-group">
+              <label>Escola das Equipes Importadas</label>
+              <select id="impEscola">
+                <option value="E. E. Profª Isaura Baia">E. E. Profª Isaura Baia</option>
+                <option value="E. E. Benedita Marilda da Silva Braga">E. E. Benedita Marilda da Silva Braga</option>
+              </select>
+            </div>
             <div class="form-group">
               <label>1. Modalidade Padrão para esta Importação</label>
               <select id="impModalidade">
@@ -1057,18 +1189,26 @@
       <div class="form-grid">
         <div class="form-group">
           <label id="lblCasa">Mandante</label>
-          <input type="number" id="editGolsCasa" min="0" value="0" />
+          <input type="number" id="editGolsCasa" min="0" value="0" oninput="togglePenaltis()" />
         </div>
         <div class="form-group">
           <label id="lblFora">Visitante</label>
-          <input type="number" id="editGolsFora" min="0" value="0" />
+          <input type="number" id="editGolsFora" min="0" value="0" oninput="togglePenaltis()" />
         </div>
         <div class="form-group">
           <label>Status do Jogo</label>
-          <select id="editPartStatus">
+          <select id="editPartStatus" onchange="togglePenaltis()">
             <option value="agendada">Agendada</option>
             <option value="ao_vivo">AO VIVO</option>
             <option value="finalizada">Finalizada (Conta na Tabela)</option>
+          </select>
+        </div>
+        <div class="form-group" id="grpPen" style="display:none;">
+          <label>Empate — quem avança no mata-mata? (pênaltis / critério)</label>
+          <select id="editPenVencedor">
+            <option value="">Selecione (só se houver jogo seguinte)</option>
+            <option value="casa" id="optPenCasa">Mandante</option>
+            <option value="fora" id="optPenFora">Visitante</option>
           </select>
         </div>
       </div>
@@ -1103,6 +1243,53 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
     };
 
     const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    // =========================================================================
+    // ESCOLAS, BRASÕES E FUSO HORÁRIO (America/Belem)
+    // =========================================================================
+    const ESCOLAS = [
+      { nome: 'E. E. Profª Isaura Baia', curta: 'Isaura Baia', brasao: '1001394888.jpg' },
+      { nome: 'E. E. Benedita Marilda da Silva Braga', curta: 'Benedita Marilda', brasao: '1001394901.jpg' }
+    ];
+    const ESCOLA_FINAL = 'Final Interescolar';
+    const TZ = 'America/Belem';
+
+    function escolaInfo(nome) { return ESCOLAS.find(x => x.nome === nome) || null; }
+    function escolaDe(eq) { return (eq && eq.escola) || ESCOLAS[0].nome; }
+
+    function escolaPartida(p) {
+      if (p.escola) return p.escola;
+      const c = state.equipes.find(e => e.id == p.equipe_casa_id);
+      return escolaDe(c);
+    }
+
+    function escolaBadge(nome) {
+      if (nome === ESCOLA_FINAL) return '<span class="badge b-gold">🏆 Final Interescolar</span>';
+      const info = escolaInfo(nome);
+      if (!info) return `<span class="badge b-blue">${esc(nome)}</span>`;
+      return `<span class="badge b-blue"><img src="${info.brasao}" class="brasao-mini" onerror="this.style.display='none'">${esc(info.curta)}</span>`;
+    }
+
+    // Converte o valor salvo no banco para Date, tratando "sem fuso" como horário de Belém (UTC-3)
+    function toBelemDate(s) {
+      if (!s) return null;
+      const str = String(s).replace(' ', 'T');
+      const t = str.split('T')[1] || '';
+      const temFuso = /[zZ+-]/.test(t);
+      const d = new Date(temFuso ? str : str + '-03:00');
+      return isNaN(d.getTime()) ? null : d;
+    }
+    function fmtDia(d) {
+      return d.toLocaleDateString('pt-BR', { timeZone: TZ, weekday: 'short', day: '2-digit', month: '2-digit' });
+    }
+    function fmtDiaCompleto(d) {
+      return d.toLocaleDateString('pt-BR', { timeZone: TZ, weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+    function fmtHora(d) {
+      return d.toLocaleTimeString('pt-BR', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+    }
+    function dataInputBelem(d) { return d.toLocaleDateString('en-CA', { timeZone: TZ }); }
 
     function toast(msg, type = 'success') {
       const box = $('toastBox');
@@ -1280,39 +1467,46 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
         return;
       }
       sel.innerHTML = state.campeonatos.map(c =>
-        `<option value="${c.id}">${c.nome} (${c.ano || ''})</option>`
+        `<option value="${c.id}">${esc(c.nome)} (${c.ano || ''})</option>`
       ).join('');
     }
 
     function populateSelects() {
-      const eqOpts = state.equipes.map(e =>
-        `<option value="${e.id}">${e.nome} (${e.modalidade || 'Futsal'} • ${e.categoria || 'Masculino'})</option>`
-      ).join('');
+      const curJog = $('jogEquipe').value;
+      const curVinc = $('vincEquipeId').value;
+      const curPrem = $('premEquipe').value;
+      const curGrupo = $('vincGrupoId').value;
+
+      const eqOpts = state.equipes.map(e => {
+        const info = escolaInfo(escolaDe(e));
+        return `<option value="${e.id}">${esc(e.nome)} (${e.modalidade || 'Futsal'} • ${e.categoria || 'Masculino'} • ${esc(info ? info.curta : escolaDe(e))})</option>`;
+      }).join('');
 
       $('jogEquipe').innerHTML = eqOpts || '<option value="">Cadastre uma equipe primeiro</option>';
       $('vincEquipeId').innerHTML = eqOpts;
       $('premEquipe').innerHTML = '<option value="">Nenhuma / Geral</option>' + eqOpts;
-      $('vincGrupoId').innerHTML = state.grupos.map(g => `<option value="${g.id}">${g.nome}</option>`).join('');
+      $('vincGrupoId').innerHTML = state.grupos.map(g => `<option value="${g.id}">${esc(g.nome)}</option>`).join('');
+
+      const manter = (id, val) => { if (val && [...$(id).options].some(o => o.value === val)) $(id).value = val; };
+      manter('jogEquipe', curJog); manter('vincEquipeId', curVinc);
+      manter('premEquipe', curPrem); manter('vincGrupoId', curGrupo);
+
       filtrarEquipesPartida();
+      if (!$('partEditId').value && !$('partOrdem').value) $('partOrdem').value = proximaOrdem();
     }
 
-    function filtrarEquipesPartida() {
-      const mod = $('partModalidade').value;
-      const cat = $('partCategoria').value;
-      const filtradas = state.equipes.filter(e =>
-        (e.modalidade || 'Futsal') === mod && (e.categoria || 'Masculino') === cat
-      );
-      const list = filtradas.length ? filtradas : state.equipes;
-      const opts = list.map(e => `<option value="${e.id}">${e.nome} (${e.modalidade || 'Futsal'} - ${e.categoria || 'Masc'})</option>`).join('');
-      $('partCasa').innerHTML = opts;
-      $('partFora').innerHTML = opts;
+    // Habilita/desabilita o modo edição de um formulário
+    function setEditMode(btnId, cancelId, ativo, textoEdicao, textoNormal) {
+      $(btnId).textContent = ativo ? textoEdicao : textoNormal;
+      $(cancelId).style.display = ativo ? 'inline-flex' : 'none';
     }
 
     // =========================================================================
-    // CAMPEONATOS CRUD
+    // CAMPEONATOS CRUD (COM EDITAR)
     // =========================================================================
     $('formCamp').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const editId = $('campEditId').value;
       const payload = {
         nome: $('campNome').value.trim(),
         ano: parseInt($('campAno').value) || 2026,
@@ -1320,6 +1514,16 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
         categoria: $('campCategoria').value,
         status: $('campStatus').value
       };
+
+      if (editId) {
+        const { error } = await supabaseClient.from('campeonatos').update(payload).eq('id', editId);
+        if (error) return toast('Erro: ' + error.message, 'error');
+        toast('Campeonato atualizado!');
+        resetFormCamp();
+        loadAllData();
+        return;
+      }
+
       const { data, error } = await supabaseClient.from('campeonatos').insert([payload]).select();
       if (error) return toast('Erro: ' + error.message, 'error');
       toast('Campeonato criado!');
@@ -1331,14 +1535,38 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       loadAllData();
     });
 
+    function editarCampeonato(id) {
+      const c = state.campeonatos.find(x => x.id == id);
+      if (!c) return;
+      $('campEditId').value = c.id;
+      $('campNome').value = c.nome || '';
+      $('campAno').value = c.ano || 2026;
+      $('campModalidade').value = c.modalidade || 'Geral (Todas)';
+      $('campCategoria').value = c.categoria || 'Misto / Geral';
+      $('campStatus').value = c.status || 'em_andamento';
+      setEditMode('btnSalvarCamp', 'btnCancelCamp', true, '💾 Atualizar Campeonato', '+ Criar Campeonato');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetFormCamp() {
+      $('formCamp').reset();
+      $('campEditId').value = '';
+      setEditMode('btnSalvarCamp', 'btnCancelCamp', false, '', '+ Criar Campeonato');
+    }
+
     function renderCampeonatosTable() {
       $('tbCampeonatos').innerHTML = state.campeonatos.map(c => `
         <tr>
-          <td><strong>${c.nome}</strong></td>
+          <td><strong>${esc(c.nome)}</strong></td>
           <td>${c.ano || '-'}</td>
-          <td><span class="badge b-blue">${c.modalidade || 'Geral'}</span></td>
-          <td><span class="badge b-green">${c.status || 'em_andamento'}</span></td>
-          <td><button class="btn btn-danger btn-sm" onclick="deletarItem('campeonatos', '${c.id}', true)">Excluir</button></td>
+          <td><span class="badge b-blue">${esc(c.modalidade || 'Geral')}</span></td>
+          <td><span class="badge b-green">${esc(c.status || 'em_andamento')}</span></td>
+          <td>
+            <div class="acoes-cell">
+              <button class="btn btn-ghost btn-sm" onclick="editarCampeonato('${c.id}')">✏️ Editar</button>
+              <button class="btn btn-danger btn-sm" onclick="deletarItem('campeonatos', '${c.id}', true)">Excluir</button>
+            </div>
+          </td>
         </tr>
       `).join('') || '<tr><td colspan="5">Nenhum campeonato cadastrado.</td></tr>';
     }
@@ -1351,18 +1579,19 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       if (!state.campeonatoId) return toast('Crie ou selecione um campeonato primeiro!', 'error');
 
       const editId = $('eqEditId').value;
-   const modalidade = $('eqModalidade').value;
-    const isFutsal = modalidade.toLowerCase() === 'futsal';
-    const payload = {
-      campeonato_id: state.campeonatoId,
-      nome: $('eqNome').value.trim(),
-      sigla: $('eqSigla').value.trim().toUpperCase(),
-      modalidade: modalidade,
-      categoria: $('eqCategoria').value,
-      escudo_url: $('eqEscudoUrl').value || null,
-      miss_nome: isFutsal ? ($('eqMissNome').value.trim() || null) : null,
-      miss_foto: isFutsal ? ($('eqMissFotoUrl').value || null) : null
-    };
+      const modalidade = $('eqModalidade').value;
+      const isFutsal = modalidade.toLowerCase() === 'futsal';
+      const payload = {
+        campeonato_id: state.campeonatoId,
+        escola: $('eqEscola').value,
+        nome: $('eqNome').value.trim(),
+        sigla: $('eqSigla').value.trim().toUpperCase(),
+        modalidade: modalidade,
+        categoria: $('eqCategoria').value,
+        escudo_url: $('eqEscudoUrl').value || null,
+        miss_nome: isFutsal ? ($('eqMissNome').value.trim() || null) : null,
+        miss_foto: isFutsal ? ($('eqMissFotoUrl').value || null) : null
+      };
 
       let res;
       if (editId) {
@@ -1376,20 +1605,23 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       resetFormEquipe();
       loadCampData();
     });
-function editarEquipe(id) {
+
+    function editarEquipe(id) {
       const eq = state.equipes.find(x => x.id == id);
       if (!eq) return;
+      const vazio = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><rect width="100%" height="100%" fill="%231e293b"/></svg>';
       $('eqEditId').value = eq.id;
+      $('eqEscola').value = escolaDe(eq);
       $('eqNome').value = eq.nome || '';
       $('eqSigla').value = eq.sigla || '';
       $('eqModalidade').value = eq.modalidade || 'Futsal';
       $('eqCategoria').value = eq.categoria || 'Masculino';
       $('eqEscudoUrl').value = eq.escudo_url || '';
-      $('prevEqEscudo').src = eq.escudo_url || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><rect width="100%" height="100%" fill="%231e293b"/></svg>';
+      $('prevEqEscudo').src = eq.escudo_url || vazio;
       $('eqMissNome').value = eq.miss_nome || '';
       const fotoMiss = eq.miss_foto_url || eq.miss_foto || '';
       $('eqMissFotoUrl').value = fotoMiss;
-      $('prevEqMiss').src = fotoMiss || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><rect width="100%" height="100%" fill="%231e293b"/></svg>';
+      $('prevEqMiss').src = fotoMiss || vazio;
       $('btnSalvarEquipe').textContent = '💾 Atualizar Equipe';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -1403,10 +1635,13 @@ function editarEquipe(id) {
       $('prevEqMiss').src = 'logo.png';
       $('btnSalvarEquipe').textContent = '💾 Salvar Equipe';
     }
-function renderEquipesTable() {
+
+    function renderEquipesTable() {
+      const fEsc = $('filtroEqEscola').value;
       const fMod = $('filtroEqMod').value;
       const fCat = $('filtroEqCat').value;
       const list = state.equipes.filter(e =>
+        (!fEsc || escolaDe(e) === fEsc) &&
         (!fMod || (e.modalidade || 'Futsal') === fMod) &&
         (!fCat || (e.categoria || 'Masculino') === fCat)
       );
@@ -1419,7 +1654,8 @@ function renderEquipesTable() {
         return `
           <tr>
             <td><img src="${e.escudo_url || placeholderImg}" class="avatar-sm" onerror="this.src='${placeholderImg}'"></td>
-            <td><strong>${e.nome}</strong> <span style="color:var(--muted); font-size:0.8rem;">${e.sigla ? '('+e.sigla+')' : ''}</span></td>
+            <td><strong>${esc(e.nome)}</strong> <span style="color:var(--muted); font-size:0.8rem;">${e.sigla ? '(' + esc(e.sigla) + ')' : ''}</span></td>
+            <td>${escolaBadge(escolaDe(e))}</td>
             <td>
               <span class="badge b-blue">${e.modalidade || 'Futsal'}</span>
               <span class="badge b-purple">${e.categoria || 'Masculino'}</span>
@@ -1429,8 +1665,8 @@ function renderEquipesTable() {
                 ? '<span style="color:var(--muted); font-size:0.85rem;">Não exige Miss</span>'
                 : temMiss
                   ? `<div style="display:flex; align-items:center; gap:8px;">
-                      <img src="${e.miss_foto || e.miss_foto_url || placeholderImg}" class="avatar-sm" style="border-color:var(--gold);" onerror="this.src='${placeholderImg}'">
-                      <span>👑 ${e.miss_nome}</span>
+                      <img src="${e.miss_foto || e.miss_foto_url || placeholderImg}" class="avatar-sm img-contain" style="border-color:var(--gold);" onerror="this.src='${placeholderImg}'">
+                      <span>👑 ${esc(e.miss_nome)}</span>
                     </div>`
                   : '<span style="color:#fca5a5;">Sem Miss cadastrada</span>'}
             </td>
@@ -1441,21 +1677,24 @@ function renderEquipesTable() {
                   ? '<span class="badge b-green">OK (0 pen.)</span>'
                   : '<span class="badge b-red">⚠️ -3 PONTOS</span>'}
             </td>
-            <td style="display:flex; gap:6px;">
-              <button class="btn btn-ghost btn-sm" onclick="editarEquipe('${e.id}')">✏️ Editar</button>
-              <button class="btn btn-danger btn-sm" onclick="deletarItem('equipes', '${e.id}')">🗑️</button>
+            <td>
+              <div class="acoes-cell">
+                <button class="btn btn-ghost btn-sm" onclick="editarEquipe('${e.id}')">✏️ Editar</button>
+                <button class="btn btn-danger btn-sm" onclick="deletarItem('equipes', '${e.id}')">🗑️</button>
+              </div>
             </td>
           </tr>
         `;
-      }).join('') || '<tr><td colspan="6">Nenhuma equipe encontrada.</td></tr>';
+      }).join('') || '<tr><td colspan="7">Nenhuma equipe encontrada.</td></tr>';
     }
 
     // =========================================================================
-    // JOGADORES CRUD
+    // JOGADORES CRUD (COM EDITAR)
     // =========================================================================
     $('formJogador').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!state.campeonatoId) return toast('Selecione um campeonato!', 'error');
+      const editId = $('jogEditId').value;
       const payload = {
         campeonato_id: state.campeonatoId,
         equipe_id: $('jogEquipe').value,
@@ -1464,14 +1703,36 @@ function renderEquipesTable() {
         posicao: $('jogPosicao').value.trim() || null,
         foto_url: $('jogFotoUrl').value || null
       };
-      const { error } = await supabaseClient.from('jogadores').insert([payload]);
-      if (error) return toast('Erro: ' + error.message, 'error');
-      toast('Jogador cadastrado!');
-      $('formJogador').reset();
-      $('jogFotoUrl').value = '';
-      $('prevJogFoto').src = 'logo.png';
+      const res = editId
+        ? await supabaseClient.from('jogadores').update(payload).eq('id', editId)
+        : await supabaseClient.from('jogadores').insert([payload]);
+      if (res.error) return toast('Erro: ' + res.error.message, 'error');
+      toast(editId ? 'Jogador atualizado!' : 'Jogador cadastrado!');
+      resetFormJogador();
       loadCampData();
     });
+
+    function editarJogador(id) {
+      const j = state.jogadores.find(x => x.id == id);
+      if (!j) return;
+      $('jogEditId').value = j.id;
+      $('jogNome').value = j.nome || '';
+      $('jogEquipe').value = j.equipe_id || '';
+      $('jogNumero').value = j.numero ?? '';
+      $('jogPosicao').value = j.posicao || '';
+      $('jogFotoUrl').value = j.foto_url || '';
+      $('prevJogFoto').src = j.foto_url || 'logo.png';
+      setEditMode('btnSalvarJog', 'btnCancelJog', true, '💾 Atualizar Jogador', '+ Cadastrar Jogador');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetFormJogador() {
+      $('formJogador').reset();
+      $('jogEditId').value = '';
+      $('jogFotoUrl').value = '';
+      $('prevJogFoto').src = 'logo.png';
+      setEditMode('btnSalvarJog', 'btnCancelJog', false, '', '+ Cadastrar Jogador');
+    }
 
     function renderJogadoresTable() {
       const eqMap = Object.fromEntries(state.equipes.map(e => [e.id, e]));
@@ -1480,31 +1741,52 @@ function renderEquipesTable() {
         return `
           <tr>
             <td><img src="${j.foto_url || 'logo.png'}" class="avatar-sm" onerror="this.src='logo.png'"></td>
-            <td><strong>${j.nome}</strong></td>
+            <td><strong>${esc(j.nome)}</strong></td>
             <td>${j.numero ? '#' + j.numero : '-'}</td>
-            <td>${j.posicao || '-'}</td>
-            <td>${eq ? `${eq.nome} (${eq.modalidade || 'Futsal'})` : '-'}</td>
-            <td><button class="btn btn-danger btn-sm" onclick="deletarItem('jogadores', '${j.id}')">Excluir</button></td>
+            <td>${esc(j.posicao || '-')}</td>
+            <td>${eq ? `${esc(eq.nome)} (${eq.modalidade || 'Futsal'})` : '-'}</td>
+            <td>
+              <div class="acoes-cell">
+                <button class="btn btn-ghost btn-sm" onclick="editarJogador('${j.id}')">✏️ Editar</button>
+                <button class="btn btn-danger btn-sm" onclick="deletarItem('jogadores', '${j.id}')">Excluir</button>
+              </div>
+            </td>
           </tr>
         `;
       }).join('') || '<tr><td colspan="6">Nenhum jogador cadastrado.</td></tr>';
     }
 
     // =========================================================================
-    // GRUPOS
+    // GRUPOS (COM EDITAR)
     // =========================================================================
     $('formGrupo').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!state.campeonatoId) return;
-      const { error } = await supabaseClient.from('grupos').insert([{
-        campeonato_id: state.campeonatoId,
-        nome: $('grpNome').value.trim()
-      }]);
-      if (error) return toast('Erro: ' + error.message, 'error');
-      toast('Grupo criado!');
-      $('formGrupo').reset();
+      const editId = $('grpEditId').value;
+      const nome = $('grpNome').value.trim();
+      const res = editId
+        ? await supabaseClient.from('grupos').update({ nome }).eq('id', editId)
+        : await supabaseClient.from('grupos').insert([{ campeonato_id: state.campeonatoId, nome }]);
+      if (res.error) return toast('Erro: ' + res.error.message, 'error');
+      toast(editId ? 'Grupo atualizado!' : 'Grupo criado!');
+      resetFormGrupo();
       loadCampData();
     });
+
+    function editarGrupo(id) {
+      const g = state.grupos.find(x => x.id == id);
+      if (!g) return;
+      $('grpEditId').value = g.id;
+      $('grpNome').value = g.nome || '';
+      setEditMode('btnSalvarGrp', 'btnCancelGrp', true, '💾 Atualizar Grupo', '+ Criar Grupo');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetFormGrupo() {
+      $('formGrupo').reset();
+      $('grpEditId').value = '';
+      setEditMode('btnSalvarGrp', 'btnCancelGrp', false, '', '+ Criar Grupo');
+    }
 
     $('formVincGrupo').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -1523,14 +1805,17 @@ function renderEquipesTable() {
         const vinculadas = state.grupoEquipes.filter(ge => ge.grupo_id === g.id);
         return `
           <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <strong>${g.nome}</strong>
-              <button class="btn btn-danger btn-sm" onclick="deletarItem('grupos', '${g.id}')">Excluir</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:8px; flex-wrap:wrap;">
+              <strong>${esc(g.nome)}</strong>
+              <div class="acoes-cell">
+                <button class="btn btn-ghost btn-sm" onclick="editarGrupo('${g.id}')">✏️ Editar</button>
+                <button class="btn btn-danger btn-sm" onclick="deletarItem('grupos', '${g.id}')">Excluir</button>
+              </div>
             </div>
             ${vinculadas.map(v => {
               const eq = eqMap[v.equipe_id];
               return `<div style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-between;">
-                <span>${eq ? eq.nome : 'Equipe'}</span>
+                <span>${eq ? esc(eq.nome) : 'Equipe'}</span>
                 <button class="btn btn-ghost btn-sm" onclick="deletarItem('grupo_equipes', '${v.id}')">✕</button>
               </div>`;
             }).join('') || '<p style="color:var(--muted); font-size:0.82rem;">Nenhuma equipe neste grupo.</p>'}
@@ -1540,94 +1825,444 @@ function renderEquipesTable() {
     }
 
     // =========================================================================
-    // PARTIDAS
+    // PARTIDAS: PROGRAMAÇÃO + CHAVEAMENTO MATA-MATA AUTOMÁTICO
     // =========================================================================
+    // origem_casa / origem_fora são salvas como  "venc:<id_da_partida_anterior>"
+    function origemLabel(origem) {
+      if (!origem) return null;
+      const id = String(origem).replace(/^venc:/, '');
+      const src = state.partidas.find(x => x.id == id);
+      return src ? `Vencedor do ${src.ordem_jogo ? src.ordem_jogo + 'º' : '?'} Jogo` : 'Vencedor (jogo removido)';
+    }
+
+    function ladoNome(p, lado, eqMap) {
+      const id = lado === 'casa' ? p.equipe_casa_id : p.equipe_fora_id;
+      const og = lado === 'casa' ? p.origem_casa : p.origem_fora;
+      if (id && eqMap[id]) return eqMap[id].nome;
+      if (og) return origemLabel(og);
+      return lado === 'casa' ? 'Mandante' : 'Visitante';
+    }
+
+    function proximaOrdem() {
+      return Math.max(0, ...state.partidas.map(p => p.ordem_jogo || 0)) + 1;
+    }
+
+    function aoMudarEscolaPartida() {
+      if (!$('partEditId').value) {
+        const fase = $('partFase').value.trim();
+        if ($('partEscola').value === ESCOLA_FINAL) {
+          if (!fase || fase === 'Fase de Grupos') $('partFase').value = 'Final Interescolar';
+        } else if (fase === 'Final Interescolar') {
+          $('partFase').value = 'Fase de Grupos';
+        }
+      }
+      filtrarEquipesPartida();
+    }
+
+    $('partHora').addEventListener('change', () => {
+      const h = $('partHora').value;
+      if (!h) return;
+      $('partTurno').value = parseInt(h.split(':')[0]) < 12 ? 'Manhã' : 'Tarde';
+    });
+
+    function filtrarEquipesPartida() {
+      const escola = $('partEscola').value;
+      const mod = $('partModalidade').value;
+      const cat = $('partCategoria').value;
+      const editId = $('partEditId').value;
+      const isFinal = escola === ESCOLA_FINAL;
+      const curC = $('partCasa').value;
+      const curF = $('partFora').value;
+      const eqMap = Object.fromEntries(state.equipes.map(e => [e.id, e]));
+
+      const equipes = state.equipes.filter(e =>
+        (e.modalidade || 'Futsal') === mod &&
+        (e.categoria || 'Masculino') === cat &&
+        (isFinal || escolaDe(e) === escola)
+      );
+
+      const origens = ordenarPartidas(state.partidas.filter(p =>
+        p.id != editId &&
+        (p.modalidade || 'Futsal') === mod &&
+        (p.categoria || 'Masculino') === cat &&
+        escolaPartida(p) !== ESCOLA_FINAL &&
+        (isFinal || escolaPartida(p) === escola)
+      ));
+
+      const grpEq = equipes.length
+        ? `<optgroup label="Equipes">${equipes.map(e => {
+            const info = escolaInfo(escolaDe(e));
+            return `<option value="${e.id}">${esc(e.nome)}${isFinal && info ? ' — ' + esc(info.curta) : ''}</option>`;
+          }).join('')}</optgroup>`
+        : '';
+      const grpOr = origens.length
+        ? `<optgroup label="Chaveamento (mata-mata)">${origens.map(p =>
+            `<option value="venc:${p.id}">🏆 Vencedor do ${p.ordem_jogo ? p.ordem_jogo + 'º' : '?'} Jogo — ${esc(ladoNome(p, 'casa', eqMap))} x ${esc(ladoNome(p, 'fora', eqMap))}</option>`
+          ).join('')}</optgroup>`
+        : '';
+      const html = (grpEq + grpOr) || '<option value="">Nenhuma equipe nesta escola/modalidade/naipe</option>';
+
+      $('partCasa').innerHTML = html;
+      $('partFora').innerHTML = html;
+
+      const tem = (sel, val) => val && [...$(sel).options].some(o => o.value === val);
+      if (tem('partCasa', curC)) $('partCasa').value = curC;
+      if (tem('partFora', curF)) $('partFora').value = curF;
+      else if ($('partFora').options.length > 1) $('partFora').selectedIndex = 1;
+    }
+
+    function parseLado(val) {
+      if (!val) return { id: null, origem: null };
+      if (val.startsWith('venc:')) return { id: null, origem: val };
+      return { id: val, origem: null };
+    }
+
     $('formPartida').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!state.campeonatoId) return;
-      const casa = $('partCasa').value;
-      const fora = $('partFora').value;
-      if (casa === fora) return toast('Selecione duas equipes diferentes!', 'error');
+      const editId = $('partEditId').value;
+      const c = parseLado($('partCasa').value);
+      const f = parseLado($('partFora').value);
+      if (!c.id && !c.origem) return toast('Escolha a equipe mandante.', 'error');
+      if (!f.id && !f.origem) return toast('Escolha a equipe visitante.', 'error');
+      if (c.id && f.id && c.id === f.id) return toast('Selecione duas equipes diferentes!', 'error');
+      if (c.origem && c.origem === f.origem) return toast('Os dois lados não podem ser o vencedor do mesmo jogo!', 'error');
+
+      const dia = $('partDia').value;
+      const hora = $('partHora').value;
+      if (dia && !hora) return toast('Informe também o horário do jogo.', 'error');
+      if (hora && !dia) return toast('Informe também o dia do jogo.', 'error');
 
       const payload = {
         campeonato_id: state.campeonatoId,
+        escola: $('partEscola').value,
         modalidade: $('partModalidade').value,
         categoria: $('partCategoria').value,
-        equipe_casa_id: casa,
-        equipe_fora_id: fora,
-        gols_casa: 0,
-        gols_fora: 0,
-        data_hora: $('partData').value || null,
+        ordem_jogo: parseInt($('partOrdem').value) || null,
+        turno: $('partTurno').value,
+        equipe_casa_id: c.id,
+        equipe_fora_id: f.id,
+        origem_casa: c.origem,
+        origem_fora: f.origem,
+        // Horário gravado com o fuso de Belém (-03:00) para não "pular" horas por causa do UTC
+        data_hora: dia ? `${dia}T${hora}:00-03:00` : null,
         local: $('partLocal').value.trim(),
-        fase: $('partFase').value.trim(),
-        status: 'agendada'
+        fase: $('partFase').value.trim()
       };
-      const { error } = await supabaseClient.from('partidas').insert([payload]);
-      if (error) return toast('Erro: ' + error.message, 'error');
-      toast('Partida agendada!');
-      loadCampData();
+
+      let res;
+      if (editId) {
+        res = await supabaseClient.from('partidas').update(payload).eq('id', editId);
+      } else {
+        payload.gols_casa = 0;
+        payload.gols_fora = 0;
+        payload.status = 'agendada';
+        res = await supabaseClient.from('partidas').insert([payload]);
+      }
+      if (res.error) return toast('Erro: ' + res.error.message, 'error');
+
+      toast(editId ? 'Partida atualizada!' : 'Partida agendada!');
+      if (editId) resetFormPartida(); else $('partOrdem').value = '';
+      await loadCampData();
+      await sincronizarChaveamento(true);
     });
+
+    function editarPartida(id) {
+      const p = state.partidas.find(x => x.id == id);
+      if (!p) return;
+      $('partEditId').value = p.id;
+      $('partEscola').value = escolaPartida(p);
+      $('partModalidade').value = p.modalidade || 'Futsal';
+      $('partCategoria').value = p.categoria || 'Masculino';
+      $('partOrdem').value = p.ordem_jogo ?? '';
+      $('partTurno').value = p.turno || 'Manhã';
+      const d = toBelemDate(p.data_hora);
+      $('partDia').value = d ? dataInputBelem(d) : '';
+      $('partHora').value = d ? fmtHora(d) : '';
+      $('partLocal').value = p.local || '';
+      $('partFase').value = p.fase || '';
+      filtrarEquipesPartida();
+      $('partCasa').value = p.origem_casa || p.equipe_casa_id || '';
+      $('partFora').value = p.origem_fora || p.equipe_fora_id || '';
+      $('tituloFormPartida').textContent = '✏️ Editando Partida';
+      setEditMode('btnSalvarPartida', 'btnCancelPartida', true, '💾 Atualizar Partida', '+ Agendar Jogo');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetFormPartida() {
+      $('formPartida').reset();
+      $('partEditId').value = '';
+      $('partOrdem').value = proximaOrdem();
+      $('tituloFormPartida').textContent = '⚽ Agendar Nova Partida';
+      setEditMode('btnSalvarPartida', 'btnCancelPartida', false, '', '+ Agendar Jogo');
+      filtrarEquipesPartida();
+    }
+
+    function ordenarPartidas(list) {
+      return [...list].sort((a, b) =>
+        (a.ordem_jogo ?? 9999) - (b.ordem_jogo ?? 9999) ||
+        (toBelemDate(a.data_hora)?.getTime() ?? 0) - (toBelemDate(b.data_hora)?.getTime() ?? 0)
+      );
+    }
+
+    function getPartidasFiltradas() {
+      const fe = $('fpEscola').value, fm = $('fpMod').value, fc = $('fpCat').value;
+      return ordenarPartidas(state.partidas.filter(p =>
+        (!fe || escolaPartida(p) === fe) &&
+        (!fm || (p.modalidade || 'Futsal') === fm) &&
+        (!fc || (p.categoria || 'Masculino') === fc)
+      ));
+    }
 
     function renderPartidasTable() {
       const eqMap = Object.fromEntries(state.equipes.map(e => [e.id, e]));
-      $('tbPartidas').innerHTML = state.partidas.map(p => {
-        const c = eqMap[p.equipe_casa_id]?.nome || 'Mandante';
-        const f = eqMap[p.equipe_fora_id]?.nome || 'Visitante';
+      $('tbPartidas').innerHTML = getPartidasFiltradas().map(p => {
+        const c = ladoNome(p, 'casa', eqMap);
+        const f = ladoNome(p, 'fora', eqMap);
+        const d = toBelemDate(p.data_hora);
         return `
           <tr>
             <td>
+              <strong style="color:var(--gold);">${p.ordem_jogo ? p.ordem_jogo + 'º Jogo' : '—'}</strong><br>
+              <span class="badge ${p.turno === 'Tarde' ? 'b-purple' : 'b-blue'}">${esc(p.turno || '—')}</span>
+            </td>
+            <td style="font-size:0.85rem;">${d ? `<strong>${esc(fmtDia(d))}</strong><br>🕒 ${esc(fmtHora(d))}` : '<span style="color:var(--muted);">A definir</span>'}</td>
+            <td>${escolaBadge(escolaPartida(p))}</td>
+            <td>
               <span class="badge b-blue">${p.modalidade || 'Futsal'}</span>
               <span class="badge b-purple">${p.categoria || 'Masculino'}</span>
+              ${p.fase ? `<div style="font-size:0.75rem; color:var(--muted); margin-top:4px;">${esc(p.fase)}</div>` : ''}
             </td>
-            <td><strong>${c}</strong> <span style="color:var(--gold); font-weight:900; padding:0 8px;">${p.gols_casa ?? 0} x ${p.gols_fora ?? 0}</span> <strong>${f}</strong></td>
-            <td style="font-size:0.82rem; color:var(--muted);">${p.data_hora ? new Date(p.data_hora).toLocaleString('pt-BR') : 'A definir'}<br>${p.local || ''}</td>
-            <td><span class="badge ${p.status === 'finalizada' ? 'b-green' : p.status === 'ao_vivo' ? 'b-red' : 'b-blue'}">${p.status}</span></td>
-            <td style="display:flex; gap:6px;">
-              <button class="btn btn-gold btn-sm" onclick="abrirPlacar('${p.id}')">⚽ Placar</button>
-              <button class="btn btn-danger btn-sm" onclick="deletarItem('partidas', '${p.id}')">🗑️</button>
+            <td><strong>${esc(c)}</strong> <span style="color:var(--gold); font-weight:900; padding:0 8px;">${p.gols_casa ?? 0} x ${p.gols_fora ?? 0}</span> <strong>${esc(f)}</strong></td>
+            <td style="font-size:0.82rem; color:var(--muted);">${esc(p.local || '')}</td>
+            <td><span class="badge ${p.status === 'finalizada' ? 'b-green' : p.status === 'ao_vivo' ? 'b-red' : 'b-blue'}">${esc(p.status)}</span></td>
+            <td>
+              <div class="acoes-cell">
+                <button class="btn btn-gold btn-sm" onclick="abrirPlacar('${p.id}')">⚽ Placar</button>
+                <button class="btn btn-ghost btn-sm" onclick="editarPartida('${p.id}')">✏️ Editar</button>
+                <button class="btn btn-danger btn-sm" onclick="deletarItem('partidas', '${p.id}')">🗑️</button>
+              </div>
             </td>
           </tr>
         `;
-      }).join('') || '<tr><td colspan="5">Nenhuma partida agendada.</td></tr>';
+      }).join('') || '<tr><td colspan="8">Nenhuma partida agendada.</td></tr>';
     }
 
     function abrirPlacar(id) {
-      const p = state.partidas.find(x => x.id === id);
+      const p = state.partidas.find(x => x.id == id);
       if (!p) return;
+      if (!p.equipe_casa_id || !p.equipe_fora_id) {
+        return toast('As duas equipes ainda não foram definidas. Finalize os jogos anteriores primeiro.', 'error');
+      }
       const eqMap = Object.fromEntries(state.equipes.map(e => [e.id, e]));
+      const nc = eqMap[p.equipe_casa_id]?.nome || 'Mandante';
+      const nf = eqMap[p.equipe_fora_id]?.nome || 'Visitante';
       $('editPartId').value = p.id;
-      $('lblCasa').textContent = eqMap[p.equipe_casa_id]?.nome || 'Mandante';
-      $('lblFora').textContent = eqMap[p.equipe_fora_id]?.nome || 'Visitante';
+      $('lblCasa').textContent = nc;
+      $('lblFora').textContent = nf;
+      $('optPenCasa').textContent = nc;
+      $('optPenFora').textContent = nf;
+      $('editPenVencedor').value = '';
       $('editGolsCasa').value = p.gols_casa ?? 0;
       $('editGolsFora').value = p.gols_fora ?? 0;
       $('editPartStatus').value = p.status || 'finalizada';
+      togglePenaltis();
       openModal('modalPlacar');
+    }
+
+    function togglePenaltis() {
+      const gc = parseInt($('editGolsCasa').value) || 0;
+      const gf = parseInt($('editGolsFora').value) || 0;
+      const id = $('editPartId').value;
+      const temSeguinte = state.partidas.some(p => p.origem_casa === 'venc:' + id || p.origem_fora === 'venc:' + id);
+      const mostrar = $('editPartStatus').value === 'finalizada' && gc === gf && temSeguinte;
+      $('grpPen').style.display = mostrar ? 'flex' : 'none';
+    }
+
+    // Preenche (ou limpa) o vencedor nas partidas seguintes que dependem desta
+    async function propagarVencedor(p, gc, gf, status, pen) {
+      const key = 'venc:' + p.id;
+      const dependentes = state.partidas.filter(x => x.origem_casa === key || x.origem_fora === key);
+      if (!dependentes.length) return;
+
+      let vencedor = null;
+      if (status === 'finalizada') {
+        if (gc > gf) vencedor = p.equipe_casa_id;
+        else if (gf > gc) vencedor = p.equipe_fora_id;
+        else if (pen === 'casa') vencedor = p.equipe_casa_id;
+        else if (pen === 'fora') vencedor = p.equipe_fora_id;
+        else toast('Empate: escolha quem avança (pênaltis) para preencher o próximo jogo.', 'error');
+      }
+
+      await Promise.all(dependentes.map(x => {
+        const upd = {};
+        if (x.origem_casa === key) upd.equipe_casa_id = vencedor;
+        if (x.origem_fora === key) upd.equipe_fora_id = vencedor;
+        return supabaseClient.from('partidas').update(upd).eq('id', x.id);
+      }));
+      if (vencedor) toast('Vencedor avançou automaticamente para o próximo jogo!');
     }
 
     async function salvarPlacar() {
       const id = $('editPartId').value;
+      const p = state.partidas.find(x => x.id == id);
+      const gc = parseInt($('editGolsCasa').value) || 0;
+      const gf = parseInt($('editGolsFora').value) || 0;
+      const status = $('editPartStatus').value;
+
       const { error } = await supabaseClient.from('partidas').update({
-        gols_casa: parseInt($('editGolsCasa').value) || 0,
-        gols_fora: parseInt($('editGolsFora').value) || 0,
-        status: $('editPartStatus').value
+        gols_casa: gc,
+        gols_fora: gf,
+        status: status
       }).eq('id', id);
 
       if (error) return toast('Erro: ' + error.message, 'error');
+
+      if (p) await propagarVencedor(p, gc, gf, status, $('editPenVencedor').value);
+
       toast('Placar atualizado e classificação recalculada!');
       closeModal('modalPlacar');
       loadCampData();
     }
 
+    // Confere todos os jogos de mata-mata e corrige o que estiver fora de sincronia
+    async function sincronizarChaveamento(silencioso = false) {
+      const ups = [];
+      for (const p of state.partidas) {
+        const upd = {};
+        for (const [lado, campo] of [['casa', 'equipe_casa_id'], ['fora', 'equipe_fora_id']]) {
+          const og = p['origem_' + lado];
+          if (!og) continue;
+          const src = state.partidas.find(x => 'venc:' + x.id === og);
+          if (!src) continue;
+          let w;
+          if (src.status !== 'finalizada') w = null;
+          else if ((src.gols_casa ?? 0) > (src.gols_fora ?? 0)) w = src.equipe_casa_id;
+          else if ((src.gols_fora ?? 0) > (src.gols_casa ?? 0)) w = src.equipe_fora_id;
+          else continue; // empate: mantém o que foi escolhido nos pênaltis
+          if ((p[campo] || null) !== (w || null)) upd[campo] = w || null;
+        }
+        if (Object.keys(upd).length) ups.push({ id: p.id, upd });
+      }
+
+      if (!ups.length) {
+        if (!silencioso) toast('Chaveamento já está sincronizado.');
+        return;
+      }
+      const results = await Promise.all(ups.map(u => supabaseClient.from('partidas').update(u.upd).eq('id', u.id)));
+      const err = results.find(r => r.error);
+      if (err) return toast('Erro ao sincronizar: ' + err.error.message, 'error');
+      toast(`Chaveamento atualizado em ${ups.length} jogo(s).`);
+      await loadCampData();
+    }
+
     // =========================================================================
-    // CLASSIFICAÇÃO COM PENALIDADE AUTOMÁTICA DE -3 PTS SEM MISS
+    // BOLETIM OFICIAL (PDF / IMPRESSÃO)
+    // =========================================================================
+    function gerarBoletimPDF() {
+      const lista = getPartidasFiltradas();
+      if (!lista.length) return toast('Nenhuma partida para gerar o boletim.', 'error');
+
+      const camp = state.campeonatos.find(c => c.id == state.campeonatoId);
+      const eqMap = Object.fromEntries(state.equipes.map(e => [e.id, e]));
+      const b1 = new URL('1001394888.jpg', location.href).href;
+      const b2 = new URL('1001394901.jpg', location.href).href;
+      const filtros = [$('fpEscola').value, $('fpMod').value, $('fpCat').value].filter(Boolean).join(' • ')
+        || 'Todas as escolas, modalidades e naipes';
+      const emitido = new Date().toLocaleString('pt-BR', { timeZone: TZ });
+
+      const linhas = lista.map(p => {
+        const d = toBelemDate(p.data_hora);
+        const c = ladoNome(p, 'casa', eqMap);
+        const f = ladoNome(p, 'fora', eqMap);
+        const placar = p.status === 'finalizada' ? ` <b>${p.gols_casa ?? 0} x ${p.gols_fora ?? 0}</b> ` : ' x ';
+        return `<tr>
+          <td><b>${p.ordem_jogo ? p.ordem_jogo + 'º' : '—'}</b></td>
+          <td>${esc(p.turno || '—')}</td>
+          <td>${d ? esc(fmtDiaCompleto(d)) : 'A definir'}</td>
+          <td>${d ? esc(fmtHora(d)) : '—'}</td>
+          <td class="conf">${esc(c)}${placar}${esc(f)}<small>${esc(p.modalidade || 'Futsal')} • ${esc(p.categoria || 'Masculino')} • ${esc(escolaPartida(p))}${p.fase ? ' • ' + esc(p.fase) : ''}</small></td>
+          <td>${esc(p.local || '—')}</td>
+        </tr>`;
+      }).join('');
+
+      const html = `<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8">
+<title>Boletim Oficial - Jogos Escolares</title>
+<style>
+  @page { size: A4 portrait; margin: 14mm; }
+  * { box-sizing: border-box; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #111; margin: 0; padding: 18px; background: #fff; }
+  .head { display: flex; align-items: center; justify-content: space-between; gap: 14px; border-bottom: 3px double #111; padding-bottom: 10px; margin-bottom: 12px; }
+  .head img { width: 78px; height: 78px; object-fit: contain; }
+  .head .t { text-align: center; flex: 1; }
+  .t h1 { font-size: 18px; margin: 0 0 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .t h2 { font-size: 12.5px; margin: 0; font-weight: 600; }
+  .t p { font-size: 11px; margin: 4px 0 0; color: #333; }
+  table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  th, td { border: 1px solid #333; padding: 6px; text-align: center; vertical-align: middle; }
+  th { background: #e5e7eb; text-transform: uppercase; font-size: 10.5px; }
+  td.conf { text-align: left; }
+  td.conf small { display: block; color: #555; font-size: 10px; margin-top: 2px; }
+  tr { page-break-inside: avoid; }
+  .assin { margin-top: 56px; display: flex; gap: 28px; justify-content: space-between; page-break-inside: avoid; }
+  .assin div { flex: 1; text-align: center; font-size: 11px; }
+  .assin .linha { border-top: 1px solid #111; margin-bottom: 4px; padding-top: 4px; }
+  .rodape { margin-top: 22px; font-size: 10px; color: #555; text-align: center; }
+  .bar { position: fixed; top: 10px; right: 10px; }
+  .bar button { padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #111; background: #fde68a; border-radius: 8px; }
+  @media print { .bar { display: none; } body { padding: 0; } }
+</style></head><body>
+  <div class="bar"><button onclick="window.print()">🖨️ Imprimir / Salvar PDF</button></div>
+  <div class="head">
+    <img src="${b1}" alt="Brasão E. E. Profª Isaura Baia" onerror="this.style.visibility='hidden'">
+    <div class="t">
+      <h1>Jogos Escolares — Boletim Oficial</h1>
+      <h2>E. E. Profª Isaura Baia &nbsp;/&nbsp; E. E. Benedita Marilda da Silva Braga</h2>
+      <p>${esc(camp ? camp.nome : '')} • Mocajuba-PA</p>
+      <p>Programação: ${esc(filtros)}</p>
+    </div>
+    <img src="${b2}" alt="Brasão E. E. Benedita Marilda da Silva Braga" onerror="this.style.visibility='hidden'">
+  </div>
+  <table>
+    <thead><tr><th>Jogo</th><th>Turno</th><th>Dia</th><th>Hora</th><th>Confronto</th><th>Local</th></tr></thead>
+    <tbody>${linhas}</tbody>
+  </table>
+  <div class="assin">
+    <div><div class="linha">Coordenação dos Jogos</div></div>
+    <div><div class="linha">Direção — E. E. Profª Isaura Baia</div></div>
+    <div><div class="linha">Direção — E. E. Benedita Marilda da Silva Braga</div></div>
+  </div>
+  <div class="rodape">Emitido em ${esc(emitido)} (horário de Belém) • Sistema desenvolvido por Gustavo Nunes</div>
+  <script>window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 600); });<\/script>
+</body></html>`;
+
+      const w = window.open('', '_blank');
+      if (!w) return toast('Permita pop-ups neste site para abrir o boletim.', 'error');
+      w.document.open();
+      w.document.write(html);
+      w.document.close();
+    }
+
+    // =========================================================================
+    // CLASSIFICAÇÃO POR ESCOLA, COM PENALIDADE AUTOMÁTICA DE -3 PTS SEM MISS (FUTSAL)
     // =========================================================================
     function renderClassificacao() {
+      const escola = $('classEscola').value;
       const mod = $('classMod').value;
       const cat = $('classCat').value;
+
+      const info = escolaInfo(escola);
+      $('classEscolaTitulo').innerHTML = info
+        ? `<img src="${info.brasao}" class="brasao-mini" style="width:22px; height:22px;" onerror="this.style.display='none'"> ${esc(info.nome)} • ${mod} ${cat}`
+        : '';
+
       const eqs = state.equipes.filter(e =>
-        (e.modalidade || 'Futsal') === mod && (e.categoria || 'Masculino') === cat
+        escolaDe(e) === escola &&
+        (e.modalidade || 'Futsal') === mod &&
+        (e.categoria || 'Masculino') === cat
       );
-const tabela = eqs.map(e => {
+      const tabela = eqs.map(e => {
         const isFutsal = (e.modalidade || 'Futsal').toLowerCase() === 'futsal';
         const temMiss = e.miss_nome && e.miss_nome.trim() !== '';
         const penalidade = isFutsal ? (temMiss ? 0 : -3) : 0;
@@ -1644,7 +2279,7 @@ const tabela = eqs.map(e => {
       state.partidas.filter(p => p.status === 'finalizada').forEach(p => {
         const c = map[p.equipe_casa_id];
         const f = map[p.equipe_fora_id];
-        if (!c || !f) return;
+        if (!c || !f) return; // jogos da Final Interescolar (entre escolas) não entram aqui
         const gc = p.gols_casa ?? 0;
         const gf = p.gols_fora ?? 0;
         c.j++; f.j++;
@@ -1658,16 +2293,17 @@ const tabela = eqs.map(e => {
       tabela.forEach(t => t.sg = t.gp - t.gc);
       tabela.sort((a, b) => b.pts - a.pts || b.v - a.v || b.sg - a.sg || b.gp - a.gp);
 
+      const isFutsalSel = mod.toLowerCase() === 'futsal';
       $('tbClassificacao').innerHTML = tabela.map((t, idx) => `
         <tr>
           <td><strong>${idx + 1}º</strong></td>
           <td>
             <div style="display:flex; align-items:center; gap:8px;">
               <img src="${t.escudo_url || 'logo.png'}" class="avatar-sm" onerror="this.src='logo.png'">
-              <strong>${t.nome}</strong>
+              <strong>${esc(t.nome)}</strong>
             </div>
           </td>
-          <td>${t.temMiss ? `<span class="badge b-gold">👑 ${t.miss_nome}</span>` : `<span class="badge b-red">-3 pts (Sem Miss)</span>`}</td>
+          <td>${!isFutsalSel ? '<span style="color:var(--muted); font-size:0.8rem;">—</span>' : (t.temMiss ? `<span class="badge b-gold">👑 ${esc(t.miss_nome)}</span>` : `<span class="badge b-red">-3 pts (Sem Miss)</span>`)}</td>
           <td><strong style="font-size:1.05rem; color:${t.pts < 0 ? '#fca5a5' : 'var(--gold)'};">${t.pts}</strong></td>
           <td>${t.j}</td>
           <td>${t.v}</td>
@@ -1677,36 +2313,61 @@ const tabela = eqs.map(e => {
           <td>${t.gc}</td>
           <td>${t.sg}</td>
         </tr>
-      `).join('') || '<tr><td colspan="11">Nenhuma equipe cadastrada nesta modalidade e categoria.</td></tr>';
+      `).join('') || '<tr><td colspan="11">Nenhuma equipe cadastrada nesta escola, modalidade e categoria.</td></tr>';
     }
 
     // =========================================================================
-    // NOTÍCIAS & PREMIAÇÕES
+    // NOTÍCIAS & PREMIAÇÕES (COM EDITAR)
     // =========================================================================
     $('formNoticia').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!state.campeonatoId) return;
-      const { error } = await supabaseClient.from('noticias').insert([{
+      const editId = $('notEditId').value;
+      const payload = {
         campeonato_id: state.campeonatoId,
         titulo: $('notTitulo').value.trim(),
         conteudo: $('notConteudo').value.trim(),
         imagem_url: $('notImgUrl').value || null
-      }]);
-      if (error) return toast('Erro: ' + error.message, 'error');
-      toast('Notícia publicada!');
-      $('formNoticia').reset();
-      $('notImgUrl').value = '';
-      $('prevNotImg').src = 'logo.png';
+      };
+      const res = editId
+        ? await supabaseClient.from('noticias').update(payload).eq('id', editId)
+        : await supabaseClient.from('noticias').insert([payload]);
+      if (res.error) return toast('Erro: ' + res.error.message, 'error');
+      toast(editId ? 'Notícia atualizada!' : 'Notícia publicada!');
+      resetFormNoticia();
       loadCampData();
     });
+
+    function editarNoticia(id) {
+      const n = state.noticias.find(x => x.id == id);
+      if (!n) return;
+      $('notEditId').value = n.id;
+      $('notTitulo').value = n.titulo || '';
+      $('notConteudo').value = n.conteudo || '';
+      $('notImgUrl').value = n.imagem_url || '';
+      $('prevNotImg').src = n.imagem_url || 'logo.png';
+      setEditMode('btnSalvarNot', 'btnCancelNot', true, '💾 Atualizar Notícia', 'Publicar no Site Público');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetFormNoticia() {
+      $('formNoticia').reset();
+      $('notEditId').value = '';
+      $('notImgUrl').value = '';
+      $('prevNotImg').src = 'logo.png';
+      setEditMode('btnSalvarNot', 'btnCancelNot', false, '', 'Publicar no Site Público');
+    }
 
     function renderNoticias() {
       $('listaNoticias').innerHTML = state.noticias.map(n => `
         <div class="card">
-          ${n.imagem_url ? `<img src="${n.imagem_url}" style="width:100%; height:150px; object-fit:cover; border-radius:12px; margin-bottom:10px;">` : ''}
-          <h4>${n.titulo}</h4>
-          <p style="color:var(--muted); font-size:0.86rem; margin:8px 0;">${n.conteudo}</p>
-          <button class="btn btn-danger btn-sm" onclick="deletarItem('noticias', '${n.id}')">Excluir</button>
+          ${n.imagem_url ? `<img src="${n.imagem_url}" class="img-contain" style="width:100%; height:180px; object-fit:contain; border-radius:12px; margin-bottom:10px;">` : ''}
+          <h4>${esc(n.titulo)}</h4>
+          <p style="color:var(--muted); font-size:0.86rem; margin:8px 0;">${esc(n.conteudo)}</p>
+          <div class="acoes-cell">
+            <button class="btn btn-ghost btn-sm" onclick="editarNoticia('${n.id}')">✏️ Editar</button>
+            <button class="btn btn-danger btn-sm" onclick="deletarItem('noticias', '${n.id}')">Excluir</button>
+          </div>
         </div>
       `).join('');
     }
@@ -1714,25 +2375,49 @@ const tabela = eqs.map(e => {
     $('formPremiacao').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!state.campeonatoId) return;
-      const { error } = await supabaseClient.from('premiacoes').insert([{
+      const editId = $('premEditId').value;
+      const payload = {
         campeonato_id: state.campeonatoId,
         titulo: $('premTitulo').value.trim(),
         equipe_id: $('premEquipe').value || null,
         descricao: $('premDescricao').value.trim() || null
-      }]);
-      if (error) return toast('Erro: ' + error.message, 'error');
-      toast('Premiação salva!');
-      $('formPremiacao').reset();
+      };
+      const res = editId
+        ? await supabaseClient.from('premiacoes').update(payload).eq('id', editId)
+        : await supabaseClient.from('premiacoes').insert([payload]);
+      if (res.error) return toast('Erro: ' + res.error.message, 'error');
+      toast(editId ? 'Premiação atualizada!' : 'Premiação salva!');
+      resetFormPremiacao();
       loadCampData();
     });
+
+    function editarPremiacao(id) {
+      const pr = state.premiacoes.find(x => x.id == id);
+      if (!pr) return;
+      $('premEditId').value = pr.id;
+      $('premTitulo').value = pr.titulo || '';
+      $('premEquipe').value = pr.equipe_id || '';
+      $('premDescricao').value = pr.descricao || '';
+      setEditMode('btnSalvarPrem', 'btnCancelPrem', true, '💾 Atualizar Premiação', '🏆 Salvar Premiação');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetFormPremiacao() {
+      $('formPremiacao').reset();
+      $('premEditId').value = '';
+      setEditMode('btnSalvarPrem', 'btnCancelPrem', false, '', '🏆 Salvar Premiação');
+    }
 
     function renderPremiacoes() {
       const eqMap = Object.fromEntries(state.equipes.map(e => [e.id, e]));
       $('listaPremiacoes').innerHTML = state.premiacoes.map(pr => `
         <div class="card">
-          <div style="color:var(--gold); font-weight:800;">🏆 ${pr.titulo}</div>
-          <div style="margin:6px 0;">${pr.equipe_id && eqMap[pr.equipe_id] ? eqMap[pr.equipe_id].nome : ''} ${pr.descricao ? '• ' + pr.descricao : ''}</div>
-          <button class="btn btn-danger btn-sm" onclick="deletarItem('premiacoes', '${pr.id}')">Excluir</button>
+          <div style="color:var(--gold); font-weight:800;">🏆 ${esc(pr.titulo)}</div>
+          <div style="margin:6px 0;">${pr.equipe_id && eqMap[pr.equipe_id] ? esc(eqMap[pr.equipe_id].nome) : ''} ${pr.descricao ? '• ' + esc(pr.descricao) : ''}</div>
+          <div class="acoes-cell">
+            <button class="btn btn-ghost btn-sm" onclick="editarPremiacao('${pr.id}')">✏️ Editar</button>
+            <button class="btn btn-danger btn-sm" onclick="deletarItem('premiacoes', '${pr.id}')">Excluir</button>
+          </div>
         </div>
       `).join('');
     }
@@ -1766,6 +2451,7 @@ const tabela = eqs.map(e => {
 
       const modPadrao = $('impModalidade').value;
       const catPadrao = $('impCategoria').value;
+      const escolaPadrao = $('impEscola').value;
       const btn = $('btnExecutarImport');
       btn.disabled = true;
       btn.textContent = '⏳ Importando...';
@@ -1780,6 +2466,7 @@ const tabela = eqs.map(e => {
           equipesParaCriar = arr.map(item => ({
             nome: item.nome || item.time || item.equipe || 'Equipe Importada',
             sigla: (item.sigla || '').slice(0, 4),
+            escola: item.escola || escolaPadrao,
             modalidade: item.modalidade || modPadrao,
             categoria: item.categoria || catPadrao,
             miss_nome: item.miss_nome || item.miss || null,
@@ -1799,6 +2486,7 @@ const tabela = eqs.map(e => {
             equipesParaCriar.push({
               nome: nomeTime,
               sigla: nomeTime.replace(/[^A-Za-z0-9]/g, '').slice(0, 3).toUpperCase(),
+              escola: escolaPadrao,
               modalidade: modPadrao,
               categoria: catPadrao,
               miss_nome: partes[2] ? partes[2].trim() : null,
@@ -1820,6 +2508,7 @@ const tabela = eqs.map(e => {
             .from('equipes')
             .insert([{
               campeonato_id: state.campeonatoId,
+              escola: eq.escola,
               nome: eq.nome,
               sigla: eq.sigla,
               modalidade: eq.modalidade,

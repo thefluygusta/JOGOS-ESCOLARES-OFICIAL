@@ -581,7 +581,7 @@
         <button class="nav-btn active" data-tab="dashboard">📊 Visão Geral</button>
         <button class="nav-btn" data-tab="campeonatos">🏆 Campeonatos</button>
         <button class="nav-btn" data-tab="equipes">🛡️ Equipes & MISS (-3 pts)</button>
-        <button class="nav-btn" data-tab="jogadores">🏃 Jogadores / Atletas</button>
+        <button class="nav-btn" data-tab="jogadores">🏃 Atletas</button>
         <button class="nav-btn" data-tab="grupos">🗂️ Grupos / Chaves</button>
         <button class="nav-btn" data-tab="partidas">⚽ Jogos & Resultados</button>
         <button class="nav-btn" data-tab="chaveamento">🏆 Chaveamento (Mata-mata)</button>
@@ -604,6 +604,7 @@
     </aside>
 
     <main class="main-area">
+      <div id="avisoSql" class="card" style="display:none; border-color:rgba(251,191,36,0.6);"></div>
       <!-- TOPBAR -->
       <div class="topbar">
         <div style="display:flex; align-items:center; gap:10px;">
@@ -634,7 +635,7 @@
             <div style="font-size:0.78rem; color:#fca5a5;">Penalizadas na tabela</div>
           </div>
           <div class="stat-box">
-            <div style="color:var(--muted); font-size:0.82rem;">Atletas / Jogadores</div>
+            <div style="color:var(--muted); font-size:0.82rem;">Atletas</div>
             <div class="stat-num" id="statJogadores">0</div>
             <div style="font-size:0.78rem; color:var(--muted);">Em todas as modalidades</div>
           </div>
@@ -648,9 +649,9 @@
         <div class="card">
           <h3 style="margin-bottom:10px; color:var(--gold);">👑 Regra Oficial das MISS nos Jogos Escolares</h3>
           <p style="color:#cbd5e1; font-size:0.92rem; line-height:1.6;">
-            Toda equipe precisa ter uma <strong>Miss</strong> cadastrada (nome e foto). O sistema verifica automaticamente:
-            equipes <strong>sem Miss</strong> sofrem penalidade automática de <strong>-3 pontos</strong> na tabela de classificação.
-            Assim que você cadastrar a Miss na aba <strong>Equipes & MISS</strong>, os 3 pontos são restaurados automaticamente!
+            A <strong>Miss</strong> vale <strong>somente para o Futsal Masculino da E. E. Profª Isaura Baia</strong>. Cada equipe desse grupo precisa ter a Miss cadastrada (nome e foto).
+            Equipes <strong>sem Miss</strong> sofrem penalidade automática de <strong>-3 pontos</strong> na classificação.
+            Assim que você cadastrar a Miss na aba <strong>Equipes & MISS</strong>, os 3 pontos são restaurados. As demais escolas, modalidades e naipes <strong>não têm Miss nem penalidade</strong>.
           </p>
         </div>
       </section>
@@ -668,6 +669,14 @@
             <div class="form-group">
               <label>Ano</label>
               <input type="number" id="campAno" value="2026" required />
+            </div>
+            <div class="form-group">
+              <label>📅 Início do Campeonato</label>
+              <input type="date" id="campInicio" />
+            </div>
+            <div class="form-group">
+              <label>🏁 Fim do Campeonato</label>
+              <input type="date" id="campFim" />
             </div>
             <div class="form-group">
               <label>Modalidade Principal</label>
@@ -709,6 +718,7 @@
               <tr>
                 <th>Nome</th>
                 <th>Ano</th>
+                <th>Período</th>
                 <th>Modalidade</th>
                 <th>Status</th>
                 <th>Ações</th>
@@ -749,7 +759,7 @@
             <div class="form-grid">
               <div class="form-group">
                 <label>Escola *</label>
-                <select id="eqEscola" required>
+                <select id="eqEscola" required onchange="atualizarCamposMiss()">
                   <option value="E. E. Profª Isaura Baia">E. E. Profª Isaura Baia</option>
                   <option value="E. E. Benedita Marilda da Silva Braga">E. E. Benedita Marilda da Silva Braga</option>
                 </select>
@@ -764,7 +774,7 @@
               </div>
               <div class="form-group">
                 <label>Modalidade *</label>
-                <select id="eqModalidade" required>
+                <select id="eqModalidade" required onchange="atualizarCamposMiss()">
                   <option value="Futsal">Futsal</option>
                   <option value="Handebol">Handebol</option>
                   <option value="Vôlei">Vôlei</option>
@@ -772,7 +782,7 @@
               </div>
               <div class="form-group">
                 <label>Naipe (Masculino / Feminino) *</label>
-                <select id="eqCategoria" required>
+                <select id="eqCategoria" required onchange="atualizarCamposMiss()">
                   <option value="Masculino">Masculino</option>
                   <option value="Feminino">Feminino</option>
                 </select>
@@ -791,12 +801,12 @@
                 </div>
               </div>
 
-              <div class="form-group">
+              <div class="form-group" id="grpMissNome">
                 <label>👑 Nome da MISS da Equipe (Evita -3 pts)</label>
                 <input type="text" id="eqMissNome" placeholder="Deixe vazio se ainda não tiver Miss (-3 pts)" />
               </div>
 
-              <div class="form-group">
+              <div class="form-group" id="grpMissFoto">
                 <label>👑 Foto da MISS (Galeria)</label>
                 <div class="upload-box">
                   <img id="prevEqMiss" src="logo.png" class="upload-preview img-contain" />
@@ -808,6 +818,9 @@
               </div>
             </div>
 
+            <p id="msgSemMiss" style="display:none; font-size:0.82rem; color:var(--muted); margin:2px 0 10px;">
+              ℹ️ A Miss é cadastrada somente para equipes de <strong>Futsal Masculino da Isaura Baia</strong>. Para esta equipe não há Miss nem penalidade.
+            </p>
             <div style="display:flex; gap:10px; margin-top:8px;">
               <button type="submit" id="btnSalvarEquipe" class="btn btn-primary">💾 Salvar Equipe</button>
               <button type="button" class="btn btn-ghost" onclick="resetFormEquipe()">Limpar</button>
@@ -836,11 +849,11 @@
       <!-- TAB 4: JOGADORES -->
       <section id="tab-jogadores" class="tab-pane">
         <div class="card">
-          <h3 style="margin-bottom:14px;">🏃 Cadastrar Atleta / Jogador</h3>
+          <h3 style="margin-bottom:14px;">🏃 Cadastrar Atleta</h3>
           <form id="formJogador" class="form-grid">
             <input type="hidden" id="jogEditId" />
             <div class="form-group">
-              <label>Nome do Jogador *</label>
+              <label>Nome do Atleta *</label>
               <input type="text" id="jogNome" required placeholder="Nome completo ou apelido" />
             </div>
             <div class="form-group">
@@ -865,7 +878,7 @@
             </div>
             <div class="form-group" style="justify-content:flex-end;">
               <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <button type="submit" id="btnSalvarJog" class="btn btn-primary">+ Cadastrar Jogador</button>
+                <button type="submit" id="btnSalvarJog" class="btn btn-primary">+ Cadastrar Atleta</button>
                 <button type="button" id="btnCancelJog" class="btn btn-ghost" style="display:none;" onclick="resetFormJogador()">Cancelar edição</button>
               </div>
             </div>
@@ -992,21 +1005,36 @@
                 <select id="partFora" required></select>
               </div>
               <div class="form-group">
-                <label>Local / Quadra</label>
-                <input type="text" id="partLocal" value="Quadra Poliesportiva Isaura Baia" />
+                <label>Local / Ginásio *</label>
+                <select id="partLocal" onchange="aoMudarLocal(this)"></select>
               </div>
               <div class="form-group">
-                <label>Fase / Rodada</label>
-                <input type="text" id="partFase" value="Fase de Grupos" list="listaFases" />
-                <datalist id="listaFases">
-                  <option value="Fase de Grupos"></option>
-                  <option value="Oitavas de Final"></option>
-                  <option value="Quartas de Final"></option>
-                  <option value="Semifinal"></option>
-                  <option value="Final da Escola"></option>
-                  <option value="Disputa de 3º Lugar"></option>
-                  <option value="Final Interescolar"></option>
-                </datalist>
+                <label>Fase *</label>
+                <select id="partFase">
+                  <option value="Classificatória">Classificatória</option>
+                  <option value="Oitavas de final">Oitavas de final</option>
+                  <option value="Quartas de final">Quartas de final</option>
+                  <option value="Semifinal">Semifinal</option>
+                  <option value="Final">Final</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Chave</label>
+                <select id="partChave">
+                  <option value="">— sem chave —</option>
+                  <option value="Chave A">Chave A</option>
+                  <option value="Chave B">Chave B</option>
+                  <option value="Chave C">Chave C</option>
+                  <option value="Chave D">Chave D</option>
+                  <option value="Chave E">Chave E</option>
+                  <option value="Chave F">Chave F</option>
+                  <option value="Chave G">Chave G</option>
+                  <option value="Chave H">Chave H</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Chave / Rodada: nº do jogo na chave</label>
+                <input type="number" id="partJogoChave" min="1" placeholder="Ex: 1 (1º jogo da chave)" />
               </div>
             </div>
             <p style="font-size:0.8rem; color:var(--muted); margin:4px 0 12px;">
@@ -1101,7 +1129,7 @@
             </div>
             <div class="form-group">
               <label>Local / Quadra padrão</label>
-              <input type="text" id="genLocal" value="Quadra Poliesportiva Isaura Baia" />
+              <select id="genLocal" onchange="aoMudarLocal(this)"></select>
             </div>
             <div class="form-group">
               <label>Final Interescolar</label>
@@ -1114,11 +1142,14 @@
             <button type="button" id="btnGerarChave" class="btn btn-gold" onclick="gerarMataMata()">⚡ Gerar mata-mata</button>
             <button type="button" class="btn btn-ghost" onclick="sincronizarChaveamento()">🔁 Sincronizar vencedores</button>
             <button type="button" id="btnApagarChave" class="btn btn-danger" onclick="apagarMataMata()">🗑️ Apagar chave (modalidade/naipe acima)</button>
+            <button type="button" class="btn btn-success" onclick="imprimirChave()">🖨️ Imprimir PDF colorido</button>
+            <button type="button" id="btnCenario" class="btn btn-primary" onclick="alternarCenario()">🎲 Simular cenário</button>
           </div>
         </div>
 
         <div class="card">
           <p style="font-size:0.8rem; color:var(--muted); margin-bottom:6px;">💡 Clique em um jogo da chave para lançar o placar. Ao finalizar, o vencedor avança sozinho.</p>
+          <div id="cenarioBar" style="display:none; margin:8px 0 12px; padding:10px 14px; border-radius:12px; border:1px dashed rgba(251,191,36,0.6); background:rgba(251,191,36,0.08); font-size:0.85rem; color:#fde68a; line-height:1.6;"></div>
           <div id="chaveWrap"></div>
         </div>
       </section>
@@ -1129,7 +1160,7 @@
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
             <div>
               <h3>📈 Tabela de Classificação Oficial</h3>
-              <p style="font-size:0.82rem; color:var(--muted);">Vitória: 3 pts | Empate: 1 pt | Sem Miss (Futsal): <strong>-3 pts automáticos</strong></p>
+              <p style="font-size:0.82rem; color:var(--muted);">Vitória: 3 pts | Empate: 1 pt | Sem Miss (só Futsal Masculino da Isaura): <strong>-3 pts automáticos</strong></p>
               <div id="classEscolaTitulo" style="margin-top:6px; font-weight:700; color:var(--gold); font-size:0.9rem;"></div>
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -1191,6 +1222,17 @@
                   <input type="hidden" id="notImgUrl" />
                 </div>
               </div>
+              <div class="form-group">
+                <label>📄 Anexar PDF (ex.: regulamento)</label>
+                <div class="upload-box">
+                  <div style="flex:1;">
+                    <input type="file" id="filePdfNot" accept="application/pdf,.pdf" onchange="uploadPdfNoticia(this)" />
+                    <input type="hidden" id="notPdfUrl" />
+                    <div id="notPdfInfo" style="font-size:0.8rem; color:var(--muted); margin-top:6px;">Nenhum PDF anexado</div>
+                  </div>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="removerPdfNoticia()">✕ Remover</button>
+                </div>
+              </div>
             </div>
             <div class="form-group">
               <label>Conteúdo *</label>
@@ -1240,7 +1282,7 @@
         <div class="card" style="border-color:rgba(251,191,36,0.4);">
           <h3 style="color:var(--gold); margin-bottom:8px;">📥 Importar Dados do Site do Professor (Sem Digitar na Mão)</h3>
           <p style="color:#cbd5e1; font-size:0.9rem; line-height:1.6; margin-bottom:16px;">
-            Aqui você pode importar rapidamente equipes, jogadores e partidas vindos do site do professor ou de uma planilha.
+            Aqui você pode importar rapidamente equipes, atletas e partidas vindos do site do professor ou de uma planilha.
             Tudo o que for importado vai para o seu Supabase e você pode <strong>editar ou apagar quando quiser</strong>!
           </p>
 
@@ -1274,7 +1316,7 @@
           </div>
 
           <div class="form-group">
-            <label>Cole aqui o JSON, CSV, lista de times/jogadores (formato: <code>Nome do Time | Jogador 1, Jogador 2, Jogador 3</code>) ou código do site:</label>
+            <label>Cole aqui o JSON, CSV, lista de times/atletas (formato: <code>Nome do Time | Atleta 1, Atleta 2, Atleta 3</code>) ou código do site:</label>
             <textarea id="impTexto" rows="8" placeholder="Exemplo simples (uma equipe por linha):
 3º Ano A | João Silva, Pedro Santos, Lucas Lima
 2º Ano B | Carlos Eduardo, Mateus Rocha, Gabriel Alves
@@ -1286,7 +1328,7 @@
               🚀 Importar Agora para o Banco
             </button>
             <button type="button" onclick="limparDadosCampeonatoAtual()" class="btn btn-danger">
-              🗑️ Limpar Equipes/Jogadores deste Campeonato
+              🗑️ Limpar Equipes/Atletas deste Campeonato
             </button>
           </div>
         </div>
@@ -1332,6 +1374,21 @@
     </div>
   </div>
 
+  <!-- MODAL DE SIMULAÇÃO (CENÁRIO) -->
+  <div class="modal" id="modalCenario">
+    <div class="modal-card" style="max-width:420px;">
+      <h3 style="margin-bottom:6px;">🎲 Quem vence neste cenário?</h3>
+      <p style="font-size:0.8rem; color:var(--muted); margin-bottom:14px;">Simulação: nada é salvo no sistema.</p>
+      <input type="hidden" id="cenId" />
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button type="button" class="btn btn-success" id="cenCasa" onclick="escolherVencedorCenario('casa')"></button>
+        <button type="button" class="btn btn-success" id="cenFora" onclick="escolherVencedorCenario('fora')"></button>
+        <button type="button" class="btn btn-ghost" onclick="escolherVencedorCenario('limpar')">↺ Limpar resultado deste jogo</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modalCenario')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toastBox"></div>
 
   <script>
@@ -1370,6 +1427,14 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
 
     function escolaInfo(nome) { return ESCOLAS.find(x => x.nome === nome) || null; }
     function escolaDe(eq) { return (eq && eq.escola) || ESCOLAS[0].nome; }
+
+    // A Miss vale SÓ para o Futsal Masculino da E. E. Profª Isaura Baia
+    function exigeMissCampos(escola, modalidade, categoria) {
+      return (escola || ESCOLAS[0].nome) === ESCOLAS[0].nome &&
+        String(modalidade || 'Futsal').toLowerCase() === 'futsal' &&
+        (categoria || 'Masculino') === 'Masculino';
+    }
+    function exigeMiss(e) { return !!e && exigeMissCampos(escolaDe(e), e.modalidade, e.categoria); }
 
     function escolaPartida(p) {
       if (p.escola) return p.escola;
@@ -1460,6 +1525,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
         $('appShell').style.display = 'flex';
         $('userEmail').textContent = session.user.email;
         loadAllData();
+        verificarColunas();
       } else {
         $('loginScreen').style.display = 'flex';
         $('appShell').style.display = 'none';
@@ -1517,6 +1583,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
     }
 
     function changeGlobalCamp(val) {
+      if (cenario.ativo) { cenario.ativo = false; cenario.partidas = []; atualizarBarraCenario(); }
       state.campeonatoId = val;
       localStorage.setItem('je_camp_id', val);
       loadCampData();
@@ -1554,8 +1621,9 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
     }
 
     function renderAll() {
-      const comMiss = state.equipes.filter(e => e.miss_nome && e.miss_nome.trim() !== '').length;
-      const semMiss = state.equipes.length - comMiss;
+      const elegiveis = state.equipes.filter(exigeMiss);
+      const comMiss = elegiveis.filter(e => e.miss_nome && e.miss_nome.trim() !== '').length;
+      const semMiss = elegiveis.length - comMiss;
       $('statEquipes').textContent = state.equipes.length;
       $('statMissOk').textContent = `${comMiss} com Miss cadastrada`;
       $('statSemMiss').textContent = semMiss;
@@ -1586,6 +1654,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
     }
 
     function populateSelects() {
+      popularLocais();
       const curJog = $('jogEquipe').value;
       const curVinc = $('vincEquipeId').value;
       const curPrem = $('premEquipe').value;
@@ -1609,6 +1678,123 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       if (!$('partEditId').value && !$('partOrdem').value) $('partOrdem').value = proximaOrdem();
     }
 
+    // =========================================================================
+    // LOCAIS (GINÁSIOS), FASE, DATAS
+    // =========================================================================
+    const LOCAIS_PADRAO = ['Ginásio Poliesportivo Irmã Vieira', 'Quadra de Esporte Isaura Baia'];
+    function locaisExtras() { try { return JSON.parse(localStorage.getItem('je_locais') || '[]'); } catch (e) { return []; } }
+    function listaLocais() {
+      const set = new Set(LOCAIS_PADRAO);
+      locaisExtras().forEach(l => { if (l) set.add(l); });
+      state.partidas.forEach(p => { if (p.local && p.local.trim()) set.add(p.local.trim()); });
+      return [...set];
+    }
+    function popularLocais() {
+      ['partLocal', 'genLocal'].forEach(id => {
+        const sel = $(id);
+        if (!sel) return;
+        const atual = sel.value;
+        sel.innerHTML = listaLocais().map(l => `<option value="${esc(l)}">${esc(l)}</option>`).join('') +
+          '<option value="__novo__">➕ Cadastrar novo local...</option>';
+        if (atual && atual !== '__novo__' && [...sel.options].some(o => o.value === atual)) sel.value = atual;
+        sel.dataset.prev = sel.value;
+      });
+    }
+    function aoMudarLocal(sel) {
+      if (sel.value !== '__novo__') { sel.dataset.prev = sel.value; return; }
+      const nome = (prompt('Nome do novo local / ginásio:') || '').trim();
+      if (!nome) { sel.value = sel.dataset.prev || LOCAIS_PADRAO[0]; return; }
+      try {
+        const ex = locaisExtras();
+        if (!ex.includes(nome)) { ex.push(nome); localStorage.setItem('je_locais', JSON.stringify(ex)); }
+      } catch (e) {}
+      popularLocais();
+      sel.value = nome;
+      sel.dataset.prev = nome;
+    }
+    function definirOpcao(id, valor) {
+      const sel = $(id);
+      if (valor && ![...sel.options].some(o => o.value === valor)) {
+        const o = document.createElement('option');
+        o.value = valor; o.textContent = valor;
+        sel.appendChild(o);
+      }
+      sel.value = valor;
+    }
+    function definirLocal(valor) {
+      const v = (valor || '').trim() || LOCAIS_PADRAO[0];
+      const sel = $('partLocal');
+      if (![...sel.options].some(o => o.value === v)) {
+        const o = document.createElement('option');
+        o.value = v; o.textContent = v;
+        sel.insertBefore(o, sel.lastElementChild);
+      }
+      sel.value = v;
+      sel.dataset.prev = v;
+    }
+    function definirFase(f) {
+      const mapa = { 'fase de grupos': 'Classificatória', 'classificatoria': 'Classificatória', 'classificatória': 'Classificatória',
+        'oitavas de final': 'Oitavas de final', 'quartas de final': 'Quartas de final', 'semifinal': 'Semifinal',
+        'final': 'Final', 'final da escola': 'Final', 'final interescolar': 'Final' };
+      const v = mapa[String(f || '').trim().toLowerCase()] || (f || 'Classificatória');
+      definirOpcao('partFase', v);
+    }
+    function fmtDataISO(s) {
+      if (!s) return '';
+      const [y, m, d] = String(s).slice(0, 10).split('-');
+      return d && m && y ? `${d}/${m}/${y}` : '';
+    }
+
+    // =========================================================================
+    // PDF NAS NOTÍCIAS (REGULAMENTO) E AVISO DAS COLUNAS NOVAS DO BANCO
+    // =========================================================================
+    async function uploadPdfNoticia(inputEl) {
+      const file = inputEl.files && inputEl.files[0];
+      if (!file) return;
+      if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') { inputEl.value = ''; return toast('Envie um arquivo PDF.', 'error'); }
+      if (file.size > 15 * 1024 * 1024) { inputEl.value = ''; return toast('PDF muito grande (máximo 15 MB).', 'error'); }
+      toast('Enviando PDF...');
+      const fileName = `pdf_${Date.now()}_${Math.random().toString(36).slice(2, 7)}.pdf`;
+      const { error } = await supabaseClient.storage.from('imagens')
+        .upload(fileName, file, { cacheControl: '3600', upsert: true, contentType: 'application/pdf' });
+      if (error) return toast('Erro ao enviar PDF: ' + error.message + ' (confira se o bucket "imagens" aceita PDF)', 'error');
+      const { data } = supabaseClient.storage.from('imagens').getPublicUrl(fileName);
+      if (data && data.publicUrl) {
+        $('notPdfUrl').value = data.publicUrl;
+        $('notPdfInfo').textContent = '✅ ' + file.name + ' anexado';
+        toast('PDF anexado!');
+      }
+    }
+    function removerPdfNoticia() {
+      $('notPdfUrl').value = '';
+      $('filePdfNot').value = '';
+      $('notPdfInfo').textContent = 'Nenhum PDF anexado';
+    }
+
+    const SQL_COLUNAS = `alter table campeonatos add column if not exists data_inicio date;
+alter table campeonatos add column if not exists data_fim date;
+alter table partidas add column if not exists chave text;
+alter table partidas add column if not exists jogo_chave integer;
+alter table noticias add column if not exists pdf_url text;`;
+
+    async function verificarColunas() {
+      const box = $('avisoSql');
+      if (!box) return;
+      try {
+        const r = await Promise.all([
+          supabaseClient.from('campeonatos').select('data_inicio,data_fim').limit(1),
+          supabaseClient.from('partidas').select('chave,jogo_chave').limit(1),
+          supabaseClient.from('noticias').select('pdf_url').limit(1)
+        ]);
+        if (!r.some(x => x.error)) { box.style.display = 'none'; return; }
+      } catch (e) { return; }
+      box.style.display = 'block';
+      box.innerHTML = `<strong style="color:var(--gold);">⚠️ Falta um passo no Supabase</strong>
+        <p style="font-size:0.85rem; color:#cbd5e1; margin:6px 0 8px; line-height:1.5;">As novidades (início/fim do campeonato, Chave e PDF nas notícias) precisam de colunas novas no banco. No Supabase abra <strong>SQL Editor → New query</strong>, cole o texto abaixo e clique em <strong>Run</strong>. Depois atualize esta página.</p>
+        <textarea id="sqlTxt" readonly rows="5" style="font-family:monospace; font-size:0.78rem;">${esc(SQL_COLUNAS)}</textarea>
+        <button type="button" class="btn btn-gold btn-sm" style="margin-top:8px;" onclick="navigator.clipboard.writeText(SQL_COLUNAS).then(() => toast('SQL copiado!'))">📋 Copiar SQL</button>`;
+    }
+
     // Habilita/desabilita o modo edição de um formulário
     function setEditMode(btnId, cancelId, ativo, textoEdicao, textoNormal) {
       $(btnId).textContent = ativo ? textoEdicao : textoNormal;
@@ -1628,6 +1814,11 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
         categoria: $('campCategoria').value,
         status: $('campStatus').value
       };
+      const ini = $('campInicio').value || null, fim = $('campFim').value || null;
+      if (ini && fim && fim < ini) return toast('A data de fim não pode ser antes do início.', 'error');
+      const existente = editId ? state.campeonatos.find(x => x.id == editId) : null;
+      if (ini || (existente && 'data_inicio' in existente)) payload.data_inicio = ini;
+      if (fim || (existente && 'data_fim' in existente)) payload.data_fim = fim;
 
       if (editId) {
         const { error } = await supabaseClient.from('campeonatos').update(payload).eq('id', editId);
@@ -1658,6 +1849,8 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       $('campModalidade').value = c.modalidade || 'Geral (Todas)';
       $('campCategoria').value = c.categoria || 'Misto / Geral';
       $('campStatus').value = c.status || 'em_andamento';
+      $('campInicio').value = c.data_inicio || '';
+      $('campFim').value = c.data_fim || '';
       setEditMode('btnSalvarCamp', 'btnCancelCamp', true, '💾 Atualizar Campeonato', '+ Criar Campeonato');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -1673,6 +1866,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
         <tr>
           <td><strong>${esc(c.nome)}</strong></td>
           <td>${c.ano || '-'}</td>
+          <td style="font-size:0.82rem;">${c.data_inicio || c.data_fim ? esc(fmtDataISO(c.data_inicio) || '?') + ' a ' + esc(fmtDataISO(c.data_fim) || '?') : '<span style="color:var(--muted);">—</span>'}</td>
           <td><span class="badge b-blue">${esc(c.modalidade || 'Geral')}</span></td>
           <td><span class="badge b-green">${esc(c.status || 'em_andamento')}</span></td>
           <td>
@@ -1682,7 +1876,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
             </div>
           </td>
         </tr>
-      `).join('') || '<tr><td colspan="5">Nenhum campeonato cadastrado.</td></tr>';
+      `).join('') || '<tr><td colspan="6">Nenhum campeonato cadastrado.</td></tr>';
     }
 
     // =========================================================================
@@ -1694,7 +1888,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
 
       const editId = $('eqEditId').value;
       const modalidade = $('eqModalidade').value;
-      const isFutsal = modalidade.toLowerCase() === 'futsal';
+      const eligivel = exigeMissCampos($('eqEscola').value, modalidade, $('eqCategoria').value);
       const payload = {
         campeonato_id: state.campeonatoId,
         escola: $('eqEscola').value,
@@ -1703,8 +1897,8 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
         modalidade: modalidade,
         categoria: $('eqCategoria').value,
         escudo_url: $('eqEscudoUrl').value || null,
-        miss_nome: isFutsal ? ($('eqMissNome').value.trim() || null) : null,
-        miss_foto: isFutsal ? ($('eqMissFotoUrl').value || null) : null
+        miss_nome: eligivel ? ($('eqMissNome').value.trim() || null) : null,
+        miss_foto: eligivel ? ($('eqMissFotoUrl').value || null) : null
       };
 
       let res;
@@ -1719,6 +1913,13 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       resetFormEquipe();
       loadCampData();
     });
+
+    function atualizarCamposMiss() {
+      const ok = exigeMissCampos($('eqEscola').value, $('eqModalidade').value, $('eqCategoria').value);
+      $('grpMissNome').style.display = ok ? '' : 'none';
+      $('grpMissFoto').style.display = ok ? '' : 'none';
+      $('msgSemMiss').style.display = ok ? 'none' : 'block';
+    }
 
     function editarEquipe(id) {
       const eq = state.equipes.find(x => x.id == id);
@@ -1737,6 +1938,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       $('eqMissFotoUrl').value = fotoMiss;
       $('prevEqMiss').src = fotoMiss || vazio;
       $('btnSalvarEquipe').textContent = '💾 Atualizar Equipe';
+      atualizarCamposMiss();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -1748,6 +1950,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       $('prevEqEscudo').src = 'logo.png';
       $('prevEqMiss').src = 'logo.png';
       $('btnSalvarEquipe').textContent = '💾 Salvar Equipe';
+      atualizarCamposMiss();
     }
 
     function renderEquipesTable() {
@@ -1763,7 +1966,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       const placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36'><rect width='100%' height='100%' fill='%231e293b'/></svg>";
 
       $('tbEquipes').innerHTML = list.map(e => {
-        const isFutsal = (e.modalidade || 'Futsal').toLowerCase() === 'futsal';
+        const isFutsal = exigeMiss(e);
         const temMiss = isFutsal && e.miss_nome && e.miss_nome.trim() !== '';
         return `
           <tr>
@@ -1821,7 +2024,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
         ? await supabaseClient.from('jogadores').update(payload).eq('id', editId)
         : await supabaseClient.from('jogadores').insert([payload]);
       if (res.error) return toast('Erro: ' + res.error.message, 'error');
-      toast(editId ? 'Jogador atualizado!' : 'Jogador cadastrado!');
+      toast(editId ? 'Atleta atualizado!' : 'Atleta cadastrado!');
       resetFormJogador();
       loadCampData();
     });
@@ -1836,7 +2039,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       $('jogPosicao').value = j.posicao || '';
       $('jogFotoUrl').value = j.foto_url || '';
       $('prevJogFoto').src = j.foto_url || 'logo.png';
-      setEditMode('btnSalvarJog', 'btnCancelJog', true, '💾 Atualizar Jogador', '+ Cadastrar Jogador');
+      setEditMode('btnSalvarJog', 'btnCancelJog', true, '💾 Atualizar Atleta', '+ Cadastrar Atleta');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -1845,7 +2048,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       $('jogEditId').value = '';
       $('jogFotoUrl').value = '';
       $('prevJogFoto').src = 'logo.png';
-      setEditMode('btnSalvarJog', 'btnCancelJog', false, '', '+ Cadastrar Jogador');
+      setEditMode('btnSalvarJog', 'btnCancelJog', false, '', '+ Cadastrar Atleta');
     }
 
     function renderJogadoresTable() {
@@ -1867,7 +2070,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
             </td>
           </tr>
         `;
-      }).join('') || '<tr><td colspan="6">Nenhum jogador cadastrado.</td></tr>';
+      }).join('') || '<tr><td colspan="6">Nenhum atleta cadastrado.</td></tr>';
     }
 
     // =========================================================================
@@ -1963,12 +2166,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
 
     function aoMudarEscolaPartida() {
       if (!$('partEditId').value) {
-        const fase = $('partFase').value.trim();
-        if ($('partEscola').value === ESCOLA_FINAL) {
-          if (!fase || fase === 'Fase de Grupos') $('partFase').value = 'Final Interescolar';
-        } else if (fase === 'Final Interescolar') {
-          $('partFase').value = 'Fase de Grupos';
-        }
+        if ($('partEscola').value === ESCOLA_FINAL) $('partFase').value = 'Final';
       }
       filtrarEquipesPartida();
     }
@@ -2063,6 +2261,11 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
         local: $('partLocal').value.trim(),
         fase: $('partFase').value.trim()
       };
+      const chv = $('partChave').value || null;
+      const jch = parseInt($('partJogoChave').value) || null;
+      const exist = editId ? state.partidas.find(x => x.id == editId) : null;
+      if (chv || (exist && 'chave' in exist)) payload.chave = chv;
+      if (jch || (exist && 'jogo_chave' in exist)) payload.jogo_chave = jch;
 
       let res;
       if (editId) {
@@ -2093,8 +2296,10 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       const d = toBelemDate(p.data_hora);
       $('partDia').value = d ? dataInputBelem(d) : '';
       $('partHora').value = d ? fmtHora(d) : '';
-      $('partLocal').value = p.local || '';
-      $('partFase').value = p.fase || '';
+      definirLocal(p.local);
+      definirFase(p.fase);
+      definirOpcao('partChave', p.chave || '');
+      $('partJogoChave').value = p.jogo_chave ?? '';
       filtrarEquipesPartida();
       $('partCasa').value = p.origem_casa || p.equipe_casa_id || '';
       $('partFora').value = p.origem_fora || p.equipe_fora_id || '';
@@ -2145,7 +2350,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
             <td>
               <span class="badge b-blue">${p.modalidade || 'Futsal'}</span>
               <span class="badge b-purple">${p.categoria || 'Masculino'}</span>
-              ${p.fase ? `<div style="font-size:0.75rem; color:var(--muted); margin-top:4px;">${esc(p.fase)}</div>` : ''}
+              ${(p.fase || p.chave) ? `<div style="font-size:0.75rem; color:var(--muted); margin-top:4px;">${esc(p.fase || '')}${p.chave ? ' • ' + esc(p.chave) + (p.jogo_chave ? ' / ' + p.jogo_chave + 'º jogo' : '') : ''}</div>` : ''}
             </td>
             <td><strong>${esc(c)}</strong> <span style="color:var(--gold); font-weight:900; padding:0 8px;">${p.gols_casa ?? 0} x ${p.gols_fora ?? 0}</span> <strong>${esc(f)}</strong></td>
             <td style="font-size:0.82rem; color:var(--muted);">${esc(p.local || '')}</td>
@@ -2295,7 +2500,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
           <td>${esc(p.turno || '—')}</td>
           <td>${d ? esc(fmtDiaCompleto(d)) : 'A definir'}</td>
           <td>${d ? esc(fmtHora(d)) : '—'}</td>
-          <td class="conf">${esc(c)}${placar}${esc(f)}<small>${esc(p.modalidade || 'Futsal')} • ${esc(p.categoria || 'Masculino')} • ${esc(escolaPartida(p))}${p.fase ? ' • ' + esc(p.fase) : ''}</small></td>
+          <td class="conf">${esc(c)}${placar}${esc(f)}<small>${esc(p.modalidade || 'Futsal')} • ${esc(p.categoria || 'Masculino')} • ${esc(escolaPartida(p))}${p.fase ? ' • ' + esc(p.fase) : ''}${p.chave ? ' • ' + esc(p.chave) + (p.jogo_chave ? ' (' + p.jogo_chave + 'º jogo)' : '') : ''}</small></td>
           <td>${esc(p.local || '—')}</td>
         </tr>`;
       }).join('');
@@ -2369,7 +2574,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       if (!wrap) return;
       const mod = $('chMod').value, cat = $('chCat').value;
       const eqMap = Object.fromEntries(state.equipes.map(e => [e.id, e]));
-      const all = state.partidas.filter(p => (p.modalidade || 'Futsal') === mod && (p.categoria || 'Masculino') === cat);
+      const all = (cenario.ativo ? cenario.partidas : state.partidas).filter(p => (p.modalidade || 'Futsal') === mod && (p.categoria || 'Masculino') === cat);
       if (!all.length) {
         wrap.innerHTML = '<p style="color:var(--muted); padding:16px;">Nenhum jogo de mata-mata para esta modalidade e naipe ainda. Use o gerador acima.</p>';
         return;
@@ -2519,7 +2724,162 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       loadCampData();
     }
 
+    // =========================================================================
+    // CENÁRIOS (SIMULAÇÃO SEM SALVAR) E IMPRESSÃO COLORIDA DA CHAVE
+    // =========================================================================
+    const cenario = { ativo: false, partidas: [] };
+
+    function alternarCenario() {
+      if (!cenario.ativo) {
+        cenario.partidas = JSON.parse(JSON.stringify(state.partidas));
+        cenario.ativo = true;
+      } else {
+        cenario.ativo = false;
+        cenario.partidas = [];
+      }
+      atualizarBarraCenario();
+      renderChave();
+    }
+
+    function atualizarBarraCenario() {
+      const bar = $('cenarioBar'), btn = $('btnCenario');
+      if (!bar || !btn) return;
+      if (cenario.ativo) {
+        bar.style.display = 'block';
+        bar.innerHTML = '🎲 <strong>Modo simulação</strong>: clique num jogo, escolha quem vence e veja a chave se montar. <strong>Nada é salvo</strong> no sistema. <button type="button" class="btn btn-ghost btn-sm" style="margin-left:8px;" onclick="reiniciarCenario()">↺ Zerar simulação</button>';
+        btn.textContent = '✖ Sair da simulação';
+      } else {
+        bar.style.display = 'none';
+        bar.innerHTML = '';
+        btn.textContent = '🎲 Simular cenário';
+      }
+    }
+
+    function reiniciarCenario() {
+      cenario.partidas = JSON.parse(JSON.stringify(state.partidas));
+      renderChave();
+    }
+
+    function abrirCenario(id) {
+      const p = cenario.partidas.find(x => x.id == id);
+      if (!p) return;
+      if (!p.equipe_casa_id || !p.equipe_fora_id) {
+        return toast('Este jogo ainda depende dos anteriores. Escolha primeiro quem vence os jogos que levam a ele.', 'error');
+      }
+      const eqMap = Object.fromEntries(state.equipes.map(e => [e.id, e]));
+      $('cenId').value = p.id;
+      $('cenCasa').textContent = '🏆 ' + (eqMap[p.equipe_casa_id]?.nome || 'Mandante');
+      $('cenFora').textContent = '🏆 ' + (eqMap[p.equipe_fora_id]?.nome || 'Visitante');
+      openModal('modalCenario');
+    }
+
+    function escolherVencedorCenario(lado) {
+      const p = cenario.partidas.find(x => x.id == $('cenId').value);
+      if (!p) return;
+      if (lado === 'casa') { p.gols_casa = 1; p.gols_fora = 0; p.status = 'finalizada'; }
+      else if (lado === 'fora') { p.gols_casa = 0; p.gols_fora = 1; p.status = 'finalizada'; }
+      else { p.gols_casa = 0; p.gols_fora = 0; p.status = 'agendada'; }
+      propagarCenario();
+      closeModal('modalCenario');
+      renderChave();
+    }
+
+    // Recalcula, só na simulação, quem avança para cada jogo seguinte
+    function propagarCenario() {
+      const ps = cenario.partidas;
+      for (let it = 0; it < ps.length + 2; it++) {
+        let mudou = false;
+        for (const p of ps) {
+          for (const [lado, campo] of [['casa', 'equipe_casa_id'], ['fora', 'equipe_fora_id']]) {
+            const og = p['origem_' + lado];
+            if (!og) continue;
+            const src = ps.find(x => 'venc:' + x.id === og);
+            if (!src) continue;
+            let w = null;
+            if (src.status === 'finalizada') {
+              if ((src.gols_casa ?? 0) > (src.gols_fora ?? 0)) w = src.equipe_casa_id;
+              else if ((src.gols_fora ?? 0) > (src.gols_casa ?? 0)) w = src.equipe_fora_id;
+            }
+            if ((p[campo] || null) !== (w || null)) {
+              p[campo] = w;
+              if (p.status !== 'agendada') { p.status = 'agendada'; p.gols_casa = 0; p.gols_fora = 0; }
+              mudou = true;
+            }
+          }
+        }
+        if (!mudou) break;
+      }
+    }
+
+    function imprimirChave() {
+      const wrap = $('chaveWrap');
+      if (!wrap || !wrap.querySelector('.bk-canvas')) return toast('Não há chave para imprimir. Gere ou agende os jogos primeiro.', 'error');
+      const camp = state.campeonatos.find(c => c.id == state.campeonatoId);
+      const mod = $('chMod').value, cat = $('chCat').value;
+      const css = [...document.querySelectorAll('style')].map(st => st.textContent).join('\n');
+      const b1 = new URL(ESCOLAS[0].brasao, location.href).href;
+      const b2 = new URL(ESCOLAS[1].brasao, location.href).href;
+      const emitido = new Date().toLocaleString('pt-BR', { timeZone: TZ });
+      const sim = cenario.ativo;
+
+      const html = `<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8">
+<title>Chaveamento - Jogos Escolares</title>
+<style>
+${css}
+  @page { size: A4 landscape; margin: 8mm; }
+  html, body, * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { display: block; padding: 10px; min-height: 0; overflow: visible; }
+  body::before { display: none; }
+  .ph { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 8px; }
+  .ph img { width: 62px; height: 62px; border-radius: 50%; object-fit: contain; background: #fff; padding: 2px; }
+  .ph .t { text-align: center; flex: 1; }
+  .ph h1 { font-size: 20px; margin: 0; color: #fde68a; letter-spacing: 1px; }
+  .ph p { font-size: 12px; margin: 3px 0 0; color: #cbd5e1; }
+  .sim { display: inline-block; margin-top: 4px; padding: 2px 10px; border-radius: 999px; background: #f59e0b; color: #1a1200; font-weight: 800; font-size: 11px; }
+  .bk-scroll { overflow: hidden; padding: 0; }
+  .rodape { margin-top: 6px; font-size: 10px; color: #94a3b8; text-align: center; }
+  .bar { position: fixed; top: 8px; right: 8px; z-index: 9; }
+  .bar button { padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #111; background: #fde68a; border-radius: 8px; }
+  @media print { .bar { display: none; } body { padding: 0; } }
+</style></head><body>
+  <div class="bar"><button onclick="window.print()">🖨️ Imprimir / Salvar PDF</button></div>
+  <div class="ph" id="printHead">
+    <img src="${b1}" alt="" onerror="this.style.visibility='hidden'">
+    <div class="t">
+      <h1>JOGOS ESCOLARES — CHAVEAMENTO</h1>
+      <p>${esc(camp ? camp.nome : '')} • ${esc(mod)} ${esc(cat)} • Mocajuba-PA</p>
+      ${sim ? '<span class="sim">CENÁRIO SIMULADO — NÃO OFICIAL</span>' : ''}
+    </div>
+    <img src="${b2}" alt="" onerror="this.style.visibility='hidden'">
+  </div>
+  ${wrap.innerHTML}
+  <div class="rodape">Emitido em ${esc(emitido)} (horário de Belém) • Sistema desenvolvido por Gustavo Nunes</div>
+  <script>
+    window.addEventListener('load', function () {
+      var c = document.querySelector('.bk-canvas'), s = document.querySelector('.bk-scroll');
+      var W = parseFloat(c.style.width), H = parseFloat(c.style.height);
+      var head = document.getElementById('printHead').offsetHeight;
+      var k = Math.min(1, 1050 / W, (690 - head) / H);
+      c.style.transformOrigin = 'top left';
+      c.style.transform = 'scale(' + k + ')';
+      c.style.margin = '0';
+      s.style.width = (W * k) + 'px';
+      s.style.height = (H * k) + 'px';
+      setTimeout(function () { window.print(); }, 600);
+    });
+  <\/script>
+</body></html>`;
+
+      const w = window.open('', '_blank');
+      if (!w) return toast('Permita pop-ups neste site para abrir a impressão.', 'error');
+      w.document.open();
+      w.document.write(html);
+      w.document.close();
+    }
+
     function clicarChave(id) {
+      if (cenario.ativo) return abrirCenario(id);
       const p = state.partidas.find(x => x.id == id);
       if (!p) return;
       if (!p.equipe_casa_id || !p.equipe_fora_id) {
@@ -2541,8 +2901,8 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
     }
 
     function faseDaRodada(dist, round) {
-      return dist === 0 ? 'Final da Escola' : dist === 1 ? 'Semifinal'
-        : dist === 2 ? 'Quartas de Final' : dist === 3 ? 'Oitavas de Final' : `Rodada ${round}`;
+      return dist === 0 ? 'Final' : dist === 1 ? 'Semifinal'
+        : dist === 2 ? 'Quartas de final' : dist === 3 ? 'Oitavas de final' : 'Classificatória';
     }
 
     async function gerarMataMata() {
@@ -2609,7 +2969,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       if (comFinal && raiz[0] && raiz[1]) {
         plan.push({
           key: 'final', gi: 9, round: Math.max(...plan.map(m => m.round)) + 1, final: true,
-          casa: { ref: raiz[0].key }, fora: { ref: raiz[1].key }, fase: 'Final Interescolar'
+          casa: { ref: raiz[0].key }, fora: { ref: raiz[1].key }, fase: 'Final'
         });
       }
 
@@ -2673,7 +3033,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
         (e.categoria || 'Masculino') === cat
       );
       const tabela = eqs.map(e => {
-        const isFutsal = (e.modalidade || 'Futsal').toLowerCase() === 'futsal';
+        const isFutsal = exigeMiss(e);
         const temMiss = e.miss_nome && e.miss_nome.trim() !== '';
         const penalidade = isFutsal ? (temMiss ? 0 : -3) : 0;
         return {
@@ -2713,7 +3073,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
               <strong>${esc(t.nome)}</strong>
             </div>
           </td>
-          <td>${!isFutsalSel ? '<span style="color:var(--muted); font-size:0.8rem;">—</span>' : (t.temMiss ? `<span class="badge b-gold">👑 ${esc(t.miss_nome)}</span>` : `<span class="badge b-red">-3 pts (Sem Miss)</span>`)}</td>
+          <td>${!exigeMiss(t) ? '<span style="color:var(--muted); font-size:0.8rem;">—</span>' : (t.temMiss ? `<span class="badge b-gold">👑 ${esc(t.miss_nome)}</span>` : `<span class="badge b-red">-3 pts (Sem Miss)</span>`)}</td>
           <td><strong style="font-size:1.05rem; color:${t.pts < 0 ? '#fca5a5' : 'var(--gold)'};">${t.pts}</strong></td>
           <td>${t.j}</td>
           <td>${t.v}</td>
@@ -2739,6 +3099,9 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
         conteudo: $('notConteudo').value.trim(),
         imagem_url: $('notImgUrl').value || null
       };
+      const pdf = $('notPdfUrl').value || null;
+      const exN = editId ? state.noticias.find(x => x.id == editId) : null;
+      if (pdf || (exN && 'pdf_url' in exN)) payload.pdf_url = pdf;
       const res = editId
         ? await supabaseClient.from('noticias').update(payload).eq('id', editId)
         : await supabaseClient.from('noticias').insert([payload]);
@@ -2756,6 +3119,8 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       $('notConteudo').value = n.conteudo || '';
       $('notImgUrl').value = n.imagem_url || '';
       $('prevNotImg').src = n.imagem_url || 'logo.png';
+      $('notPdfUrl').value = n.pdf_url || '';
+      $('notPdfInfo').textContent = n.pdf_url ? '✅ PDF já anexado (envie outro para trocar)' : 'Nenhum PDF anexado';
       setEditMode('btnSalvarNot', 'btnCancelNot', true, '💾 Atualizar Notícia', 'Publicar no Site Público');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -2765,6 +3130,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       $('notEditId').value = '';
       $('notImgUrl').value = '';
       $('prevNotImg').src = 'logo.png';
+      removerPdfNoticia();
       setEditMode('btnSalvarNot', 'btnCancelNot', false, '', 'Publicar no Site Público');
     }
 
@@ -2774,6 +3140,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
           ${n.imagem_url ? `<img src="${n.imagem_url}" class="img-contain" style="width:100%; height:180px; object-fit:contain; border-radius:12px; margin-bottom:10px;">` : ''}
           <h4>${esc(n.titulo)}</h4>
           <p style="color:var(--muted); font-size:0.86rem; margin:8px 0;">${esc(n.conteudo)}</p>
+          ${n.pdf_url ? `<a href="${esc(n.pdf_url)}" target="_blank" rel="noopener" class="btn btn-gold btn-sm" style="text-decoration:none; margin-bottom:8px;">📄 Ver PDF</a>` : ''}
           <div class="acoes-cell">
             <button class="btn btn-ghost btn-sm" onclick="editarNoticia('${n.id}')">✏️ Editar</button>
             <button class="btn btn-danger btn-sm" onclick="deletarItem('noticias', '${n.id}')">Excluir</button>
@@ -2923,7 +3290,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
               sigla: eq.sigla,
               modalidade: eq.modalidade,
               categoria: eq.categoria,
-              miss_nome: eq.miss_nome
+              miss_nome: exigeMissCampos(eq.escola, eq.modalidade, eq.categoria) ? eq.miss_nome : null
             }])
             .select();
 
@@ -2944,7 +3311,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
           }
         }
 
-        toast(`Importação concluída: ${totalEq} equipes e ${totalJog} jogadores salvos!`);
+        toast(`Importação concluída: ${totalEq} equipes e ${totalJog} atletas salvos!`);
         $('impTexto').value = '';
         await loadCampData();
       } catch (err) {
@@ -2957,7 +3324,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
 
     async function limparDadosCampeonatoAtual() {
       if (!state.campeonatoId) return;
-      if (!confirm('ATENÇÃO: Isso vai apagar TODAS as equipes, jogadores e partidas deste campeonato atual para você recomeçar. Continuar?')) return;
+      if (!confirm('ATENÇÃO: Isso vai apagar TODAS as equipes, atletas e partidas deste campeonato atual para você recomeçar. Continuar?')) return;
       await supabaseClient.from('partidas').delete().eq('campeonato_id', state.campeonatoId);
       await supabaseClient.from('jogadores').delete().eq('campeonato_id', state.campeonatoId);
       await supabaseClient.from('equipes').delete().eq('campeonato_id', state.campeonatoId);
@@ -2965,6 +3332,8 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       loadCampData();
     }
 
+    atualizarCamposMiss();
+    popularLocais();
     initAuth();
   </script>
 </body>

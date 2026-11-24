@@ -827,7 +827,7 @@
       });
     }
 
-    // Monta a programação agrupada por dia (estilo Jogos da Juventude)
+// Monta a programação agrupada por dia (estilo Jogos da Juventude)
     function htmlProgramacao(lista, eqMap, isFinal) {
       let html = '';
       let diaAtual = null;
@@ -1000,7 +1000,7 @@
       pubState.partidas.filter(p => p.status === 'finalizada').forEach(p => {
         const c = map[p.equipe_casa_id];
         const f = map[p.equipe_fora_id];
-        if (!c || !f) return; // jogos da Final Interescolar (entre escolas) não entram na tabela da escola
+        if (!c || !f) return;
         const gc = p.gols_casa ?? 0;
         const gf = p.gols_fora ?? 0;
         c.j++; f.j++;
@@ -1023,7 +1023,7 @@
               <strong>${esc(t.nome)}</strong>
             </div>
           </td>
-         <td>${!t.isFutsal ? `<span style="color:var(--muted); font-size:0.85rem;">Isento</span>` : t.temMiss ? `<span class="badge b-gold">👑 ${esc(t.miss_nome)}</span>` : `<span class="badge b-red">-3 pts (Sem Miss)</span>`}</td>
+          <td>${!t.isFutsal ? `<span style="color:var(--muted); font-size:0.85rem;">Isento</span>` : t.temMiss ? `<span class="badge b-gold">👑 ${esc(t.miss_nome)}</span>` : `<span class="badge b-red">-3 pts (Sem Miss)</span>`}</td>
           <td><strong style="font-size:1.1rem; color:${t.pts < 0 ? '#fca5a5' : 'var(--gold)'};">${t.pts}</strong></td>
           <td>${t.j}</td>
           <td>${t.v}</td>
@@ -1073,7 +1073,7 @@
         </div>
       `).join('') || '<p style="color:var(--muted);">Nenhuma Miss cadastrada ainda.</p>';
 
-      // 4. EQUIPES E ELENCOS
+      // 4. EQUIPES E ELENCOS (COM BOLINHA REDONDA DA FOTO DO ATLETA IGUAL AO ADM)
       document.getElementById('pubEquipesGrid').innerHTML = eqFiltradas.map(e => {
         const jogs = pubState.jogadores.filter(j => j.equipe_id === e.id);
         return `
@@ -1083,13 +1083,18 @@
               <div>
                 <strong>${esc(e.nome)}</strong>
                 <div style="font-size:0.78rem; color:var(--gold);">
-           ${exigeMiss(e) ? (e.miss_nome ? `👑 Miss: ${esc(e.miss_nome)}` : '⚠️ Sem Miss (-3 pts)') : ''}
+                  ${exigeMiss(e) ? (e.miss_nome ? `👑 Miss: ${esc(e.miss_nome)}` : '⚠️ Sem Miss (-3 pts)') : ''}
                 </div>
               </div>
             </div>
-            <div style="font-size:0.8rem; color:var(--cyan); font-weight:700; margin-bottom:6px;">Atletas Inscritos (${jogs.length}):</div>
-            <div style="display:flex; flex-wrap:wrap; gap:6px;">
-              ${jogs.map(j => `<span class="badge b-blue">${j.numero ? '#'+j.numero+' ' : ''}${esc(j.nome)}</span>`).join('') || '<span style="color:var(--muted); font-size:0.8rem;">Elenco em atualização</span>'}
+            <div style="font-size:0.8rem; color:var(--cyan); font-weight:700; margin-bottom:8px;">Atletas Inscritos (${jogs.length}):</div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+              ${jogs.map(j => `
+                <div style="display:inline-flex; align-items:center; gap:7px; padding:4px 10px 4px 5px; border-radius:999px; background:rgba(37,99,235,0.2); border:1px solid rgba(59,130,246,0.38);">
+                  <img src="${esc(j.foto_url || 'logo.png')}" class="avatar-sm" style="width:28px; height:28px;" alt="${esc(j.nome)}" onerror="this.src='logo.png'">
+                  <span style="font-size:0.78rem; font-weight:700; color:#e2e8f0;">${j.numero ? '#' + esc(j.numero) + ' ' : ''}${esc(j.nome)}</span>
+                </div>
+              `).join('') || '<span style="color:var(--muted); font-size:0.8rem;">Elenco em atualização</span>'}
             </div>
           </div>
         `;
@@ -1115,6 +1120,13 @@
     }
 
     initPublico();
+
+    // Atualização automática a cada 15s direto do Supabase (sem precisar dar F5 no GitHub)
+    setInterval(() => {
+      if (!document.hidden && pubState.campId) {
+        carregarDadosPublicos();
+      }
+    }, 15000);
   </script>
 </body>
 </html>

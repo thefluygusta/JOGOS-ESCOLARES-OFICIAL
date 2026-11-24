@@ -1113,6 +1113,7 @@
           <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;">
             <button type="button" id="btnGerarChave" class="btn btn-gold" onclick="gerarMataMata()">⚡ Gerar mata-mata</button>
             <button type="button" class="btn btn-ghost" onclick="sincronizarChaveamento()">🔁 Sincronizar vencedores</button>
+            <button type="button" id="btnApagarChave" class="btn btn-danger" onclick="apagarMataMata()">🗑️ Apagar chave (modalidade/naipe acima)</button>
           </div>
         </div>
 
@@ -2487,6 +2488,35 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
 
       wrap.innerHTML = `<div class="bk-scroll"><div class="bk-canvas" style="width:${W}px; height:${totalH}px;">
         <svg class="bk-lines" width="${W}" height="${totalH}">${paths}</svg>${headers}${centro}${boxes}</div></div>`;
+    }
+
+    // Apaga só os jogos do mata-mata (os ligados por "Vencedor do Nº Jogo" + a Final Interescolar)
+    async function apagarMataMata() {
+      if (!state.campeonatoId) return toast('Selecione um campeonato primeiro!', 'error');
+      const mod = $('chMod').value, cat = $('chCat').value;
+      const base = state.partidas.filter(p => (p.modalidade || 'Futsal') === mod && (p.categoria || 'Masculino') === cat);
+      const ids = new Set();
+      base.forEach(p => {
+        if (p.origem_casa || p.origem_fora || escolaPartida(p) === ESCOLA_FINAL) {
+          ids.add(String(p.id));
+          [p.origem_casa, p.origem_fora].filter(Boolean).forEach(o => ids.add(String(o).replace(/^venc:/, '')));
+        }
+      });
+      const alvo = base.filter(p => ids.has(String(p.id)));
+      if (!alvo.length) return toast('Não há jogos de mata-mata para apagar em ' + mod + ' ' + cat + '.', 'error');
+      const comPlacar = alvo.filter(p => p.status !== 'agendada').length;
+      const aviso = `Apagar ${alvo.length} jogo(s) da chave de ${mod} ${cat}?` +
+        (comPlacar ? `\n\n⚠️ ${comPlacar} deles já têm placar/andamento e esses resultados serão perdidos.` : '') +
+        `\n\nOs jogos da fase de grupos e as equipes NÃO são apagados. Isso não pode ser desfeito.`;
+      if (!confirm(aviso)) return;
+
+      const btn = $('btnApagarChave');
+      btn.disabled = true;
+      const { error } = await supabaseClient.from('partidas').delete().in('id', alvo.map(p => p.id));
+      btn.disabled = false;
+      if (error) return toast('Erro ao apagar: ' + error.message, 'error');
+      toast(`Chave apagada (${alvo.length} jogos). Você pode gerar de novo quando quiser.`);
+      loadCampData();
     }
 
     function clicarChave(id) {

@@ -42,7 +42,6 @@
       overflow-x: hidden;
     }
 
-    /* BRASÃO DA ESCOLA COMO MARCA-D'ÁGUA NA TEXTURA DO FUNDO */
     body::before {
       content: "";
       position: fixed;
@@ -70,7 +69,6 @@
       z-index: 1;
     }
 
-    /* HEADER HERO 3D */
     header {
       background: linear-gradient(180deg, rgba(13, 18, 36, 0.92), rgba(6, 8, 18, 0.85));
       backdrop-filter: blur(14px);
@@ -124,7 +122,6 @@
       font-weight: 600;
     }
 
-    /* FILTROS DE ESCOLA, MODALIDADE E NAIPE */
     .filter-strip {
       background: rgba(19, 26, 51, 0.88);
       backdrop-filter: blur(12px);
@@ -187,7 +184,6 @@
       background: #fff;
     }
 
-    /* NAVEGAÇÃO PRINCIPAL */
     .main-tabs {
       display: flex;
       gap: 10px;
@@ -228,7 +224,6 @@
       box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
     }
 
-    /* CARDS 3D */
     .card {
       background: linear-gradient(160deg, rgba(19, 26, 51, 0.88), rgba(13, 18, 36, 0.92));
       backdrop-filter: blur(10px);
@@ -256,7 +251,6 @@
       flex-wrap: wrap;
     }
 
-    /* TABELA CLASSIFICAÇÃO */
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
     th, td {
@@ -284,8 +278,8 @@
     .b-red { background: rgba(239, 68, 68, 0.22); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
     .b-gold { background: rgba(251, 191, 36, 0.2); color: #fde68a; border: 1px solid rgba(251, 191, 36, 0.45); }
     .b-teal { background: rgba(6, 182, 212, 0.22); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.45); }
+    .b-benedita { background: rgba(239, 68, 68, 0.2); color: #fecaca; border: 1px solid rgba(248, 113, 113, 0.45); }
 
-    /* GRID DE JOGOS */
     .grid-cards {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -358,7 +352,6 @@
       color: var(--gold);
     }
 
-    /* CARDS DAS MISS (FOTO INTEIRA, SEM CORTAR) */
     .miss-card {
       background: linear-gradient(155deg, rgba(19, 26, 51, 0.94), rgba(13, 18, 36, 0.96));
       border: 1px solid rgba(251, 191, 36, 0.35);
@@ -398,7 +391,6 @@
       margin-right: 5px;
     }
 
-    /* CHAVEAMENTO VISUAL (ESTILO COPA) — SOMENTE LEITURA */
     .bk-scroll { overflow: auto; padding: 8px 0 18px; }
     .bk-canvas { position: relative; margin: 0 auto; }
     .bk-lines { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 1; }
@@ -446,7 +438,6 @@
     .pane { display: none; }
     .pane.active { display: block; }
 
-    /* RODAPÉ COM CRÉDITO GUSTAVO NUNES */
     footer {
       margin-top: 44px;
       border-top: 1px solid var(--border);
@@ -692,15 +683,28 @@
       partidas: [],
       noticias: [],
       premiacoes: [],
-      // Dados globais unificados (todos os campeonatos juntos)
       todasEquipes: [],
       todasPartidas: []
     };
 
     const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-    function escolaInfo(nome) { return ESCOLAS.find(x => x.nome === nome) || null; }
-    function escolaDe(eq) { return (eq && eq.escola) || ESCOLAS[0].nome; }
+    function escolaInfo(nome) {
+      if (!nome) return null;
+      if (/benedita/i.test(nome)) return ESCOLAS[1];
+      if (/isaura/i.test(nome)) return ESCOLAS[0];
+      return ESCOLAS.find(x => x.nome === nome) || null;
+    }
+
+    // Identifica a escola da EQUIPE priorizando o campeonato quando o nome do campeonato é da Benedita
+    function escolaDe(eq) {
+      if (!eq) return ESCOLAS[0].nome;
+      if (eq.escola && /benedita/i.test(eq.escola)) return ESCOLAS[1].nome;
+      const camp = pubState.camps.find(x => String(x.id) === String(eq.campeonato_id));
+      if (camp && /benedita/i.test(camp.nome)) return ESCOLAS[1].nome;
+      if (camp && /isaura/i.test(camp.nome)) return ESCOLAS[0].nome;
+      return eq.escola || ESCOLAS[0].nome;
+    }
 
     function exigeMissCampos(escola, modalidade, categoria) {
       return (escola || ESCOLAS[0].nome) === ESCOLAS[0].nome &&
@@ -709,14 +713,20 @@
     }
     function exigeMiss(e) { return !!e && exigeMissCampos(escolaDe(e), e.modalidade, e.categoria); }
 
-    function escolaPartida(p, listaEquipes = pubState.equipes) {
-      if (p.escola) return p.escola;
-      const c = listaEquipes.find(e => e.id == p.equipe_casa_id);
-      if (c && c.escola) return c.escola;
-      // Fallback pelo nome do campeonato se houver múltiplos campeonatos
-      const camp = pubState.camps.find(x => x.id == p.campeonato_id);
+    // Identifica a escola da PARTIDA priorizando Final Interescolar e o campeonato (Benedita vs Isaura)
+    function escolaPartida(p, listaEquipes = pubState.todasEquipes) {
+      if (!p) return ESCOLAS[0].nome;
+      if (p.escola === ESCOLA_FINAL || /interescolar/i.test(p.escola || '')) return ESCOLA_FINAL;
+      if (p.escola && /benedita/i.test(p.escola)) return ESCOLAS[1].nome;
+
+      const camp = pubState.camps.find(x => String(x.id) === String(p.campeonato_id));
       if (camp && /benedita/i.test(camp.nome)) return ESCOLAS[1].nome;
-      return ESCOLAS[0].nome;
+      if (camp && /isaura/i.test(camp.nome)) return ESCOLAS[0].nome;
+
+      const c = listaEquipes.find(e => String(e.id) === String(p.equipe_casa_id));
+      if (c) return escolaDe(c);
+
+      return p.escola || ESCOLAS[0].nome;
     }
 
     function toBelemDate(s) {
@@ -751,7 +761,6 @@
       pubState.escola = ESCOLAS[idx].nome;
       atualizarPillsEscola(idx);
 
-      // Se existir um campeonato específico para essa escola no seletor do topo, troca automaticamente!
       const termo = idx === 1 ? /benedita/i : /isaura/i;
       const campDaEscola = pubState.camps.find(c => termo.test(c.nome));
       if (campDaEscola && String(campDaEscola.id) !== String(pubState.campId)) {
@@ -804,7 +813,6 @@
       sel.innerHTML = camps.map(c => `<option value="${c.id}">${esc(c.nome)} (${c.ano || ''})</option>`).join('');
       pubState.campId = camps[0].id;
 
-      // Sincroniza o botão da escola inicial com o campeonato selecionado
       if (/benedita/i.test(camps[0].nome)) {
         pubState.escola = ESCOLAS[1].nome;
         atualizarPillsEscola(1);
@@ -841,7 +849,6 @@
         db.from('partidas').select('*').eq('campeonato_id', cid).order('data_hora', { ascending: true }),
         db.from('noticias').select('*').eq('campeonato_id', cid).order('created_at', { ascending: false }),
         db.from('premiacoes').select('*').eq('campeonato_id', cid).order('created_at', { ascending: false }),
-        // Carrega também TODAS as equipes e partidas de todas as escolas para a Programação Geral Unificada
         db.from('equipes').select('*').order('nome'),
         db.from('partidas').select('*').order('data_hora', { ascending: true })
       ]);
@@ -863,7 +870,7 @@
     function origemLabel(origem, listaPartidas = pubState.partidas) {
       if (!origem) return null;
       const id = String(origem).replace(/^venc:/, '');
-      const src = listaPartidas.find(x => x.id == id);
+      const src = listaPartidas.find(x => String(x.id) === id);
       return src ? `Vencedor do ${src.ordem_jogo ? src.ordem_jogo + 'º' : '?'} Jogo` : 'Vencedor a definir';
     }
 
@@ -877,7 +884,7 @@
       }
       if (og) {
         const id2 = String(og).replace(/^venc:/, '');
-        const src = listaPartidas.find(x => x.id == id2);
+        const src = listaPartidas.find(x => String(x.id) === id2);
         const info = src ? escolaInfo(escolaPartida(src, listaEquipes)) : null;
         return { nome: origemLabel(og, listaPartidas), img: info ? info.brasao : 'logo.png', tbd: true, sub: info ? info.curta : '' };
       }
@@ -896,6 +903,7 @@
       const escNome = escolaPartida(p, listaEquipes);
       const escObj = escolaInfo(escNome);
       const escCurta = escObj ? escObj.curta : escNome;
+      const isBenedita = escNome === ESCOLAS[1].nome;
 
       const lado = (x) => `
         <div class="team-col">
@@ -909,7 +917,7 @@
           <div class="match-top">
             <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
               <span class="badge b-gold">${ordem}</span>
-              ${mostrarBadgesGerais ? `<span class="badge b-teal">${escObj ? `<img src="${escObj.brasao}" class="brasao-mini" onerror="this.style.display='none'">` : ''}${esc(escCurta)}</span>` : ''}
+              ${mostrarBadgesGerais ? `<span class="badge ${isBenedita ? 'b-benedita' : 'b-teal'}">${escObj ? `<img src="${escObj.brasao}" class="brasao-mini" onerror="this.style.display='none'">` : ''}${esc(escCurta)}</span>` : ''}
               ${p.turno ? `<span class="badge ${p.turno === 'Tarde' ? 'b-purple' : 'b-blue'}">${p.turno === 'Tarde' ? '🌇' : '🌅'} ${esc(p.turno)}</span>` : ''}
             </div>
             <span class="badge ${p.status === 'finalizada' ? 'b-green' : p.status === 'ao_vivo' ? 'b-red' : 'b-blue'}">${esc(p.status)}</span>
@@ -937,7 +945,6 @@
         const ka = da ? chaveDia(da) : '9999-99-99';
         const kb = dbb ? chaveDia(dbb) : '9999-99-99';
         if (ka !== kb) return ka < kb ? -1 : 1;
-        // Ordena primeiro pelo horário exato do dia e depois pela ordem do jogo
         const ta = da ? da.getTime() : 9999999999999;
         const tb = dbb ? dbb.getTime() : 9999999999999;
         if (ta !== tb) return ta - tb;
@@ -1143,13 +1150,11 @@
       const escCurta = escInfo ? escInfo.curta : pubState.escola;
       document.getElementById('lblFiltroAtual').textContent = `${escCurta} • ${pubState.mod} • ${pubState.cat}`;
 
-      // Filtra equipes da escola selecionada (ou do campeonato da escola selecionada)
       let eqFiltradas = pubState.equipes.filter(e =>
         escolaDe(e) === pubState.escola &&
         (e.modalidade || 'Futsal') === pubState.mod &&
         (e.categoria || 'Masculino') === pubState.cat
       );
-      // Fallback caso no ADM da Benedita as equipes tenham ficado com escola padrão
       if (!eqFiltradas.length) {
         eqFiltradas = pubState.equipes.filter(e =>
           (e.modalidade || 'Futsal') === pubState.mod &&
@@ -1157,7 +1162,6 @@
         );
       }
 
-      // 1. CLASSIFICAÇÃO POR ESCOLA COM REGRA DA MISS (-3 PTS)
       const tabela = eqFiltradas.map(e => {
         const isFutsal = exigeMiss(e);
         const temMiss = e.miss_nome && e.miss_nome.trim() !== '';
@@ -1204,18 +1208,17 @@
         </tr>
       `).join('') || '<tr><td colspan="11">Nenhuma equipe cadastrada nesta escola e categoria ainda.</td></tr>';
 
-      // 2. PROGRAMAÇÃO / PARTIDAS (separadas por escola + Final Interescolar)
       const eqAllMap = Object.fromEntries(pubState.todasEquipes.map(e => [e.id, e]));
       const daModCat = (p) =>
         (p.modalidade || 'Futsal') === pubState.mod &&
         (p.categoria || 'Masculino') === pubState.cat;
 
       let partsEscola = pubState.partidas.filter(p =>
-        daModCat(p) && escolaPartida(p) === pubState.escola
+        daModCat(p) && escolaPartida(p, pubState.todasEquipes) === pubState.escola
       );
       if (!partsEscola.length) {
         partsEscola = pubState.partidas.filter(p =>
-          daModCat(p) && escolaPartida(p) !== ESCOLA_FINAL
+          daModCat(p) && escolaPartida(p, pubState.todasEquipes) !== ESCOLA_FINAL
         );
       }
 
@@ -1232,7 +1235,6 @@
       document.getElementById('lblFinalFiltro').textContent = `${pubState.mod} • ${pubState.cat}`;
       document.getElementById('pubFinalGrid').innerHTML = htmlProgramacao(partsFinal, eqAllMap, true);
 
-      // 3. ÁREA DAS MISS
       const comMiss = pubState.todasEquipes.filter(e =>
         exigeMiss(e) && e.miss_nome && e.miss_nome.trim() !== ''
       );
@@ -1248,7 +1250,6 @@
         </div>
       `).join('') || '<p style="color:var(--muted);">Nenhuma Miss cadastrada ainda.</p>';
 
-      // 4. EQUIPES E ELENCOS
       document.getElementById('pubEquipesGrid').innerHTML = eqFiltradas.map(e => {
         const jogs = pubState.jogadores.filter(j => j.equipe_id === e.id);
         return `
@@ -1275,7 +1276,6 @@
         `;
       }).join('') || '<p style="color:var(--muted);">Nenhuma equipe desta escola nesta modalidade e categoria.</p>';
 
-      // 5. PREMIAÇÕES E NOTÍCIAS
       document.getElementById('pubPremGrid').innerHTML = pubState.premiacoes.map(pr => `
         <div class="match-card" style="border-color:rgba(251,191,36,0.4);">
           <div style="color:var(--gold); font-weight:800; font-size:1rem;">🏆 ${esc(pr.titulo)}</div>
@@ -1296,7 +1296,6 @@
 
     initPublico();
 
-    // Atualização automática a cada 15s direto do Supabase
     setInterval(() => {
       if (!document.hidden && pubState.campId) {
         carregarDadosPublicos();

@@ -2360,6 +2360,273 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
     // =========================================================================
     // CLASSIFICAÇÃO POR ESCOLA, COM PENALIDADE AUTOMÁTICA DE -3 PTS SEM MISS (FUTSAL)
     // =========================================================================
+    // =========================================================================
+    // CHAVEAMENTO: DESENHO DA CHAVE (DOIS LADOS + FINAL NO CENTRO)
+    // =========================================================================
+    function renderChave() {
+      const wrap = $('chaveWrap');
+      if (!wrap) return;
+      const mod = $('chMod').value, cat = $('chCat').value;
+      const eqMap = Object.fromEntries(state.equipes.map(e => [e.id, e]));
+      const all = state.partidas.filter(p => (p.modalidade || 'Futsal') === mod && (p.categoria || 'Masculino') === cat);
+      if (!all.length) {
+        wrap.innerHTML = '<p style="color:var(--muted); padding:16px;">Nenhum jogo de mata-mata para esta modalidade e naipe ainda. Use o gerador acima.</p>';
+        return;
+      }
+
+      const byId = {};
+      all.forEach(p => { byId[String(p.id)] = p; });
+      const BW = 190, BH = 58, GAP = 50, COLW = BW + GAP, SLOT = BH + 30, TOP = 80;
+      const srcIds = (p, ids) => [p.origem_casa, p.origem_fora].filter(Boolean)
+        .map(o => String(o).replace(/^venc:/, '')).filter(id => ids.has(id));
+
+      // Posição vertical de cada jogo = média dos jogos que o alimentam; rodada = 1 + maior rodada de origem
+      function layout(list) {
+        const ids = new Set(list.map(p => String(p.id)));
+        const referenced = new Set();
+        list.forEach(p => srcIds(p, ids).forEach(s => referenced.add(s)));
+        const info = {};
+        const visiting = new Set();
+        let leaf = 0;
+        function visit(p) {
+          const k = String(p.id);
+          if (info[k]) return info[k];
+          if (visiting.has(k)) return { round: 1, y: 0 };
+          visiting.add(k);
+          const ss = srcIds(p, ids).map(id => visit(byId[id]));
+          let r, y;
+          if (!ss.length) { r = 1; y = leaf++; }
+          else { r = 1 + Math.max(...ss.map(s => s.round)); y = ss.reduce((a, s) => a + s.y, 0) / ss.length; }
+          visiting.delete(k);
+          return (info[k] = { p, round: r, y });
+        }
+        const ordered = ordenarPartidas(list);
+        ordered.filter(p => !referenced.has(String(p.id))).forEach(visit);
+        ordered.forEach(visit);
+        const maxR = Math.max(1, ...Object.values(info).map(i => i.round));
+        return { info, leaves: leaf, maxR };
+      }
+
+      const sides = ESCOLAS.map(es => layout(all.filter(p => escolaPartida(p) === es.nome)));
+      const finals = ordenarPartidas(all.filter(p => escolaPartida(p) === ESCOLA_FINAL));
+      const Rmax = Math.max(1, sides[0].maxR, sides[1].maxR);
+      const Lmax = Math.max(1, sides[0].leaves, sides[1].leaves);
+      const H = Lmax * SLOT;
+      const x0 = Rmax * COLW;                          // coluna da Final Interescolar
+      const startR = x0 + BW + GAP;                    // início da chave da direita
+      const W = startR + (Rmax - 1) * COLW + BW + 10;
+      const totalH = TOP + H + 150;
+
+      const pos = {};
+      sides.forEach((s, si) => {
+        const off = (H - Math.max(1, s.leaves) * SLOT) / 2;
+        Object.values(s.info).forEach(i => {
+          const d = s.maxR - i.round;
+          const x = si === 0 ? (Rmax - 1 - d) * COLW : startR + d * COLW;
+          const cy = TOP + off + (i.y + 0.5) * SLOT;
+          pos[String(i.p.id)] = { x, top: cy - BH / 2, p: i.p, final: false };
+        });
+      });
+      finals.forEach((p, k) => {
+        const cy = TOP + H / 2 + (k - (finals.length - 1) / 2) * SLOT;
+        pos[String(p.id)] = { x: x0, top: cy - BH / 2, p, final: true };
+      });
+
+      // Linhas de ligação entre os jogos
+      let paths = '';
+      Object.values(pos).forEach(m => {
+        [[m.p.origem_casa, 0.25], [m.p.origem_fora, 0.75]].forEach(([og, frac]) => {
+          if (!og) return;
+          const s = pos[String(og).replace(/^venc:/, '')];
+          if (!s) return;
+          const y1 = s.top + BH / 2, y2 = m.top + BH * frac;
+          const x1 = s.x < m.x ? s.x + BW : s.x;
+          const x2 = s.x < m.x ? m.x : m.x + BW;
+          const xm = (x1 + x2) / 2;
+          paths += `<path d="M${x1} ${y1} H${xm} V${y2} H${x2}" />`;
+        });
+      });
+
+      const boxes = Object.values(pos).map(m => {
+        const p = m.p;
+        const fin = p.status === 'finalizada';
+        const gc = p.gols_casa ?? 0, gf = p.gols_fora ?? 0;
+        const win = fin ? (gc > gf ? 'casa' : gf > gc ? 'fora' : '') : '';
+        const row = (lado) => {
+          const id = lado === 'casa' ? p.equipe_casa_id : p.equipe_fora_id;
+          const nome = ladoNome(p, lado, eqMap);
+          const sc = (fin || p.status === 'ao_vivo') ? (lado === 'casa' ? gc : gf) : '';
+          return `<div class="bk-row ${id ? '' : 'bk-tbd'} ${win === lado ? 'bk-win' : ''}"><span class="bk-n" title="${esc(nome)}">${esc(nome)}</span><b class="bk-s">${sc}</b></div>`;
+        };
+        const d = toBelemDate(p.data_hora);
+        const tag = `${p.ordem_jogo ? p.ordem_jogo + 'º Jogo' : 'Jogo'}${p.turno ? ' • ' + p.turno : ''}${d ? ' • ' + fmtDia(d) + ' ' + fmtHora(d) : ''}`;
+        return `<div class="bk-box ${m.final ? 'bk-final' : ''}" style="left:${m.x}px; top:${m.top}px; width:${BW}px; height:${BH}px;" onclick="clicarChave('${p.id}')" title="Clique para lançar o placar"><div class="bk-tag">${esc(tag)}</div>${row('casa')}${row('fora')}</div>`;
+      }).join('');
+
+      const headers = ESCOLAS.map((es, si) => {
+        const left = si === 0 ? 0 : startR;
+        const width = si === 0 ? x0 - GAP : W - startR;
+        return `<div class="bk-head" style="left:${left}px; width:${width}px;"><img src="${es.brasao}" alt="" onerror="this.style.display='none'"><span>${esc(es.nome)}</span></div>`;
+      }).join('');
+
+      let centro;
+      if (finals.length) {
+        const first = pos[String(finals[0].id)], last = pos[String(finals[finals.length - 1].id)];
+        const f0 = finals[0];
+        let campeao = '';
+        if (f0.status === 'finalizada') {
+          const wid = (f0.gols_casa ?? 0) > (f0.gols_fora ?? 0) ? f0.equipe_casa_id
+            : (f0.gols_fora ?? 0) > (f0.gols_casa ?? 0) ? f0.equipe_fora_id : null;
+          if (wid && eqMap[wid]) campeao = eqMap[wid].nome;
+        }
+        centro = `<div class="bk-centro-top" style="left:${x0}px; top:${first.top - 40}px; width:${BW}px;">FINAL INTERESCOLAR</div>
+          <div class="bk-trofeu" style="left:${x0}px; top:${last.top + BH + 14}px; width:${BW}px;">🏆<div>${campeao ? 'CAMPEÃO<br><b>' + esc(campeao) + '</b>' : 'CAMPEÃO DOS JOGOS'}</div></div>`;
+      } else {
+        centro = `<div class="bk-trofeu" style="left:${x0}px; top:${TOP + H / 2 - 50}px; width:${BW}px;">🏆<div>Final Interescolar<br>ainda não gerada</div></div>`;
+      }
+
+      wrap.innerHTML = `<div class="bk-scroll"><div class="bk-canvas" style="width:${W}px; height:${totalH}px;">
+        <svg class="bk-lines" width="${W}" height="${totalH}">${paths}</svg>${headers}${centro}${boxes}</div></div>`;
+    }
+
+    function clicarChave(id) {
+      const p = state.partidas.find(x => x.id == id);
+      if (!p) return;
+      if (!p.equipe_casa_id || !p.equipe_fora_id) {
+        return toast('Este jogo ainda aguarda os vencedores dos jogos anteriores.', 'error');
+      }
+      abrirPlacar(id);
+    }
+
+    // =========================================================================
+    // CHAVEAMENTO: GERADOR AUTOMÁTICO DO MATA-MATA (2 ESCOLAS + FINAL INTERESCOLAR)
+    // =========================================================================
+    function embaralhar(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function faseDaRodada(dist, round) {
+      return dist === 0 ? 'Final da Escola' : dist === 1 ? 'Semifinal'
+        : dist === 2 ? 'Quartas de Final' : dist === 3 ? 'Oitavas de Final' : `Rodada ${round}`;
+    }
+
+    async function gerarMataMata() {
+      if (!state.campeonatoId) return toast('Selecione um campeonato primeiro!', 'error');
+      const mod = $('chMod').value, cat = $('chCat').value;
+      const sortear = $('genOrdem').value === 'sorteio';
+      const comFinal = $('genFinal').checked;
+      const turno = $('genTurno').value;
+      const local = $('genLocal').value.trim();
+
+      const grupos = ESCOLAS.map(es => {
+        let t = state.equipes.filter(e =>
+          escolaDe(e) === es.nome && (e.modalidade || 'Futsal') === mod && (e.categoria || 'Masculino') === cat);
+        if (sortear) t = embaralhar(t);
+        return { escola: es.nome, curta: es.curta, teams: t };
+      });
+      if (!grupos.some(g => g.teams.length >= 2)) {
+        return toast('Cadastre pelo menos 2 equipes de uma escola nesta modalidade e naipe.', 'error');
+      }
+      const semEquipes = grupos.filter(g => g.teams.length < 2).map(g => g.curta);
+
+      const existentes = state.partidas.filter(p => (p.modalidade || 'Futsal') === mod && (p.categoria || 'Masculino') === cat);
+      if (existentes.length && !confirm(`Já existem ${existentes.length} jogo(s) de ${mod} ${cat}. Os novos jogos serão ADICIONADOS (nada é apagado). Continuar?`)) return;
+
+      // 1) Monta o plano de jogos de cada escola
+      const plan = [];
+      const raiz = {};
+      grupos.forEach((g, gi) => {
+        const n = g.teams.length;
+        if (n < 2) return;
+        let size = 1; while (size < n) size *= 2;
+        const byes = size - n;
+        const nR1 = n - size / 2;
+        const byeTeams = g.teams.slice(0, byes);
+        const r1Teams = g.teams.slice(byes);
+        const refs = [];
+        for (let i = 0; i < nR1; i++) {
+          const key = `${gi}-1-${i}`;
+          plan.push({ key, gi, round: 1, casa: { team: r1Teams[2 * i].id }, fora: { team: r1Teams[2 * i + 1].id } });
+          refs.push({ ref: key });
+        }
+        // intercala jogos da 1ª rodada com equipes que já avançam direto (quando o nº não é potência de 2)
+        const bs = byeTeams.map(t => ({ team: t.id }));
+        let nodes = [];
+        while (refs.length || bs.length) {
+          if (refs.length) nodes.push(refs.shift());
+          if (bs.length) nodes.push(bs.shift());
+        }
+        let round = 2;
+        while (nodes.length > 1) {
+          const next = [];
+          for (let i = 0; i < nodes.length; i += 2) {
+            const key = `${gi}-${round}-${i / 2}`;
+            plan.push({ key, gi, round, casa: nodes[i], fora: nodes[i + 1] });
+            next.push({ ref: key });
+          }
+          nodes = next; round++;
+        }
+        raiz[gi] = { key: nodes[0].ref, round: round - 1 };
+      });
+
+      plan.forEach(m => { m.fase = faseDaRodada(raiz[m.gi].round - m.round, m.round); });
+
+      if (comFinal && raiz[0] && raiz[1]) {
+        plan.push({
+          key: 'final', gi: 9, round: Math.max(...plan.map(m => m.round)) + 1, final: true,
+          casa: { ref: raiz[0].key }, fora: { ref: raiz[1].key }, fase: 'Final Interescolar'
+        });
+      }
+
+      // 2) Numera (1º Jogo, 2º Jogo...) por rodada, alternando as escolas
+      const ordenado = plan.map((m, idx) => ({ m, idx }))
+        .sort((a, b) => a.m.round - b.m.round || a.m.gi - b.m.gi || a.idx - b.idx)
+        .map(x => x.m);
+      const inicio = proximaOrdem();
+
+      const btn = $('btnGerarChave');
+      btn.disabled = true; btn.textContent = '⏳ Gerando...';
+      const ids = {};
+      try {
+        for (let i = 0; i < ordenado.length; i++) {
+          const m = ordenado[i];
+          const lado = (s) => s.team ? { id: s.team, origem: null } : { id: null, origem: 'venc:' + ids[s.ref] };
+          const c = lado(m.casa), f = lado(m.fora);
+          const { data, error } = await supabaseClient.from('partidas').insert([{
+            campeonato_id: state.campeonatoId,
+            escola: m.final ? ESCOLA_FINAL : grupos[m.gi].escola,
+            modalidade: mod,
+            categoria: cat,
+            ordem_jogo: inicio + i,
+            turno,
+            equipe_casa_id: c.id,
+            equipe_fora_id: f.id,
+            origem_casa: c.origem,
+            origem_fora: f.origem,
+            data_hora: null,
+            local,
+            fase: m.fase,
+            gols_casa: 0,
+            gols_fora: 0,
+            status: 'agendada'
+          }]).select();
+          if (error) throw new Error(error.message);
+          ids[m.key] = data[0].id;
+        }
+        toast(`Mata-mata gerado: ${ordenado.length} jogos criados!` + (semEquipes.length ? ` (sem chave: ${semEquipes.join(', ')} — menos de 2 equipes)` : ''));
+      } catch (err) {
+        toast('Erro ao gerar a chave: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = '⚡ Gerar mata-mata';
+        await loadCampData();
+      }
+    }
+
     function renderClassificacao() {
       const escola = $('classEscola').value;
       const mod = $('classMod').value;

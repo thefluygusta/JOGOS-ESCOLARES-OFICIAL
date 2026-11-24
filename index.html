@@ -417,6 +417,13 @@
     .bk-trofeu div { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.78rem; color: #fde68a; font-weight: 700; margin-top: 4px; }
     .bk-trofeu b { color: #fff; font-size: 0.95rem; }
 
+    .pdf-link {
+      display: inline-block; margin-top: 10px; padding: 8px 14px; border-radius: 10px;
+      background: linear-gradient(135deg, #d97706, #fbbf24); color: #060812;
+      font-weight: 800; font-size: 0.82rem; text-decoration: none;
+    }
+    .pdf-link:hover { filter: brightness(1.1); }
+
     .pane { display: none; }
     .pane.active { display: block; }
 
@@ -515,8 +522,8 @@
         <div class="section-title">
           <span>🏆 Tabela Oficial — <span id="lblFiltroAtual" style="color:var(--gold);">Futsal • Masculino</span></span>
         </div>
-        <p style="font-size:0.83rem; color:var(--muted); margin-bottom:14px;">
-          ⚠️ <strong>Regra Oficial:</strong> Equipes sem <strong>MISS</strong> cadastrada iniciam com penalidade de <strong>-3 pontos</strong> na tabela.
+        <p id="ruleMiss" style="font-size:0.83rem; color:var(--muted); margin-bottom:14px;">
+          ⚠️ <strong>Regra Oficial (Futsal Masculino da Isaura Baia):</strong> equipes sem <strong>MISS</strong> cadastrada iniciam com penalidade de <strong>-3 pontos</strong> na tabela.
         </p>
 
         <div class="table-wrap">
@@ -574,7 +581,7 @@
       <div class="card">
         <div class="section-title" style="color:var(--gold);">👑 Candidatas & Representantes MISS dos Jogos Escolares</div>
         <p style="font-size:0.86rem; color:#cbd5e1; margin-bottom:18px;">
-          Conheça as representantes oficiais de cada equipe! A presença da Miss garante os +3 pontos na pontuação da turma.
+          Conheça as representantes oficiais das equipes de <strong>Futsal Masculino da Isaura Baia</strong>! Equipe sem Miss cadastrada perde 3 pontos na classificação.
         </p>
         <div id="pubMissGrid" class="grid-cards"></div>
       </div>
@@ -642,6 +649,14 @@
 
     function escolaInfo(nome) { return ESCOLAS.find(x => x.nome === nome) || null; }
     function escolaDe(eq) { return (eq && eq.escola) || ESCOLAS[0].nome; }
+
+    // A Miss vale SÓ para o Futsal Masculino da E. E. Profª Isaura Baia
+    function exigeMissCampos(escola, modalidade, categoria) {
+      return (escola || ESCOLAS[0].nome) === ESCOLAS[0].nome &&
+        String(modalidade || 'Futsal').toLowerCase() === 'futsal' &&
+        (categoria || 'Masculino') === 'Masculino';
+    }
+    function exigeMiss(e) { return !!e && exigeMissCampos(escolaDe(e), e.modalidade, e.categoria); }
     function escolaPartida(p) {
       if (p.escola) return p.escola;
       const c = pubState.equipes.find(e => e.id == p.equipe_casa_id);
@@ -787,7 +802,7 @@
             </div>
             <span class="badge ${p.status === 'finalizada' ? 'b-green' : p.status === 'ao_vivo' ? 'b-red' : 'b-blue'}">${esc(p.status)}</span>
           </div>
-          <div style="font-size:0.76rem; color:var(--muted); margin-top:8px;">${esc(p.fase || 'Fase de Grupos')}</div>
+          <div style="font-size:0.76rem; color:var(--muted); margin-top:8px;">${esc((p.fase === 'Fase de Grupos' ? 'Classificatória' : p.fase) || 'Classificatória')}${p.chave ? ' • ' + esc(p.chave) + (p.jogo_chave ? ' / ' + p.jogo_chave + 'º jogo' : '') : ''}</div>
           <div class="scoreboard">
             ${lado(c)}
             <div class="score-pill">${placar}</div>
@@ -962,6 +977,7 @@
     // =========================================================================
     function renderPublico() {
       renderChavePublica();
+      document.getElementById('ruleMiss').style.display = exigeMissCampos(pubState.escola, pubState.mod, pubState.cat) ? 'block' : 'none';
       const escInfo = escolaInfo(pubState.escola);
       const escCurta = escInfo ? escInfo.curta : pubState.escola;
       document.getElementById('lblFiltroAtual').textContent = `${escCurta} • ${pubState.mod} • ${pubState.cat}`;
@@ -974,7 +990,7 @@
 
       // 1. CLASSIFICAÇÃO POR ESCOLA COM REGRA DA MISS (-3 PTS)
       const tabela = eqFiltradas.map(e => {
-        const isFutsal = (e.modalidade || 'Futsal').toLowerCase() === 'futsal';
+        const isFutsal = exigeMiss(e);
         const temMiss = e.miss_nome && e.miss_nome.trim() !== '';
         const pen = isFutsal ? (temMiss ? 0 : -3) : 0;
         return { ...e, isFutsal, temMiss, pts: pen, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 };
@@ -1043,7 +1059,7 @@
 
       // 3. ÁREA DAS MISS (EQUIPES DA ESCOLA SELECIONADA COM MISS)
       const comMiss = pubState.equipes.filter(e =>
-        escolaDe(e) === pubState.escola && e.miss_nome && e.miss_nome.trim() !== ''
+        exigeMiss(e) && e.miss_nome && e.miss_nome.trim() !== ''
       );
       document.getElementById('pubMissGrid').innerHTML = comMiss.map(e => `
         <div class="miss-card">
@@ -1052,10 +1068,10 @@
             <span class="badge b-gold" style="margin-bottom:8px;">👑 MISS OFICIAL</span>
             <h3 style="font-size:1.1rem; margin-bottom:4px;">${esc(e.miss_nome)}</h3>
             <div style="color:var(--cyan); font-weight:700; font-size:0.86rem;">${esc(e.nome)}</div>
-            <div style="color:var(--muted); font-size:0.78rem; margin-top:4px;">${esc(e.modalidade || 'Futsal')} • ${esc(e.categoria || 'Masculino')} • ${esc(escCurta)}</div>
+            <div style="color:var(--muted); font-size:0.78rem; margin-top:4px;">${esc(e.modalidade || 'Futsal')} • ${esc(e.categoria || 'Masculino')} • ${esc(ESCOLAS[0].curta)}</div>
           </div>
         </div>
-      `).join('') || '<p style="color:var(--muted);">Nenhuma Miss cadastrada ainda para esta escola no painel ADM.</p>';
+      `).join('') || '<p style="color:var(--muted);">Nenhuma Miss cadastrada ainda.</p>';
 
       // 4. EQUIPES E ELENCOS
       document.getElementById('pubEquipesGrid').innerHTML = eqFiltradas.map(e => {
@@ -1067,7 +1083,7 @@
               <div>
                 <strong>${esc(e.nome)}</strong>
                 <div style="font-size:0.78rem; color:var(--gold);">
-           ${(e.modalidade || 'Futsal').toLowerCase() === 'futsal' ? (e.miss_nome ? `👑 Miss: ${esc(e.miss_nome)}` : '⚠️ Sem Miss (-3 pts)') : ''}
+           ${exigeMiss(e) ? (e.miss_nome ? `👑 Miss: ${esc(e.miss_nome)}` : '⚠️ Sem Miss (-3 pts)') : ''}
                 </div>
               </div>
             </div>
@@ -1093,6 +1109,7 @@
           ${n.imagem_url ? `<img src="${n.imagem_url}" class="news-photo">` : ''}
           <h4 style="margin-bottom:6px;">${esc(n.titulo)}</h4>
           <p style="color:var(--muted); font-size:0.86rem; line-height:1.5;">${esc(n.conteudo)}</p>
+          ${n.pdf_url ? `<a href="${esc(n.pdf_url)}" target="_blank" rel="noopener" class="pdf-link">📄 Abrir PDF (regulamento)</a>` : ''}
         </div>
       `).join('') || '<p style="color:var(--muted);">Nenhuma notícia publicada ainda.</p>';
     }

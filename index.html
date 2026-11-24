@@ -379,6 +379,44 @@
       margin-right: 5px;
     }
 
+    /* CHAVEAMENTO VISUAL (ESTILO COPA) — SOMENTE LEITURA */
+    .bk-scroll { overflow: auto; padding: 8px 0 18px; }
+    .bk-canvas { position: relative; margin: 0 auto; }
+    .bk-lines { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 1; }
+    .bk-lines path { fill: none; stroke: rgba(168, 85, 247, 0.65); stroke-width: 2; }
+    .bk-box {
+      position: absolute; z-index: 2;
+      background: rgba(9, 13, 28, 0.96);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .bk-box.bk-final { border-color: var(--gold); box-shadow: 0 0 22px rgba(251, 191, 36, 0.28); }
+    .bk-tag { position: absolute; top: -16px; left: 2px; font-size: 0.66rem; color: var(--muted); white-space: nowrap; }
+    .bk-row {
+      display: flex; justify-content: space-between; align-items: center; gap: 6px;
+      height: 50%; padding: 0 10px; font-size: 0.78rem; color: #cbd5e1;
+    }
+    .bk-row + .bk-row { border-top: 1px solid rgba(139, 92, 246, 0.2); }
+    .bk-n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bk-tbd .bk-n { color: var(--gold); font-style: italic; }
+    .bk-win .bk-n { color: #fff; font-weight: 800; }
+    .bk-win .bk-s { color: var(--gold); }
+    .bk-s { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; }
+    .bk-head {
+      position: absolute; top: 0; height: 44px; z-index: 2;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      font-weight: 800; font-size: 0.85rem; color: #e2e8f0;
+      background: rgba(37, 99, 235, 0.14); border: 1px solid var(--border); border-radius: 12px;
+    }
+    .bk-head img { width: 32px; height: 32px; border-radius: 50%; object-fit: contain; background: #fff; }
+    .bk-centro-top {
+      position: absolute; z-index: 2; text-align: center;
+      font-family: 'Orbitron', sans-serif; font-size: 0.78rem; font-weight: 800; color: var(--gold);
+    }
+    .bk-trofeu { position: absolute; z-index: 2; text-align: center; font-size: 3rem; line-height: 1.1; }
+    .bk-trofeu div { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.78rem; color: #fde68a; font-weight: 700; margin-top: 4px; }
+    .bk-trofeu b { color: #fff; font-size: 0.95rem; }
+
     .pane { display: none; }
     .pane.active { display: block; }
 
@@ -465,6 +503,7 @@
     <div class="main-tabs">
       <button class="tab-btn active" onclick="openPane('classificacao', this)">📈 Classificação</button>
       <button class="tab-btn" onclick="openPane('jogos', this)">⚽ Jogos & Placares</button>
+      <button class="tab-btn" onclick="openPane('chave', this)">🏆 Chaveamento</button>
       <button class="tab-btn" onclick="openPane('miss', this)">👑 Área das MISS</button>
       <button class="tab-btn" onclick="openPane('equipes', this)">🛡️ Equipes & Atletas</button>
       <button class="tab-btn" onclick="openPane('noticias', this)">📰 Notícias & Premiações</button>
@@ -516,6 +555,17 @@
       <div class="card">
         <div class="section-title">⚽ Programação & Resultados — <span id="lblJogosEscola" style="color:var(--gold); font-size:0.9rem;"></span></div>
         <div id="pubPartidasGrid" class="grid-cards"></div>
+      </div>
+    </section>
+
+    <!-- PANE: CHAVEAMENTO (MATA-MATA) -->
+    <section id="pane-chave" class="pane">
+      <div class="card final-card">
+        <div class="section-title" style="color:var(--gold);">🏆 Chaveamento — <span id="lblChaveFiltro" style="font-size:0.9rem;"></span></div>
+        <p style="font-size:0.83rem; color:var(--muted); margin-bottom:10px;">
+          Cada escola tem a sua chave e os campeões se enfrentam na <strong>Final Interescolar</strong>. Use os filtros de modalidade e categoria acima. Deslize para os lados para ver a chave inteira.
+        </p>
+        <div id="pubChaveWrap"></div>
       </div>
     </section>
 
@@ -779,9 +829,139 @@
     }
 
     // =========================================================================
+    // CHAVEAMENTO VISUAL (DOIS LADOS + FINAL INTERESCOLAR NO CENTRO)
+    // =========================================================================
+    function renderChavePublica() {
+      const wrap = document.getElementById('pubChaveWrap');
+      if (!wrap) return;
+      document.getElementById('lblChaveFiltro').textContent = `${pubState.mod} • ${pubState.cat}`;
+      const eqMap = Object.fromEntries(pubState.equipes.map(e => [e.id, e]));
+      const all = pubState.partidas.filter(p =>
+        (p.modalidade || 'Futsal') === pubState.mod && (p.categoria || 'Masculino') === pubState.cat &&
+        (p.origem_casa || p.origem_fora || pubState.partidas.some(x => x.origem_casa === 'venc:' + p.id || x.origem_fora === 'venc:' + p.id) || escolaPartida(p) === ESCOLA_FINAL)
+      );
+      if (!all.length) {
+        wrap.innerHTML = '<p style="color:var(--muted); padding:16px;">O chaveamento desta modalidade e categoria ainda não foi publicado.</p>';
+        return;
+      }
+
+      const byId = {};
+      all.forEach(p => { byId[String(p.id)] = p; });
+      const BW = 190, BH = 58, GAP = 50, COLW = BW + GAP, SLOT = BH + 30, TOP = 80;
+      const srcIds = (p, ids) => [p.origem_casa, p.origem_fora].filter(Boolean)
+        .map(o => String(o).replace(/^venc:/, '')).filter(id => ids.has(id));
+
+      function layout(list) {
+        const ids = new Set(list.map(p => String(p.id)));
+        const referenced = new Set();
+        list.forEach(p => srcIds(p, ids).forEach(s => referenced.add(s)));
+        const info = {};
+        const visiting = new Set();
+        let leaf = 0;
+        function visit(p) {
+          const k = String(p.id);
+          if (info[k]) return info[k];
+          if (visiting.has(k)) return { round: 1, y: 0 };
+          visiting.add(k);
+          const ss = srcIds(p, ids).map(id => visit(byId[id]));
+          let r, y;
+          if (!ss.length) { r = 1; y = leaf++; }
+          else { r = 1 + Math.max(...ss.map(s => s.round)); y = ss.reduce((a, s) => a + s.y, 0) / ss.length; }
+          visiting.delete(k);
+          return (info[k] = { p, round: r, y });
+        }
+        const ordered = ordenarPartidas(list);
+        ordered.filter(p => !referenced.has(String(p.id))).forEach(visit);
+        ordered.forEach(visit);
+        const maxR = Math.max(1, ...Object.values(info).map(i => i.round));
+        return { info, leaves: leaf, maxR };
+      }
+
+      const sides = ESCOLAS.map(es => layout(all.filter(p => escolaPartida(p) === es.nome)));
+      const finals = ordenarPartidas(all.filter(p => escolaPartida(p) === ESCOLA_FINAL));
+      const Rmax = Math.max(1, sides[0].maxR, sides[1].maxR);
+      const Lmax = Math.max(1, sides[0].leaves, sides[1].leaves);
+      const H = Lmax * SLOT;
+      const x0 = Rmax * COLW;
+      const startR = x0 + BW + GAP;
+      const W = startR + (Rmax - 1) * COLW + BW + 10;
+      const totalH = TOP + H + 150;
+
+      const pos = {};
+      sides.forEach((s, si) => {
+        const off = (H - Math.max(1, s.leaves) * SLOT) / 2;
+        Object.values(s.info).forEach(i => {
+          const d = s.maxR - i.round;
+          const x = si === 0 ? (Rmax - 1 - d) * COLW : startR + d * COLW;
+          const cy = TOP + off + (i.y + 0.5) * SLOT;
+          pos[String(i.p.id)] = { x, top: cy - BH / 2, p: i.p, final: false };
+        });
+      });
+      finals.forEach((p, k) => {
+        const cy = TOP + H / 2 + (k - (finals.length - 1) / 2) * SLOT;
+        pos[String(p.id)] = { x: x0, top: cy - BH / 2, p, final: true };
+      });
+
+      let paths = '';
+      Object.values(pos).forEach(m => {
+        [[m.p.origem_casa, 0.25], [m.p.origem_fora, 0.75]].forEach(([og, frac]) => {
+          if (!og) return;
+          const s = pos[String(og).replace(/^venc:/, '')];
+          if (!s) return;
+          const y1 = s.top + BH / 2, y2 = m.top + BH * frac;
+          const x1 = s.x < m.x ? s.x + BW : s.x;
+          const x2 = s.x < m.x ? m.x : m.x + BW;
+          const xm = (x1 + x2) / 2;
+          paths += `<path d="M${x1} ${y1} H${xm} V${y2} H${x2}" />`;
+        });
+      });
+
+      const boxes = Object.values(pos).map(m => {
+        const p = m.p;
+        const fin = p.status === 'finalizada';
+        const gc = p.gols_casa ?? 0, gf = p.gols_fora ?? 0;
+        const win = fin ? (gc > gf ? 'casa' : gf > gc ? 'fora' : '') : '';
+        const row = (lado) => {
+          const x = ladoInfo(p, lado, eqMap, false);
+          const sc = (fin || p.status === 'ao_vivo') ? (lado === 'casa' ? gc : gf) : '';
+          return `<div class="bk-row ${x.tbd ? 'bk-tbd' : ''} ${win === lado ? 'bk-win' : ''}"><span class="bk-n" title="${esc(x.nome)}">${esc(x.nome)}</span><b class="bk-s">${sc}</b></div>`;
+        };
+        const d = toBelemDate(p.data_hora);
+        const tag = `${p.ordem_jogo ? p.ordem_jogo + 'º Jogo' : 'Jogo'}${p.turno ? ' • ' + p.turno : ''}${d ? ' • ' + fmtDiaCurto(d) + ' ' + fmtHora(d) : ''}`;
+        return `<div class="bk-box ${m.final ? 'bk-final' : ''}" style="left:${m.x}px; top:${m.top}px; width:${BW}px; height:${BH}px;"><div class="bk-tag">${esc(tag)}</div>${row('casa')}${row('fora')}</div>`;
+      }).join('');
+
+      const headers = ESCOLAS.map((es, si) => {
+        const left = si === 0 ? 0 : startR;
+        const width = si === 0 ? x0 - GAP : W - startR;
+        return `<div class="bk-head" style="left:${left}px; width:${width}px;"><img src="${es.brasao}" alt="" onerror="this.style.display='none'"><span>${esc(es.nome)}</span></div>`;
+      }).join('');
+
+      let centro;
+      if (finals.length) {
+        const first = pos[String(finals[0].id)], last = pos[String(finals[finals.length - 1].id)];
+        const f0 = finals[0];
+        let campeao = '';
+        if (f0.status === 'finalizada') {
+          const wid = (f0.gols_casa ?? 0) > (f0.gols_fora ?? 0) ? f0.equipe_casa_id
+            : (f0.gols_fora ?? 0) > (f0.gols_casa ?? 0) ? f0.equipe_fora_id : null;
+          if (wid && eqMap[wid]) campeao = eqMap[wid].nome;
+        }
+        centro = `<div class="bk-centro-top" style="left:${x0}px; top:${first.top - 40}px; width:${BW}px;">FINAL INTERESCOLAR</div>
+          <div class="bk-trofeu" style="left:${x0}px; top:${last.top + BH + 14}px; width:${BW}px;">🏆<div>${campeao ? 'CAMPEÃO<br><b>' + esc(campeao) + '</b>' : 'CAMPEÃO DOS JOGOS'}</div></div>`;
+      } else {
+        centro = `<div class="bk-trofeu" style="left:${x0}px; top:${TOP + H / 2 - 50}px; width:${BW}px;">🏆<div>Final Interescolar<br>em breve</div></div>`;
+      }
+
+      wrap.innerHTML = `<div class="bk-scroll"><div class="bk-canvas" style="width:${W}px; height:${totalH}px;">
+        <svg class="bk-lines" width="${W}" height="${totalH}">${paths}</svg>${headers}${centro}${boxes}</div></div>`;
+    }
+
+    // =========================================================================
     // RENDER PÚBLICO
     // =========================================================================
     function renderPublico() {
+      renderChavePublica();
       const escInfo = escolaInfo(pubState.escola);
       const escCurta = escInfo ? escInfo.curta : pubState.escola;
       document.getElementById('lblFiltroAtual').textContent = `${escCurta} • ${pubState.mod} • ${pubState.cat}`;

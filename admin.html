@@ -2651,7 +2651,7 @@ alter table noticias add column if not exists pdf_url text;`;
     // =========================================================================
     // CLASSIFICAÇÃO POR ESCOLA, COM PENALIDADE AUTOMÁTICA DE -3 PTS SEM MISS (FUTSAL)
     // =========================================================================
-    // =========================================================================
+   // =========================================================================
     // CHAVEAMENTO: DESENHO DA CHAVE (DOIS LADOS + FINAL NO CENTRO)
     // =========================================================================
     function renderChave() {
@@ -2667,11 +2667,11 @@ alter table noticias add column if not exists pdf_url text;`;
 
       const byId = {};
       all.forEach(p => { byId[String(p.id)] = p; });
-      const BW = 190, BH = 58, GAP = 50, COLW = BW + GAP, SLOT = BH + 30, TOP = 80;
+      const BW = 250, BH = 74, GAP = 56, COLW = BW + GAP, SLOT = BH + 36, TOP = 88;
+      const cleanRef = (o) => String(o).replace(/^(venc|perd):/, '');
       const srcIds = (p, ids) => [p.origem_casa, p.origem_fora].filter(Boolean)
-        .map(o => String(o).replace(/^venc:/, '')).filter(id => ids.has(id));
+        .map(cleanRef).filter(id => ids.has(id));
 
-      // Posição vertical de cada jogo = média dos jogos que o alimentam; rodada = 1 + maior rodada de origem
       function layout(list) {
         const ids = new Set(list.map(p => String(p.id)));
         const referenced = new Set();
@@ -2703,10 +2703,10 @@ alter table noticias add column if not exists pdf_url text;`;
       const Rmax = Math.max(1, sides[0].maxR, sides[1].maxR);
       const Lmax = Math.max(1, sides[0].leaves, sides[1].leaves);
       const H = Lmax * SLOT;
-      const x0 = Rmax * COLW;                          // coluna da Final Interescolar
-      const startR = x0 + BW + GAP;                    // início da chave da direita
-      const W = startR + (Rmax - 1) * COLW + BW + 10;
-      const totalH = TOP + H + 150;
+      const x0 = Rmax * COLW;
+      const startR = x0 + BW + GAP;
+      const W = startR + (Rmax - 1) * COLW + BW + 16;
+      const totalH = TOP + H + 160;
 
       const pos = {};
       sides.forEach((s, si) => {
@@ -2723,12 +2723,11 @@ alter table noticias add column if not exists pdf_url text;`;
         pos[String(p.id)] = { x: x0, top: cy - BH / 2, p, final: true };
       });
 
-      // Linhas de ligação entre os jogos
       let paths = '';
       Object.values(pos).forEach(m => {
         [[m.p.origem_casa, 0.25], [m.p.origem_fora, 0.75]].forEach(([og, frac]) => {
           if (!og) return;
-          const s = pos[String(og).replace(/^venc:/, '')];
+          const s = pos[cleanRef(og)];
           if (!s) return;
           const y1 = s.top + BH / 2, y2 = m.top + BH * frac;
           const x1 = s.x < m.x ? s.x + BW : s.x;
@@ -2747,17 +2746,17 @@ alter table noticias add column if not exists pdf_url text;`;
           const id = lado === 'casa' ? p.equipe_casa_id : p.equipe_fora_id;
           const nome = ladoNome(p, lado, eqMap);
           const sc = (fin || p.status === 'ao_vivo') ? (lado === 'casa' ? gc : gf) : '';
-          return `<div class="bk-row ${id ? '' : 'bk-tbd'} ${win === lado ? 'bk-win' : ''}"><span class="bk-n" title="${esc(nome)}">${esc(nome)}</span><b class="bk-s">${sc}</b></div>`;
+          return `<div class="bk-row ${id ? '' : 'bk-tbd'} ${win === lado ? 'bk-win' : ''}" style="font-size:0.92rem;"><span class="bk-n" title="${esc(nome)}">${esc(nome)}</span><b class="bk-s">${sc}</b></div>`;
         };
         const d = toBelemDate(p.data_hora);
         const tag = `${p.ordem_jogo ? p.ordem_jogo + 'º Jogo' : 'Jogo'}${p.turno ? ' • ' + p.turno : ''}${d ? ' • ' + fmtDia(d) + ' ' + fmtHora(d) : ''}`;
-        return `<div class="bk-box ${m.final ? 'bk-final' : ''}" style="left:${m.x}px; top:${m.top}px; width:${BW}px; height:${BH}px;" onclick="clicarChave('${p.id}')" title="Clique para lançar o placar"><div class="bk-tag">${esc(tag)}</div>${row('casa')}${row('fora')}</div>`;
+        return `<div class="bk-box ${m.final ? 'bk-final' : ''}" style="left:${m.x}px; top:${m.top}px; width:${BW}px; height:${BH}px;" onclick="clicarChave('${p.id}')" title="Clique para lançar o placar"><div class="bk-tag" style="font-size:0.76rem; top:-19px;">${esc(tag)}</div>${row('casa')}${row('fora')}</div>`;
       }).join('');
 
       const headers = ESCOLAS.map((es, si) => {
         const left = si === 0 ? 0 : startR;
         const width = si === 0 ? x0 - GAP : W - startR;
-        return `<div class="bk-head" style="left:${left}px; width:${width}px;"><img src="${es.brasao}" alt="" onerror="this.style.display='none'"><span>${esc(es.nome)}</span></div>`;
+        return `<div class="bk-head" style="left:${left}px; width:${width}px; font-size:0.95rem;"><img src="${es.brasao}" alt="" onerror="this.style.display='none'"><span>${esc(es.nome)}</span></div>`;
       }).join('');
 
       let centro;
@@ -2770,8 +2769,8 @@ alter table noticias add column if not exists pdf_url text;`;
             : (f0.gols_fora ?? 0) > (f0.gols_casa ?? 0) ? f0.equipe_fora_id : null;
           if (wid && eqMap[wid]) campeao = eqMap[wid].nome;
         }
-        centro = `<div class="bk-centro-top" style="left:${x0}px; top:${first.top - 40}px; width:${BW}px;">FINAL INTERESCOLAR</div>
-          <div class="bk-trofeu" style="left:${x0}px; top:${last.top + BH + 14}px; width:${BW}px;">🏆<div>${campeao ? 'CAMPEÃO<br><b>' + esc(campeao) + '</b>' : 'CAMPEÃO DOS JOGOS'}</div></div>`;
+        centro = `<div class="bk-centro-top" style="left:${x0}px; top:${first.top - 42}px; width:${BW}px;">FINAL INTERESCOLAR</div>
+          <div class="bk-trofeu" style="left:${x0}px; top:${last.top + BH + 16}px; width:${BW}px;">🏆<div>${campeao ? 'CAMPEÃO<br><b>' + esc(campeao) + '</b>' : 'CAMPEÃO DOS JOGOS'}</div></div>`;
       } else {
         centro = `<div class="bk-trofeu" style="left:${x0}px; top:${TOP + H / 2 - 50}px; width:${BW}px;">🏆<div>Final Interescolar<br>ainda não gerada</div></div>`;
       }
@@ -2780,7 +2779,6 @@ alter table noticias add column if not exists pdf_url text;`;
         <svg class="bk-lines" width="${W}" height="${totalH}">${paths}</svg>${headers}${centro}${boxes}</div></div>`;
     }
 
-    // Apaga só os jogos do mata-mata (os ligados por "Vencedor do Nº Jogo" + a Final Interescolar)
     async function apagarMataMata() {
       if (!state.campeonatoId) return toast('Selecione um campeonato primeiro!', 'error');
       const mod = $('chMod').value, cat = $('chCat').value;
@@ -2789,7 +2787,7 @@ alter table noticias add column if not exists pdf_url text;`;
       base.forEach(p => {
         if (p.origem_casa || p.origem_fora || escolaPartida(p) === ESCOLA_FINAL) {
           ids.add(String(p.id));
-          [p.origem_casa, p.origem_fora].filter(Boolean).forEach(o => ids.add(String(o).replace(/^venc:/, '')));
+          [p.origem_casa, p.origem_fora].filter(Boolean).forEach(o => ids.add(String(o).replace(/^(venc|perd):/, '')));
         }
       });
       const alvo = base.filter(p => ids.has(String(p.id)));
@@ -2869,7 +2867,6 @@ alter table noticias add column if not exists pdf_url text;`;
       renderChave();
     }
 
-    // Recalcula, só na simulação, quem avança para cada jogo seguinte
     function propagarCenario() {
       const ps = cenario.partidas;
       for (let it = 0; it < ps.length + 2; it++) {
@@ -2878,15 +2875,17 @@ alter table noticias add column if not exists pdf_url text;`;
           for (const [lado, campo] of [['casa', 'equipe_casa_id'], ['fora', 'equipe_fora_id']]) {
             const og = p['origem_' + lado];
             if (!og) continue;
-            const src = ps.find(x => 'venc:' + x.id === og);
+            const isPerd = og.startsWith('perd:');
+            const srcId = og.replace(/^(venc|perd):/, '');
+            const src = ps.find(x => String(x.id) === srcId);
             if (!src) continue;
-            let w = null;
+            let alvo = null;
             if (src.status === 'finalizada') {
-              if ((src.gols_casa ?? 0) > (src.gols_fora ?? 0)) w = src.equipe_casa_id;
-              else if ((src.gols_fora ?? 0) > (src.gols_casa ?? 0)) w = src.equipe_fora_id;
+              if ((src.gols_casa ?? 0) > (src.gols_fora ?? 0)) alvo = isPerd ? src.equipe_fora_id : src.equipe_casa_id;
+              else if ((src.gols_fora ?? 0) > (src.gols_casa ?? 0)) alvo = isPerd ? src.equipe_casa_id : src.equipe_fora_id;
             }
-            if ((p[campo] || null) !== (w || null)) {
-              p[campo] = w;
+            if ((p[campo] || null) !== (alvo || null)) {
+              p[campo] = alvo;
               if (p.status !== 'agendada') { p.status = 'agendada'; p.gols_casa = 0; p.gols_fora = 0; }
               mudou = true;
             }
@@ -2913,20 +2912,21 @@ alter table noticias add column if not exists pdf_url text;`;
 <style>
 ${css}
   @page { size: A4 landscape; margin: 8mm; }
-  html, body, * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  body { display: block; padding: 10px; min-height: 0; overflow: visible; }
-  body::before { display: none; }
-  .ph { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 8px; }
-  .ph img { width: 62px; height: 62px; border-radius: 50%; object-fit: contain; background: #fff; padding: 2px; }
+  html, body, * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  body { display: block !important; padding: 10px !important; min-height: 0 !important; overflow: visible !important; background: #070b19 !important; color: #f8fafc !important; }
+  body::before { display: none !important; }
+  .ph { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 10px; }
+  .ph img { width: 64px; height: 64px; border-radius: 50%; object-fit: contain; background: #fff; padding: 2px; }
   .ph .t { text-align: center; flex: 1; }
   .ph h1 { font-size: 20px; margin: 0; color: #fde68a; letter-spacing: 1px; }
   .ph p { font-size: 12px; margin: 3px 0 0; color: #cbd5e1; }
   .sim { display: inline-block; margin-top: 4px; padding: 2px 10px; border-radius: 999px; background: #f59e0b; color: #1a1200; font-weight: 800; font-size: 11px; }
-  .bk-scroll { overflow: hidden; padding: 0; }
-  .rodape { margin-top: 6px; font-size: 10px; color: #94a3b8; text-align: center; }
-  .bar { position: fixed; top: 8px; right: 8px; z-index: 9; }
-  .bar button { padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #111; background: #fde68a; border-radius: 8px; }
-  @media print { .bar { display: none; } body { padding: 0; } }
+  .bk-scroll { overflow: visible !important; padding: 0 !important; }
+  .bk-canvas { position: relative !important; margin: 0 auto !important; }
+  .rodape { margin-top: 8px; font-size: 10px; color: #94a3b8; text-align: center; }
+  .bar { position: fixed; top: 8px; right: 8px; z-index: 99; }
+  .bar button { padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #111; background: #fde68a; color: #111; border-radius: 8px; }
+  @media print { .bar { display: none !important; } body { padding: 0 !important; } }
 </style></head><body>
   <div class="bar"><button onclick="window.print()">🖨️ Imprimir / Salvar PDF</button></div>
   <div class="ph" id="printHead">
@@ -2943,14 +2943,14 @@ ${css}
   <script>
     window.addEventListener('load', function () {
       var c = document.querySelector('.bk-canvas'), s = document.querySelector('.bk-scroll');
-      var W = parseFloat(c.style.width), H = parseFloat(c.style.height);
-      var head = document.getElementById('printHead').offsetHeight;
-      var k = Math.min(1, 1050 / W, (690 - head) / H);
-      c.style.transformOrigin = 'top left';
-      c.style.transform = 'scale(' + k + ')';
-      c.style.margin = '0';
-      s.style.width = (W * k) + 'px';
-      s.style.height = (H * k) + 'px';
+      if (c && s) {
+        var W = parseFloat(c.style.width) || 1000, H = parseFloat(c.style.height) || 600;
+        var head = document.getElementById('printHead').offsetHeight || 70;
+        var k = Math.min(1, 1020 / W, (660 - head) / H);
+        c.style.zoom = k;
+        s.style.width = (W * k) + 'px';
+        s.style.height = (H * k) + 'px';
+      }
       setTimeout(function () { window.print(); }, 600);
     });
   <\/script>
@@ -2961,16 +2961,6 @@ ${css}
       w.document.open();
       w.document.write(html);
       w.document.close();
-    }
-
-    function clicarChave(id) {
-      if (cenario.ativo) return abrirCenario(id);
-      const p = state.partidas.find(x => x.id == id);
-      if (!p) return;
-      if (!p.equipe_casa_id || !p.equipe_fora_id) {
-        return toast('Este jogo ainda aguarda os vencedores dos jogos anteriores.', 'error');
-      }
-      abrirPlacar(id);
     }
 
     // =========================================================================

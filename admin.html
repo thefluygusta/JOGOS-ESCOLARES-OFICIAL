@@ -1434,12 +1434,10 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
     }
 
     // A Miss vale SÓ para o Futsal Masculino da E. E. Profª Isaura Baia
-function exigeMissCampos(escola, modalidade, categoria) {
-      const escNorm = String(escola || ESCOLAS[0].name).trim().toLowerCase();
-      const ehIsaura = escNorm === ESCOLAS[0].name.trim().toLowerCase() || escNorm.includes('isaura');
-      return ehIsaura &&
-        String(modalidade || 'Futsal').trim().toLowerCase() === 'futsal' &&
-        String(categoria || 'Masculino').trim().toLowerCase() === 'masculino';
+    function exigeMissCampos(escola, modalidade, categoria) {
+      return (escola || ESCOLAS[0].name) === ESCOLAS[0].name &&
+        String(modalidade || 'Futsal').toLowerCase() === 'futsal' &&
+        (categoria || 'Masculino') === 'Masculino';
     }
     function exigeMiss(e) { return !!e && exigeMissCampos(escolaDe(e), e.modalidade, e.categoria); }
 
@@ -1551,18 +1549,14 @@ function exigeMissCampos(escola, modalidade, categoria) {
       }
     }
 
-  $('loginForm').addEventListener('submit', async (e) => {
+    $('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
+      const { error } = await supabaseClient.auth.signInWithPassword({
         email: $('loginEmail').value.trim(),
         password: $('loginPass').value
       });
-      if (error) {
-        toast('Erro no login: ' + error.message, 'error');
-      } else {
-        toast('Bem-vindo, Gustavo!');
-        if (data && data.session) handleSession(data.session);
-      }
+      if (error) toast('Erro no login: ' + error.message, 'error');
+      else toast('Bem-vindo, Gustavo!');
     });
 
     async function logout() {
@@ -1597,11 +1591,10 @@ function exigeMissCampos(escola, modalidade, categoria) {
       renderCampeonatoSelector();
       renderCampeonatosTable();
 
-    const campValido = state.campeonatos.some(c => String(c.id) === String(state.campeonatoId));
-   if (!campValido && state.campeonatos.length > 0) {
-     state.campeonatoId = state.campeonatos[0].id;
-     localStorage.setItem('je_camp_id', state.campeonatoId);
-   }
+      if (!state.campeonatoId && state.campeonatos.length > 0) {
+        state.campeonatoId = state.campeonatos[0].id;
+        localStorage.setItem('je_camp_id', state.campeonatoId);
+      }
       if ($('globalCampSelect')) $('globalCampSelect').value = state.campeonatoId;
       await loadCampData();
     }
@@ -1622,7 +1615,7 @@ function exigeMissCampos(escola, modalidade, categoria) {
         return;
       }
 
- const [eqR, jogR, grpR, geR, partR, notR, premR] = await Promise.all([
+      const [eqR, jogR, grpR, geR, partR, notR, premR] = await Promise.all([
         supabaseClient.from('equipes').select('*').eq('campeonato_id', cid).order('nome'),
         supabaseClient.from('jogadores').select('*').eq('campeonato_id', cid).order('nome'),
         supabaseClient.from('grupos').select('*').eq('campeonato_id', cid).order('nome'),
@@ -1631,9 +1624,6 @@ function exigeMissCampos(escola, modalidade, categoria) {
         supabaseClient.from('noticias').select('*').eq('campeonato_id', cid).order('created_at', { ascending: false }),
         supabaseClient.from('premiacoes').select('*').eq('campeonato_id', cid).order('created_at', { ascending: false })
       ]);
-
-      if (eqR.error) toast('Erro equipes: ' + eqR.error.message, 'error');
-      if (partR.error) toast('Erro partidas: ' + partR.error.message, 'error');
 
       state.equipes = eqR.data || [];
       state.jogadores = jogR.data || [];
@@ -1644,11 +1634,11 @@ function exigeMissCampos(escola, modalidade, categoria) {
       state.noticias = notR.data || [];
       state.premiacoes = premR.data || [];
 
-   renderAll();
+      renderAll();
     }
 
     function renderAll() {
-      const elegiveis = state.equipes.filter(exigeMissCampos);
+      const elegiveis = state.equipes.filter(exigeMiss);
       const comMiss = elegiveis.filter(e => e.miss_nome && e.miss_nome.trim() !== '').length;
       const semMiss = elegiveis.length - comMiss;
       $('statEquipes').textContent = state.equipes.length;

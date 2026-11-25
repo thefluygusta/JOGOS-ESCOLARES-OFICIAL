@@ -1551,14 +1551,18 @@ function exigeMissCampos(escola, modalidade, categoria) {
       }
     }
 
-    $('loginForm').addEventListener('submit', async (e) => {
+  $('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const { error } = await supabaseClient.auth.signInWithPassword({
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
         email: $('loginEmail').value.trim(),
         password: $('loginPass').value
       });
-      if (error) toast('Erro no login: ' + error.message, 'error');
-      else toast('Bem-vindo, Gustavo!');
+      if (error) {
+        toast('Erro no login: ' + error.message, 'error');
+      } else {
+        toast('Bem-vindo, Gustavo!');
+        if (data && data.session) handleSession(data.session);
+      }
     });
 
     async function logout() {

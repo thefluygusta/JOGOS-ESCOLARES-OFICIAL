@@ -53,7 +53,7 @@
       transform: translate(-50%, -50%);
       width: min(68vw, 540px);
       height: min(68vw, 540px);
-      background-image: url('logo.png');
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23131a33' stroke='%233b82f6' stroke-width='3'/><path d='M32 14l14 6v12c0 10-6 17-14 20-8-3-14-10-14-20V20l14-6z' fill='%232563eb' stroke='%23fbbf24' stroke-width='2.5'/></svg>');
       background-repeat: no-repeat;
       background-position: center;
       background-size: contain;
@@ -793,7 +793,7 @@
               <div class="form-group">
                 <label>Escudo da Equipe (Galeria)</label>
                 <div class="upload-box">
-                  <img id="prevEqEscudo" src="logo.png" class="upload-preview" />
+                  <img id="prevEqEscudo" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23131a33' stroke='%233b82f6' stroke-width='3'/><path d='M32 14l14 6v12c0 10-6 17-14 20-8-3-14-10-14-20V20l14-6z' fill='%232563eb' stroke='%23fbbf24' stroke-width='2.5'/></svg>" class="upload-preview" />
                   <div style="flex:1;">
                     <input type="file" id="fileEqEscudo" accept="image/*" onchange="uploadFotoGaleria(this, 'eqEscudoUrl', 'prevEqEscudo')" />
                     <input type="hidden" id="eqEscudoUrl" />
@@ -809,7 +809,7 @@
               <div class="form-group" id="grpMissFoto">
                 <label>👑 Foto da MISS (Galeria)</label>
                 <div class="upload-box">
-                  <img id="prevEqMiss" src="logo.png" class="upload-preview img-contain" />
+                  <img id="prevEqMiss" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23131a33' stroke='%233b82f6' stroke-width='3'/><path d='M32 14l14 6v12c0 10-6 17-14 20-8-3-14-10-14-20V20l14-6z' fill='%232563eb' stroke='%23fbbf24' stroke-width='2.5'/></svg>" class="upload-preview img-contain" />
                   <div style="flex:1;">
                     <input type="file" id="fileEqMiss" accept="image/*" onchange="uploadFotoGaleria(this, 'eqMissFotoUrl', 'prevEqMiss')" />
                     <input type="hidden" id="eqMissFotoUrl" />
@@ -871,7 +871,7 @@
             <div class="form-group">
               <label>Foto do Atleta (Galeria)</label>
               <div class="upload-box">
-                <img id="prevJogFoto" src="logo.png" class="upload-preview" />
+                <img id="prevJogFoto" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23131a33' stroke='%233b82f6' stroke-width='3'/><path d='M32 14l14 6v12c0 10-6 17-14 20-8-3-14-10-14-20V20l14-6z' fill='%232563eb' stroke='%23fbbf24' stroke-width='2.5'/></svg>" class="upload-preview" />
                 <input type="file" accept="image/*" onchange="uploadFotoGaleria(this, 'jogFotoUrl', 'prevJogFoto')" />
                 <input type="hidden" id="jogFotoUrl" />
               </div>
@@ -1217,7 +1217,7 @@
               <div class="form-group">
                 <label>Imagem de Capa (Galeria)</label>
                 <div class="upload-box">
-                  <img id="prevNotImg" src="logo.png" class="upload-preview img-contain" />
+                  <img id="prevNotImg" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23131a33' stroke='%233b82f6' stroke-width='3'/><path d='M32 14l14 6v12c0 10-6 17-14 20-8-3-14-10-14-20V20l14-6z' fill='%232563eb' stroke='%23fbbf24' stroke-width='2.5'/></svg>" class="upload-preview img-contain" />
                   <input type="file" accept="image/*" onchange="uploadFotoGaleria(this, 'notImgUrl', 'prevNotImg')" />
                   <input type="hidden" id="notImgUrl" />
                 </div>
@@ -1947,8 +1947,8 @@ alter table noticias add column if not exists pdf_url text;`;
       $('eqEditId').value = '';
       $('eqEscudoUrl').value = '';
       $('eqMissFotoUrl').value = '';
-      $('prevEqEscudo').src = 'logo.png';
-      $('prevEqMiss').src = 'logo.png';
+      $('prevEqEscudo').src = 'data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23131a33' stroke='%233b82f6' stroke-width='3'/><path d='M32 14l14 6v12c0 10-6 17-14 20-8-3-14-10-14-20V20l14-6z' fill='%232563eb' stroke='%23fbbf24' stroke-width='2.5'/></svg>';
+      $('prevEqMiss').src = 'data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23131a33' stroke='%233b82f6' stroke-width='3'/><path d='M32 14l14 6v12c0 10-6 17-14 20-8-3-14-10-14-20V20l14-6z' fill='%232563eb' stroke='%23fbbf24' stroke-width='2.5'/></svg>';
       $('btnSalvarEquipe').textContent = '💾 Salvar Equipe';
       atualizarCamposMiss();
     }
@@ -2038,7 +2038,7 @@ alter table noticias add column if not exists pdf_url text;`;
       $('jogNumero').value = j.numero ?? '';
       $('jogPosicao').value = j.posicao || '';
       $('jogFotoUrl').value = j.foto_url || '';
-      $('prevJogFoto').src = j.foto_url || 'logo.png';
+      $('prevJogFoto').src = j.foto_url || 'data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23131a33' stroke='%233b82f6' stroke-width='3'/><path d='M32 14l14 6v12c0 10-6 17-14 20-8-3-14-10-14-20V20l14-6z' fill='%232563eb' stroke='%23fbbf24' stroke-width='2.5'/></svg>';
       setEditMode('btnSalvarJog', 'btnCancelJog', true, '💾 Atualizar Atleta', '+ Cadastrar Atleta');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -2047,7 +2047,7 @@ alter table noticias add column if not exists pdf_url text;`;
       $('formJogador').reset();
       $('jogEditId').value = '';
       $('jogFotoUrl').value = '';
-      $('prevJogFoto').src = 'logo.png';
+      $('prevJogFoto').src = 'data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23131a33' stroke='%233b82f6' stroke-width='3'/><path d='M32 14l14 6v12c0 10-6 17-14 20-8-3-14-10-14-20V20l14-6z' fill='%232563eb' stroke='%23fbbf24' stroke-width='2.5'/></svg>';
       setEditMode('btnSalvarJog', 'btnCancelJog', false, '', '+ Cadastrar Atleta');
     }
 
@@ -2057,7 +2057,7 @@ alter table noticias add column if not exists pdf_url text;`;
         const eq = eqMap[j.equipe_id];
         return `
           <tr>
-            <td><img src="${j.foto_url || 'logo.png'}" class="avatar-sm" onerror="this.src='logo.png'"></td>
+            <td><img src="${j.foto_url || 'data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23131a33' stroke='%233b82f6' stroke-width='3'/><path d='M32 14l14 6v12c0 10-6 17-14 20-8-3-14-10-14-20V20l14-6z' fill='%232563eb' stroke='%23fbbf24' stroke-width='2.5'/></svg>'}" class="avatar-sm" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23131a33' stroke='%233b82f6' stroke-width='3'/><path d='M32 14l14 6v12c0 10-6 17-14 20-8-3-14-10-14-20V20l14-6z' fill='%232563eb' stroke='%23fbbf24' stroke-width='2.5'/></svg>'"></td>
             <td><strong>${esc(j.nome)}</strong></td>
             <td>${j.numero ? '#' + j.numero : '-'}</td>
             <td>${esc(j.posicao || '-')}</td>
@@ -3069,7 +3069,7 @@ ${css}
           <td><strong>${idx + 1}º</strong></td>
           <td>
             <div style="display:flex; align-items:center; gap:8px;">
-              <img src="${t.escudo_url || 'logo.png'}" class="avatar-sm" onerror="this.src='logo.png'">
+              <img src="${t.escudo_url || 'data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23131a33' stroke='%233b82f6' stroke-width='3'/><path d='M32 14l14 6v12c0 10-6 17-14 20-8-3-14-10-14-20V20l14-6z' fill='%232563eb' stroke='%23fbbf24' stroke-width='2.5'/></svg>'}" class="avatar-sm" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23131a33' stroke='%233b82f6' stroke-width='3'/><path d='M32 14l14 6v12c0 10-6 17-14 20-8-3-14-10-14-20V20l14-6z' fill='%232563eb' stroke='%23fbbf24' stroke-width='2.5'/></svg>'">
               <strong>${esc(t.nome)}</strong>
             </div>
           </td>
@@ -3118,7 +3118,7 @@ ${css}
       $('notTitulo').value = n.titulo || '';
       $('notConteudo').value = n.conteudo || '';
       $('notImgUrl').value = n.imagem_url || '';
-      $('prevNotImg').src = n.imagem_url || 'logo.png';
+      $('prevNotImg').src = n.imagem_url || 'data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23131a33' stroke='%233b82f6' stroke-width='3'/><path d='M32 14l14 6v12c0 10-6 17-14 20-8-3-14-10-14-20V20l14-6z' fill='%232563eb' stroke='%23fbbf24' stroke-width='2.5'/></svg>';
       $('notPdfUrl').value = n.pdf_url || '';
       $('notPdfInfo').textContent = n.pdf_url ? '✅ PDF já anexado (envie outro para trocar)' : 'Nenhum PDF anexado';
       setEditMode('btnSalvarNot', 'btnCancelNot', true, '💾 Atualizar Notícia', 'Publicar no Site Público');
@@ -3129,7 +3129,7 @@ ${css}
       $('formNoticia').reset();
       $('notEditId').value = '';
       $('notImgUrl').value = '';
-      $('prevNotImg').src = 'logo.png';
+      $('prevNotImg').src = 'data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23131a33' stroke='%233b82f6' stroke-width='3'/><path d='M32 14l14 6v12c0 10-6 17-14 20-8-3-14-10-14-20V20l14-6z' fill='%232563eb' stroke='%23fbbf24' stroke-width='2.5'/></svg>';
       removerPdfNoticia();
       setEditMode('btnSalvarNot', 'btnCancelNot', false, '', 'Publicar no Site Público');
     }

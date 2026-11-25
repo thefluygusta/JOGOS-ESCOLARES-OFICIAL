@@ -1153,7 +1153,7 @@
       });
 
       const map = Object.fromEntries(tabela.map(t => [String(t.id), t]));
-      pubState.partidas.filter(p => p.status === 'finalizada').forEach(p => {
+ pubState.todasPartidas.filter(p => String(p.status || '').trim().toLowerCase() === 'finalizada').forEach(p => {
         const c = map[String(p.equipe_casa_id)];
         const f = map[String(p.equipe_fora_id)];
         if (!c || !f) return;

@@ -2377,7 +2377,7 @@ alter table noticias add column if not exists pdf_url text;`;
         const c = ladoNome(p, 'casa', eqMap);
         const f = ladoNome(p, 'fora', eqMap);
         const d = toBelemDate(p.data_hora);
-        return `
+       return `
           <tr>
             <td>
               <strong style="color:var(--gold);">${p.ordem_jogo ? p.ordem_jogo + 'º Jogo' : '—'}</strong><br>
@@ -2431,33 +2431,79 @@ alter table noticias add column if not exists pdf_url text;`;
       const gc = parseInt($('editGolsCasa').value) || 0;
       const gf = parseInt($('editGolsFora').value) || 0;
       const id = $('editPartId').value;
-      const temSeguinte = state.partidas.some(p => p.origem_casa === 'venc:' + id || p.origem_fora === 'venc:' + id);
+      const temSeguinte = state.partidas.some(p =>
+        p.origem_casa === 'venc:' + id || p.origem_fora === 'venc:' + id ||
+        p.origem_casa === 'perd:' + id || p.origem_fora === 'perd:' + id
+      );
       const mostrar = $('editPartStatus').value === 'finalizada' && gc === gf && temSeguinte;
       $('grpPen').style.display = mostrar ? 'flex' : 'none';
     }
 
-    // Preenche (ou limpa) o vencedor nas partidas seguintes que dependem desta
     async function propagarVencedor(p, gc, gf, status, pen) {
-      const key = 'venc:' + p.id;
-      const dependentes = state.partidas.filter(x => x.origem_casa === key || x.origem_fora === key);
-      if (!dependentes.length) return;
+      const kVenc = 'venc:' + p.id;
+      const kPerd = 'perd:' + p.id;
+      const dependentes = state.partidas.filter(x =>
+        x.origem_casa === kVenc || x.origem_fora === kVenc ||
+        x.origem_casa === kPerd || x.origem_fora === kPerd
+      );
 
       let vencedor = null;
+      let perdedor = null;
       if (status === 'finalizada') {
-        if (gc > gf) vencedor = p.equipe_casa_id;
-        else if (gf > gc) vencedor = p.equipe_fora_id;
-        else if (pen === 'casa') vencedor = p.equipe_casa_id;
-        else if (pen === 'fora') vencedor = p.equipe_fora_id;
-        else toast('Empate: escolha quem avança (pênaltis) para preencher o próximo jogo.', 'error');
+        if (gc > gf) { vencedor = p.equipe_casa_id; perdedor = p.equipe_fora_id; }
+        else if (gf > gc) { vencedor = p.equipe_fora_id; perdedor = p.equipe_casa_id; }
+        else if (pen === 'casa') { vencedor = p.equipe_casa_id; perdedor = p.equipe_fora_id; }
+        else if (pen === 'fora') { vencedor = p.equipe_fora_id; perdedor = p.equipe_casa_id; }
+        else if (dependentes.length) {
+          toast('Empate: escolha quem avança (pênaltis) para preencher o próximo jogo.', 'error');
+        }
       }
 
-      await Promise.all(dependentes.map(x => {
-        const upd = {};
-        if (x.origem_casa === key) upd.equipe_casa_id = vencedor;
-        if (x.origem_fora === key) upd.equipe_fora_id = vencedor;
-        return supabaseClient.from('partidas').update(upd).eq('id', x.id);
-      }));
-      if (vencedor) toast('Vencedor avançou automaticamente para o próximo jogo!');
+      if (dependentes.length) {
+        await Promise.all(dependentes.map(x => {
+          const upd = {};
+          if (x.origem_casa === kVenc) upd.equipe_casa_id = vencedor;
+          if (x.origem_fora === kVenc) upd.equipe_fora_id = vencedor;
+          if (x.origem_casa === kPerd) upd.equipe_casa_id = perdedor;
+          if (x.origem_fora === kPerd) upd.equipe_fora_id = perdedor;
+          return supabaseClient.from('partidas').update(upd).eq('id', x.id);
+        }));
+        if (vencedor) toast('Vencedor e perdedor avançaram automaticamente para a próxima rodada!');
+      }
+
+      await aplicarCruzamentoTerceiraRodada(p, gc, gf, status, vencedor, perdedor);
+    }
+
+    async function aplicarCruzamentoTerceiraRodada(pAtual, gc, gf, status, vencAtual, perdAtual) {
+      const mesmas = state.partidas
+        .filter(x =>
+          (x.modalidade || 'Futsal') === (pAtual.modalidade || 'Futsal') &&
+          (x.categoria || 'Masculino') === (pAtual.categoria || 'Masculino') &&
+          escolaPartida(x) === escolaPartida(pAtual)
+        )
+        .sort((a, b) => (a.ordem_jogo || 999) - (b.ordem_jogo || 999) || String(a.id).localeCompare(String(b.id)));
+
+      if (mesmas.length < 4) return;
+      const j1 = mesmas[0], j2 = mesmas[1], j3 = mesmas[2], j4 = mesmas[3];
+      if (pAtual.id !== j1.id && pAtual.id !== j2.id) return;
+
+      const res = (j) => {
+        if (j.id === pAtual.id) return { v: vencAtual, d: perdAtual };
+        if (j.status !== 'finalizada') return { v: null, d: null };
+        if ((j.gols_casa ?? 0) > (j.gols_fora ?? 0)) return { v: j.equipe_casa_id, d: j.equipe_fora_id };
+        if ((j.gols_fora ?? 0) > (j.gols_casa ?? 0)) return { v: j.equipe_fora_id, d: j.equipe_casa_id };
+        return { v: null, d: null };
+      };
+
+      const r1 = res(j1);
+      const r2 = res(j2);
+      const ups = [];
+      if (r1.v || r2.d) ups.push(supabaseClient.from('partidas').update({ equipe_casa_id: r1.v, equipe_fora_id: r2.d }).eq('id', j3.id));
+      if (r2.v || r1.d) ups.push(supabaseClient.from('partidas').update({ equipe_casa_id: r2.v, equipe_fora_id: r1.d }).eq('id', j4.id));
+      if (ups.length) {
+        await Promise.all(ups);
+        toast('3ª Rodada atualizada (Vencedor J1 x Perdedor J2 e Vencedor J2 x Perdedor J1)!');
+      }
     }
 
     async function salvarPlacar() {
@@ -2482,7 +2528,6 @@ alter table noticias add column if not exists pdf_url text;`;
       loadCampData();
     }
 
-    // Confere todos os jogos de mata-mata e corrige o que estiver fora de sincronia
     async function sincronizarChaveamento(silencioso = false) {
       const ups = [];
       for (const p of state.partidas) {
@@ -2490,14 +2535,16 @@ alter table noticias add column if not exists pdf_url text;`;
         for (const [lado, campo] of [['casa', 'equipe_casa_id'], ['fora', 'equipe_fora_id']]) {
           const og = p['origem_' + lado];
           if (!og) continue;
-          const src = state.partidas.find(x => 'venc:' + x.id === og);
+          const isPerd = og.startsWith('perd:');
+          const srcId = og.replace(/^(venc|perd):/, '');
+          const src = state.partidas.find(x => String(x.id) === srcId);
           if (!src) continue;
-          let w;
-          if (src.status !== 'finalizada') w = null;
-          else if ((src.gols_casa ?? 0) > (src.gols_fora ?? 0)) w = src.equipe_casa_id;
-          else if ((src.gols_fora ?? 0) > (src.gols_casa ?? 0)) w = src.equipe_fora_id;
-          else continue; // empate: mantém o que foi escolhido nos pênaltis
-          if ((p[campo] || null) !== (w || null)) upd[campo] = w || null;
+          let alvo;
+          if (src.status !== 'finalizada') alvo = null;
+          else if ((src.gols_casa ?? 0) > (src.gols_fora ?? 0)) alvo = isPerd ? src.equipe_fora_id : src.equipe_casa_id;
+          else if ((src.gols_fora ?? 0) > (src.gols_casa ?? 0)) alvo = isPerd ? src.equipe_casa_id : src.equipe_fora_id;
+          else continue;
+          if ((p[campo] || null) !== (alvo || null)) upd[campo] = alvo || null;
         }
         if (Object.keys(upd).length) ups.push({ id: p.id, upd });
       }

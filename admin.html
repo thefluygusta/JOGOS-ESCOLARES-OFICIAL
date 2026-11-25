@@ -1435,9 +1435,11 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
 
     // A Miss vale SÓ para o Futsal Masculino da E. E. Profª Isaura Baia
 function exigeMissCampos(escola, modalidade, categoria) {
-      return (escola || ESCOLAS[0].name) === ESCOLAS[0].name &&
-        String(modalidade || 'Futsal').toLowerCase() === 'futsal' &&
-        (categoria || 'Masculino') === 'Masculino';
+      const escNorm = String(escola || ESCOLAS[0].name).trim().toLowerCase();
+      const ehIsaura = escNorm === ESCOLAS[0].name.trim().toLowerCase() || escNorm.includes('isaura');
+      return ehIsaura &&
+        String(modalidade || 'Futsal').trim().toLowerCase() === 'futsal' &&
+        String(categoria || 'Masculino').trim().toLowerCase() === 'masculino';
     }
     function exigeMiss(e) { return !!e && exigeMissCampos(escolaDe(e), e.modalidade, e.categoria); }
 

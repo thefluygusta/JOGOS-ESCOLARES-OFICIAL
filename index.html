@@ -50,7 +50,7 @@
       transform: translate(-50%, -50%);
       width: min(78vw, 560px);
       height: min(78vw, 560px);
-      background-image: url('logo.png');
+      background-image: url('./istockphoto-1440837734-612x612.jpg');
       background-repeat: no-repeat;
       background-position: center;
       background-size: contain;
@@ -649,7 +649,7 @@
 
   <footer>
     <div class="container">
-      <img src="logo.png" alt="Brasão" style="width:52px; height:52px; border-radius:50%; background:#fff; padding:2px; margin-bottom:8px;" onerror="this.style.display='none'">
+      <img src="./istockphoto-1440837734-612x612.jpg" alt="Brasão" style="width:52px; height:52px; border-radius:50%; background:#fff; padding:2px; margin-bottom:8px;" onerror="this.style.display='none'">
       <div style="font-weight:800; font-size:0.95rem;">JOGOS ESCOLARES — E. E. Profª Isaura Baia / E. E. Benedita Marilda da Silva Braga</div>
       <div style="color:var(--muted); font-size:0.82rem; margin-top:4px;">Mocajuba - Pará • Futsal • Handebol • Vôlei</div>
       <div class="creator-sign">⚡ Plataforma criada por <strong>Gustavo Nunes</strong></div>
@@ -876,15 +876,15 @@
       if (id && eqMap[id]) {
         const e = eqMap[id];
         const info = escolaInfo(escolaDe(e));
-        return { nome: e.nome, img: e.escudo_url || 'logo.png', tbd: false, sub: mostrarEscola && info ? info.curta : '' };
+        return { nome: e.nome, img: e.escudo_url || './istockphoto-1440837734-612x612.jpg', tbd: false, sub: mostrarEscola && info ? info.curta : '' };
       }
       if (og) {
         const id2 = String(og).replace(/^(venc|perd):/, '');
         const src = listaPartidas.find(x => String(x.id) === id2);
         const info = src ? escolaInfo(escolaPartida(src, listaEquipes)) : null;
-        return { nome: origemLabel(og, listaPartidas), img: info ? info.brasao : 'logo.png', tbd: true, sub: info ? info.curta : '' };
+        return { nome: origemLabel(og, listaPartidas), img: info ? info.brasao : './istockphoto-1440837734-612x612.jpg', tbd: true, sub: info ? info.curta : '' };
       }
-      return { nome: lado === 'casa' ? 'Mandante' : 'Visitante', img: 'logo.png', tbd: true, sub: '' };
+      return { nome: lado === 'casa' ? 'Mandante' : 'Visitante', img: './istockphoto-1440837734-612x612.jpg', tbd: true, sub: '' };
     }
 
     function cardPartida(p, eqMap, isFinal, opcoes = {}) {
@@ -903,7 +903,7 @@
 
       const lado = (x) => `
         <div class="team-col">
-          <img src="${x.img}" class="${x.tbd ? 'tbd-img' : ''}" onerror="this.src='logo.png'">
+          <img src="${x.img}" class="${x.tbd ? 'tbd-img' : ''}" onerror="this.src='./istockphoto-1440837734-612x612.jpg'">
           <strong style="font-size:0.86rem;" class="${x.tbd ? 'tbd-name' : ''}">${esc(x.nome)}</strong>
           ${x.sub ? `<span class="team-escola">${esc(x.sub)}</span>` : ''}
         </div>`;
@@ -1179,7 +1179,7 @@
           <td><strong>${i + 1}º</strong></td>
           <td>
             <div style="display:flex; align-items:center; gap:9px;">
-              <img src="${t.escudo_url || 'logo.png'}" class="avatar-sm" onerror="this.src='logo.png'">
+              <img src="${t.escudo_url || './istockphoto-1440837734-612x612.jpg'}" class="avatar-sm" onerror="this.src='./istockphoto-1440837734-612x612.jpg'">
               <strong>${esc(t.nome)}</strong>
             </div>
           </td>
@@ -1227,7 +1227,7 @@
       );
       document.getElementById('pubMissGrid').innerHTML = comMiss.map(e => `
         <div class="miss-card">
-          <img src="${e.miss_foto || e.miss_foto_url || e.escudo_url || 'logo.png'}" class="miss-photo" onerror="this.src='logo.png'">
+          <img src="${e.miss_foto || e.miss_foto_url || e.escudo_url || './istockphoto-1440837734-612x612.jpg'}" class="miss-photo" onerror="this.src='./istockphoto-1440837734-612x612.jpg'">
           <div style="padding:16px;">
             <span class="badge b-gold" style="margin-bottom:8px;">👑 MISS OFICIAL</span>
             <h3 style="font-size:1.1rem; margin-bottom:4px;">${esc(e.miss_nome)}</h3>
@@ -1242,7 +1242,7 @@
         return `
           <div class="match-card">
             <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-              <img src="${e.escudo_url || 'logo.png'}" class="avatar-sm" style="width:46px; height:46px;" onerror="this.src='logo.png'">
+              <img src="${e.escudo_url || './istockphoto-1440837734-612x612.jpg'}" class="avatar-sm" style="width:46px; height:46px;" onerror="this.src='./istockphoto-1440837734-612x612.jpg'">
               <div>
                 <strong>${esc(e.nome)}</strong>
                 <div style="font-size:0.78rem; color:var(--gold);">
@@ -1254,7 +1254,7 @@
             <div style="display:flex; flex-wrap:wrap; gap:8px;">
               ${jogs.map(j => `
                 <div style="display:inline-flex; align-items:center; gap:7px; padding:4px 10px 4px 5px; border-radius:999px; background:rgba(37,99,235,0.2); border:1px solid rgba(59,130,246,0.38);">
-                  <img src="${esc(j.foto_url || 'logo.png')}" class="avatar-sm" style="width:28px; height:28px;" alt="${esc(j.nome)}" onerror="this.src='logo.png'">
+                  <img src="${esc(j.foto_url || './istockphoto-1440837734-612x612.jpg')}" class="avatar-sm" style="width:28px; height:28px;" alt="${esc(j.nome)}" onerror="this.src='./istockphoto-1440837734-612x612.jpg'">
                   <span style="font-size:0.78rem; font-weight:700; color:#e2e8f0;">${j.numero ? '#' + esc(j.numero) + ' ' : ''}${esc(j.nome)}</span>
                 </div>
               `).join('') || '<span style="color:var(--muted); font-size:0.8rem;">Elenco em atualização</span>'}

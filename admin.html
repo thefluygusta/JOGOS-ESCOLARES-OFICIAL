@@ -2216,6 +2216,7 @@ alter table noticias add column if not exists pdf_url text;`;
     });
 
     function filtrarEquipesPartida() {
+      const norm = v => String(v || '').trim().toLowerCase();
       const escola = $('partEscola').value;
       const mod = $('partModalidade').value;
       const cat = $('partCategoria').value;
@@ -2225,32 +2226,39 @@ alter table noticias add column if not exists pdf_url text;`;
       const curF = $('partFora').value;
       const eqMap = Object.fromEntries(state.equipes.map(e => [e.id, e]));
 
-      const equipes = state.equipes.filter(e =>
-        (e.modalidade || 'Futsal') === mod &&
-        (e.categoria || 'Masculino') === cat &&
-        (isFinal || escolaDe(e) === escola)
+      const equipesFiltradas = state.equipes.filter(e =>
+        norm(e.modalidade || 'Futsal') === norm(mod) &&
+        norm(e.categoria || 'Masculino') === norm(cat) &&
+        (isFinal || norm(escolaDe(e)) === norm(escola))
       );
+
+      const equipesExibir = equipesFiltradas.length ? equipesFiltradas : state.equipes;
+      const labelEq = equipesFiltradas.length
+        ? 'Equipes'
+        : 'Todas as equipes cadastradas (nenhuma na combinação exata)';
 
       const origens = ordenarPartidas(state.partidas.filter(p =>
         p.id != editId &&
-        (p.modalidade || 'Futsal') === mod &&
-        (p.categoria || 'Masculino') === cat &&
+        norm(p.modalidade || 'Futsal') === norm(mod) &&
+        norm(p.categoria || 'Masculino') === norm(cat) &&
         escolaPartida(p) !== ESCOLA_FINAL &&
-        (isFinal || escolaPartida(p) === escola)
+        (isFinal || norm(escolaPartida(p)) === norm(escola))
       ));
 
-      const grpEq = equipes.length
-        ? `<optgroup label="Equipes">${equipes.map(e => {
+      const grpEq = equipesExibir.length
+        ? `<optgroup label="${labelEq}">${equipesExibir.map(e => {
             const info = escolaInfo(escolaDe(e));
-            return `<option value="${e.id}">${esc(e.nome)}${isFinal && info ? ' — ' + esc(info.curta) : ''}</option>`;
+            const mostrarEsc = isFinal || !equipesFiltradas.length;
+            return `<option value="${e.id}">${esc(e.nome)}${mostrarEsc && info ? ' — ' + esc(info.curta) : ''} (${esc(e.modalidade || 'Futsal')} • ${esc(e.categoria || 'Masculino')})</option>`;
           }).join('')}</optgroup>`
         : '';
       const grpOr = origens.length
-        ? `<optgroup label="Chaveamento (mata-mata)">${origens.map(p =>
-            `<option value="venc:${p.id}">🏆 Vencedor do ${p.ordem_jogo ? p.ordem_jogo + 'º' : '?'} Jogo — ${esc(ladoNome(p, 'casa', eqMap))} x ${esc(ladoNome(p, 'fora', eqMap))}</option>`
-          ).join('')}</optgroup>`
+        ? `<optgroup label="Chaveamento (mata-mata)">${origens.map(p => {
+            const desc = `${p.ordem_jogo ? p.ordem_jogo + 'º' : '?'} Jogo — ${esc(ladoNome(p, 'casa', eqMap))} x ${esc(ladoNome(p, 'fora', eqMap))}`;
+            return `<option value="venc:${p.id}">🏆 Vencedor do ${desc}</option><option value="perd:${p.id}">🥈 Perdedor do ${desc}</option>`;
+          }).join('')}</optgroup>`
         : '';
-      const html = (grpEq + grpOr) || '<option value="">Nenhuma equipe nesta escola/modalidade/naipe</option>';
+      const html = (grpEq + grpOr) || '<option value="">Nenhuma equipe cadastrada no sistema</option>';
 
       $('partCasa').innerHTML = html;
       $('partFora').innerHTML = html;
@@ -3224,20 +3232,29 @@ ${css}
       `).join('');
     }
 
-    $('formPremiacao').addEventListener('submit', async (e) => {
+ $('formPremiacao').addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!state.campeonatoId) return;
+      if (!state.campeonatoId) return toast('Selecione um campeonato primeiro.', 'error');
+      const titulo = $('premTitulo').value.trim();
+      if (!titulo) return toast('Informe o título do prêmio.', 'error');
+      const eqVal = $('premEquipe').value;
       const editId = $('premEditId').value;
       const payload = {
         campeonato_id: state.campeonatoId,
-        titulo: $('premTitulo').value.trim(),
-        equipe_id: $('premEquipe').value || null,
+        titulo,
+        equipe_id: eqVal ? (isNaN(Number(eqVal)) ? eqVal : Number(eqVal)) : null,
         descricao: $('premDescricao').value.trim() || null
       };
-      const res = editId
+      let res = editId
         ? await supabaseClient.from('premiacoes').update(payload).eq('id', editId)
         : await supabaseClient.from('premiacoes').insert([payload]);
-      if (res.error) return toast('Erro: ' + res.error.message, 'error');
+      if (res.error && res.error.message && res.error.message.includes('equipe_id')) {
+        return toast('Selecione uma Equipe Vencedora (campo obrigatório no banco).', 'error');
+      }
+      if (res.error) {
+        console.error('Erro premiacoes:', res.error);
+        return toast('Erro ao salvar premiação: ' + res.error.message, 'error');
+      }
       toast(editId ? 'Premiação atualizada!' : 'Premiação salva!');
       resetFormPremiacao();
       loadCampData();

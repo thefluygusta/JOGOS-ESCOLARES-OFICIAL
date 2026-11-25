@@ -1622,7 +1622,7 @@ function exigeMissCampos(escola, modalidade, categoria) {
         return;
       }
 
-      const [eqR, jogR, grpR, geR, partR, notR, premR] = await Promise.all([
+ const [eqR, jogR, grpR, geR, partR, notR, premR] = await Promise.all([
         supabaseClient.from('equipes').select('*').eq('campeonato_id', cid).order('nome'),
         supabaseClient.from('jogadores').select('*').eq('campeonato_id', cid).order('nome'),
         supabaseClient.from('grupos').select('*').eq('campeonato_id', cid).order('nome'),
@@ -1631,6 +1631,9 @@ function exigeMissCampos(escola, modalidade, categoria) {
         supabaseClient.from('noticias').select('*').eq('campeonato_id', cid).order('created_at', { ascending: false }),
         supabaseClient.from('premiacoes').select('*').eq('campeonato_id', cid).order('created_at', { ascending: false })
       ]);
+
+      if (eqR.error) toast('Erro equipes: ' + eqR.error.message, 'error');
+      if (partR.error) toast('Erro partidas: ' + partR.error.message, 'error');
 
       state.equipes = eqR.data || [];
       state.jogadores = jogR.data || [];
@@ -1642,7 +1645,6 @@ function exigeMissCampos(escola, modalidade, categoria) {
       state.premiacoes = premR.data || [];
 
       renderAll();
-    }
 
     function renderAll() {
       const elegiveis = state.equipes.filter(exigeMiss);

@@ -1417,21 +1417,41 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
     const ESCOLA_FINAL = 'Final Interescolar';
     const TZ = 'America/Belem';
 
-    function escolaInfo(nome) { return ESCOLAS.find(x => x.nome === nome) || null; }
-    function escolaDe(eq) { return (eq && eq.escola) || ESCOLAS[0].nome; }
+  function escolaInfo(nome) {
+      if (!nome) return null;
+      const n = String(nome).toLowerCase();
+      if (n.includes('benedita')) return ESCOLAS[1];
+      if (n.includes('isaura')) return ESCOLAS[0];
+      return ESCOLAS.find(x => x.name === nome || x.curta === nome) || null;
+    }
+
+    function escolaDe(eq) {
+      if (!eq || !eq.escola) return ESCOLAS[0].name;
+      const info = escolaInfo(eq.escola);
+      return info ? info.name : eq.escola;
+    }
 
     // A Miss vale SÓ para o Futsal Masculino da E. E. Profª Isaura Baia
     function exigeMissCampos(escola, modalidade, categoria) {
-      return (escola || ESCOLAS[0].nome) === ESCOLAS[0].nome &&
+      return (escola || ESCOLAS[0].name) === ESCOLAS[0].name &&
         String(modalidade || 'Futsal').toLowerCase() === 'futsal' &&
         (categoria || 'Masculino') === 'Masculino';
     }
     function exigeMiss(e) { return !!e && exigeMissCampos(escolaDe(e), e.modalidade, e.categoria); }
 
     function escolaPartida(p) {
-      if (p.escola) return p.escola;
       const c = state.equipes.find(e => e.id == p.equipe_casa_id);
-      return escolaDe(c);
+      const f = state.equipes.find(e => e.id == p.equipe_fora_id);
+      const escC = c ? escolaDe(c) : null;
+      const escF = f ? escolaDe(f) : null;
+
+      if (p.escola === ESCOLA_FINAL || (escC && escF && escC !== escF)) {
+        return ESCOLA_FINAL;
+      }
+      if (escC) return escC;
+      if (escF) return escF;
+      const infoSalva = escolaInfo(p.escola);
+      return infoSalva ? infoSalva.name : ESCOLAS[0].name;
     }
 
     function escolaBadge(nome) {

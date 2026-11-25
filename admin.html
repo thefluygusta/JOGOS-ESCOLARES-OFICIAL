@@ -1644,10 +1644,11 @@ function exigeMissCampos(escola, modalidade, categoria) {
       state.noticias = notR.data || [];
       state.premiacoes = premR.data || [];
 
-      renderAll();
+   renderAll();
+    }
 
     function renderAll() {
-      const elegiveis = state.equipes.filter(exigeMiss);
+      const elegiveis = state.equipes.filter(exigeMissCampos);
       const comMiss = elegiveis.filter(e => e.miss_nome && e.miss_nome.trim() !== '').length;
       const semMiss = elegiveis.length - comMiss;
       $('statEquipes').textContent = state.equipes.length;

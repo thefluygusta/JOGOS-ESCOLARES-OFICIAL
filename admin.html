@@ -1680,7 +1680,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
 
       const eqOpts = state.equipes.map(e => {
         const info = escolaInfo(escolaDe(e));
-        return `<option value="${e.id}">${esc(e.name)} (${e.modalidade || 'Futsal'} • ${e.categoria || 'Masculino'} • ${esc(info ? info.sigla : '')})</option>`;
+     return `<option value="${e.id}">${esc(e.nome || e.name)} (${e.modalidade || 'Futsal'} • ${e.categoria || 'Masculino'} • ${esc(info ? info.short : '')})</option>`;
       }).join('');
 
       $('jogEquipe').innerHTML = eqOpts || '<option value="">Cadastre uma equipe primeiro</option>';

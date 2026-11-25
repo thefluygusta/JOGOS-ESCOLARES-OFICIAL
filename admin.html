@@ -1597,10 +1597,11 @@ function exigeMissCampos(escola, modalidade, categoria) {
       renderCampeonatoSelector();
       renderCampeonatosTable();
 
-      if (!state.campeonatoId && state.campeonatos.length > 0) {
-        state.campeonatoId = state.campeonatos[0].id;
-        localStorage.setItem('je_camp_id', state.campeonatoId);
-      }
+    const campValido = state.campeonatos.some(c => String(c.id) === String(state.campeonatoId));
+   if (!campValido && state.campeonatos.length > 0) {
+     state.campeonatoId = state.campeonatos[0].id;
+     localStorage.setItem('je_camp_id', state.campeonatoId);
+   }
       if ($('globalCampSelect')) $('globalCampSelect').value = state.campeonatoId;
       await loadCampData();
     }

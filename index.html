@@ -1112,7 +1112,7 @@
         <svg class="bk-lines" width="${W}" height="${totalH}">${paths}</svg>${headers}${centro}${boxes}</div></div>`;
     }
 
-    function renderPublico() {
+  function renderPublico() {
       renderProgramacaoGeral();
       renderChavePublica();
       document.getElementById('ruleMiss').style.display = exigeMissCampos(pubState.escola, pubState.mod, pubState.cat) ? 'block' : 'none';
@@ -1120,10 +1120,12 @@
       const escCurta = escInfo ? escInfo.curta : pubState.escola;
       document.getElementById('lblFiltroAtual').textContent = `${escCurta} • ${pubState.mod} • ${pubState.cat}`;
 
-      const eqFiltradas = pubState.equipes.filter(e =>
-        escolaDe(e) === pubState.escola &&
-        norm(e.modalidade || 'futsal') === norm(pubState.mod) &&
-        norm(e.categoria || 'masculino') === norm(pubState.cat)
+      const daModCat = (item) =>
+        norm(item.modalidade || 'futsal') === norm(pubState.mod) &&
+        norm(item.categoria || 'masculino') === norm(pubState.cat);
+
+      const eqFiltradas = pubState.todasEquipes.filter(e =>
+        escolaDe(e) === pubState.escola && daModCat(e)
       );
 
       const tabela = eqFiltradas.map(e => {
@@ -1133,20 +1135,22 @@
         return { ...e, isFutsal, temMiss, pts: pen, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 };
       });
 
-      const map = Object.fromEntries(tabela.map(t => [t.id, t]));
-      pubState.partidas.filter(p => p.status === 'finalizada').forEach(p => {
-        const c = map[p.equipe_casa_id];
-        const f = map[p.equipe_fora_id];
-        if (!c || !f) return;
-        const gc = p.gols_casa ?? 0;
-        const gf = p.gols_fora ?? 0;
-        c.j++; f.j++;
-        c.gp += gc; c.gc += gf;
-        f.gp += gf; f.gc += gc;
-        if (gc > gf) { c.v++; c.pts += 3; f.d++; }
-        else if (gf > gc) { f.v++; f.pts += 3; c.d++; }
-        else { c.e++; f.e++; c.pts += 1; f.pts += 1; }
-      });
+      const map = Object.fromEntries(tabela.map(t => [String(t.id), t]));
+      pubState.todasPartidas
+        .filter(p => (p.status === 'finalizada' || p.status === 'ao_vivo') && daModCat(p))
+        .forEach(p => {
+          const c = map[String(p.equipe_casa_id)];
+          const f = map[String(p.equipe_fora_id)];
+          if (!c || !f) return;
+          const gc = Number(p.gols_casa ?? 0);
+          const gf = Number(p.gols_fora ?? 0);
+          c.j++; f.j++;
+          c.gp += gc; c.gc += gf;
+          f.gp += gf; f.gc += gc;
+          if (gc > gf) { c.v++; c.pts += 3; f.d++; }
+          else if (gf > gc) { f.v++; f.pts += 3; c.d++; }
+          else { c.e++; f.e++; c.pts += 1; f.pts += 1; }
+        });
 
       tabela.forEach(t => t.sg = t.gp - t.gc);
       tabela.sort((a, b) => b.pts - a.pts || b.v - a.v || b.sg - a.sg || b.gp - a.gp);
@@ -1172,12 +1176,9 @@
         </tr>
       `).join('') || '<tr><td colspan="11">Nenhuma equipe cadastrada nesta escola e categoria ainda.</td></tr>';
 
-      const eqAllMap = Object.fromEntries(pubState.todasEquipes.map(e => [e.id, e]));
-      const daModCat = (p) =>
-        norm(p.modalidade || 'futsal') === norm(pubState.mod) &&
-        norm(p.categoria || 'masculino') === norm(pubState.cat);
+      const eqAllMap = Object.fromEntries(pubState.todasEquipes.map(e => [String(e.id), e]));
 
-      const partsEscola = pubState.partidas.filter(p =>
+      const partsEscola = pubState.todasPartidas.filter(p =>
         daModCat(p) && escolaPartida(p, pubState.todasEquipes) === pubState.escola
       );
 
@@ -1210,7 +1211,7 @@
       `).join('') || '<p style="color:var(--muted);">Nenhuma Miss cadastrada ainda.</p>';
 
       document.getElementById('pubEquipesGrid').innerHTML = eqFiltradas.map(e => {
-        const jogs = pubState.jogadores.filter(j => j.equipe_id === e.id);
+        const jogs = pubState.jogadores.filter(j => String(j.equipe_id) === String(e.id));
         return `
           <div class="match-card">
             <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
@@ -1238,7 +1239,7 @@
       document.getElementById('pubPremGrid').innerHTML = pubState.premiacoes.map(pr => `
         <div class="match-card" style="border-color:rgba(251,191,36,0.4);">
           <div style="color:var(--gold); font-weight:800; font-size:1rem;">🏆 ${esc(pr.titulo)}</div>
-          <div style="margin-top:6px; font-weight:700;">${pr.equipe_id && eqAllMap[pr.equipe_id] ? esc(eqAllMap[pr.equipe_id].nome) : ''}</div>
+          <div style="margin-top:6px; font-weight:700;">${pr.equipe_id && eqAllMap[String(pr.equipe_id)] ? esc(eqAllMap[String(pr.equipe_id)].nome) : ''}</div>
           <div style="color:var(--muted); font-size:0.84rem; margin-top:4px;">${esc(pr.descricao || '')}</div>
         </div>
       `).join('') || '<p style="color:var(--muted);">Premiações serão divulgadas em breve.</p>';

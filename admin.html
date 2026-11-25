@@ -1425,10 +1425,12 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       return ESCOLAS.find(x => x.name === nome || x.curta === nome) || null;
     }
 
-    function escolaDe(eq) {
-      if (!eq || !eq.escola) return ESCOLAS[0].name;
-      const info = escolaInfo(eq.escola);
-      return info ? info.name : eq.escola;
+ function escolaDe(eq) {
+      if (!eq) return ESCOLAS[0].name;
+      const raw = String(eq.escola || '').trim();
+      if (!raw) return ESCOLAS[0].name;
+      const info = escolaInfo(raw);
+      return info ? info.name : ESCOLAS[0].name;
     }
 
     // A Miss vale SÓ para o Futsal Masculino da E. E. Profª Isaura Baia
@@ -1440,8 +1442,12 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
     function exigeMiss(e) { return !!e && exigeMissCampos(escolaDe(e), e.modalidade, e.categoria); }
 
     function escolaPartida(p) {
-      const c = state.equipes.find(e => e.id == p.equipe_casa_id);
-      const f = state.equipes.find(e => e.id == p.equipe_fora_id);
+      if (!p) return ESCOLAS[0].name;
+      const idCasa = p.equipe_casa_id ?? p.equipe_a_id ?? p.time1_id;
+      const idFora = p.equipe_fora_id ?? p.equipe_b_id ?? p.time2_id;
+      const c = state.equipes.find(e => e.id == idCasa);
+      const f = state.equipes.find(e => e.id == idFora);
+
       const escC = c ? escolaDe(c) : null;
       const escF = f ? escolaDe(f) : null;
 
@@ -1450,17 +1456,16 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       }
       if (escC) return escC;
       if (escF) return escF;
+
       const infoSalva = escolaInfo(p.escola);
       return infoSalva ? infoSalva.name : ESCOLAS[0].name;
     }
 
     function escolaBadge(nome) {
       if (nome === ESCOLA_FINAL) return '<span class="badge b-gold">🏆 Final Interescolar</span>';
-      const info = escolaInfo(nome);
-      if (!info) return `<span class="badge b-blue">${esc(nome)}</span>`;
+      const info = escolaInfo(nome) || ESCOLAS[0];
       return `<span class="badge b-blue"><img src="${info.brasao}" class="brasao-mini" onerror="this.style.display='none'">${esc(info.curta)}</span>`;
     }
-
     // Converte o valor salvo no banco para Date, tratando "sem fuso" como horário de Belém (UTC-3)
     function toBelemDate(s) {
       if (!s) return null;

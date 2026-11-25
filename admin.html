@@ -1686,8 +1686,7 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       $('jogEquipe').innerHTML = eqOpts || '<option value="">Cadastre uma equipe primeiro</option>';
       $('vincEquipeId').innerHTML = eqOpts;
       $('premEquipe').innerHTML = '<option value="">Nenhuma / Geral</option>' + eqOpts;
-      $('vincGrupoId').innerHTML = state.grupos.map(g => `<option value="${g.id}">${esc(g.name)}</option>`).join('');
-
+ $('vincGrupoId').innerHTML = state.grupos.map(g => `<option value="${g.id}">${esc(g.nome || g.name)}</option>`).join('');
       const eqMap = Object.fromEntries(state.equipes.map(e => [e.id, e]));
       const chavesDinamicas = state.grupos.map(g => {
         const eqsDoGrupo = (state.grupoEquipes || [])

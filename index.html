@@ -859,11 +859,15 @@
       renderPublico();
     }
 
-    function origemLabel(origem, listaPartidas = pubState.partidas) {
-      if (!origem) return null;
-      const id = String(origem).replace(/^venc:/, '');
-      const src = listaPartidas.find(x => String(x.id) === id);
-      return src ? `Vencedor do ${src.ordem_jogo ? src.ordem_jogo + 'º' : '?'} Jogo` : 'Vencedor a definir';
+   function origemLabel(og, listaPartidas = pubState.partidas) {
+      if (!og) return '';
+      const s = String(og);
+      const isPerd = s.startsWith('perd:');
+      const id = s.replace(/^(venc|perd):/, '');
+      const p = listaPartidas.find(x => String(x.id) === id);
+      const prefixo = isPerd ? 'Perdedor do ' : 'Vencedor do ';
+      if (!p) return prefixo + 'jogo anterior';
+      return prefixo + (p.ordem_jogo ? p.ordem_jogo + 'º Jogo' : 'jogo anterior');
     }
 
     function ladoInfo(p, lado, eqMap, mostrarEscola, listaPartidas = pubState.partidas, listaEquipes = pubState.equipes) {
@@ -875,7 +879,7 @@
         return { nome: e.nome, img: e.escudo_url || 'logo.png', tbd: false, sub: mostrarEscola && info ? info.curta : '' };
       }
       if (og) {
-        const id2 = String(og).replace(/^venc:/, '');
+        const id2 = String(og).replace(/^(venc|perd):/, '');
         const src = listaPartidas.find(x => String(x.id) === id2);
         const info = src ? escolaInfo(escolaPartida(src, listaEquipes)) : null;
         return { nome: origemLabel(og, listaPartidas), img: info ? info.brasao : 'logo.png', tbd: true, sub: info ? info.curta : '' };
@@ -999,14 +1003,15 @@
       }) || '<p style="color:var(--muted);">Nenhum jogo encontrado para este filtro.</p>';
     }
 
-    function renderChavePublica() {
+   function renderChavePublica() {
       const wrap = document.getElementById('pubChaveWrap');
       if (!wrap) return;
       document.getElementById('lblChaveFiltro').textContent = `${pubState.mod} • ${pubState.cat}`;
       const eqMap = Object.fromEntries(pubState.todasEquipes.map(e => [e.id, e]));
+      const cleanRef = (o) => String(o).replace(/^(venc|perd):/, '');
       const all = pubState.todasPartidas.filter(p =>
         (p.modalidade || 'Futsal') === pubState.mod && (p.categoria || 'Masculino') === pubState.cat &&
-        (p.origem_casa || p.origem_fora || pubState.todasPartidas.some(x => x.origem_casa === 'venc:' + p.id || x.origem_fora === 'venc:' + p.id) || escolaPartida(p, pubState.todasEquipes) === ESCOLA_FINAL)
+        (p.origem_casa || p.origem_fora || pubState.todasPartidas.some(x => (x.origem_casa && cleanRef(x.origem_casa) === String(p.id)) || (x.origem_fora && cleanRef(x.origem_fora) === String(p.id))) || escolaPartida(p, pubState.todasEquipes) === ESCOLA_FINAL)
       );
       if (!all.length) {
         wrap.innerHTML = '<p style="color:var(--muted); padding:16px;">O chaveamento desta modalidade e categoria ainda não foi publicado.</p>';
@@ -1015,9 +1020,9 @@
 
       const byId = {};
       all.forEach(p => { byId[String(p.id)] = p; });
-      const BW = 190, BH = 58, GAP = 50, COLW = BW + GAP, SLOT = BH + 30, TOP = 80;
+      const BW = 250, BH = 74, GAP = 56, COLW = BW + GAP, SLOT = BH + 36, TOP = 88;
       const srcIds = (p, ids) => [p.origem_casa, p.origem_fora].filter(Boolean)
-        .map(o => String(o).replace(/^venc:/, '')).filter(id => ids.has(id));
+        .map(cleanRef).filter(id => ids.has(id));
 
       function layout(list) {
         const ids = new Set(list.map(p => String(p.id)));
@@ -1052,8 +1057,8 @@
       const H = Lmax * SLOT;
       const x0 = Rmax * COLW;
       const startR = x0 + BW + GAP;
-      const W = startR + (Rmax - 1) * COLW + BW + 10;
-      const totalH = TOP + H + 150;
+      const W = startR + (Rmax - 1) * COLW + BW + 16;
+      const totalH = TOP + H + 160;
 
       const pos = {};
       sides.forEach((s, si) => {
@@ -1074,7 +1079,7 @@
       Object.values(pos).forEach(m => {
         [[m.p.origem_casa, 0.25], [m.p.origem_fora, 0.75]].forEach(([og, frac]) => {
           if (!og) return;
-          const s = pos[String(og).replace(/^venc:/, '')];
+          const s = pos[cleanRef(og)];
           if (!s) return;
           const y1 = s.top + BH / 2, y2 = m.top + BH * frac;
           const x1 = s.x < m.x ? s.x + BW : s.x;
@@ -1092,17 +1097,17 @@
         const row = (lado) => {
           const x = ladoInfo(p, lado, eqMap, false, pubState.todasPartidas, pubState.todasEquipes);
           const sc = (fin || p.status === 'ao_vivo') ? (lado === 'casa' ? gc : gf) : '';
-          return `<div class="bk-row ${x.tbd ? 'bk-tbd' : ''} ${win === lado ? 'bk-win' : ''}"><span class="bk-n" title="${esc(x.nome)}">${esc(x.nome)}</span><b class="bk-s">${sc}</b></div>`;
+          return `<div class="bk-row ${x.tbd ? 'bk-tbd' : ''} ${win === lado ? 'bk-win' : ''}" style="font-size:0.92rem;"><span class="bk-n" title="${esc(x.nome)}">${esc(x.nome)}</span><b class="bk-s">${sc}</b></div>`;
         };
         const d = toBelemDate(p.data_hora);
         const tag = `${p.ordem_jogo ? p.ordem_jogo + 'º Jogo' : 'Jogo'}${p.turno ? ' • ' + p.turno : ''}${d ? ' • ' + fmtDiaCurto(d) + ' ' + fmtHora(d) : ''}`;
-        return `<div class="bk-box ${m.final ? 'bk-final' : ''}" style="left:${m.x}px; top:${m.top}px; width:${BW}px; height:${BH}px;"><div class="bk-tag">${esc(tag)}</div>${row('casa')}${row('fora')}</div>`;
+        return `<div class="bk-box ${m.final ? 'bk-final' : ''}" style="left:${m.x}px; top:${m.top}px; width:${BW}px; height:${BH}px;"><div class="bk-tag" style="font-size:0.76rem; top:-19px;">${esc(tag)}</div>${row('casa')}${row('fora')}</div>`;
       }).join('');
 
       const headers = ESCOLAS.map((es, si) => {
         const left = si === 0 ? 0 : startR;
         const width = si === 0 ? x0 - GAP : W - startR;
-        return `<div class="bk-head" style="left:${left}px; width:${width}px;"><img src="${es.brasao}" alt="" onerror="this.style.display='none'"><span>${esc(es.nome)}</span></div>`;
+        return `<div class="bk-head" style="left:${left}px; width:${width}px; font-size:0.95rem;"><img src="${es.brasao}" alt="" onerror="this.style.display='none'"><span>${esc(es.nome)}</span></div>`;
       }).join('');
 
       let centro;
@@ -1115,8 +1120,8 @@
             : (f0.gols_fora ?? 0) > (f0.gols_casa ?? 0) ? f0.equipe_fora_id : null;
           if (wid && eqMap[wid]) campeao = eqMap[wid].nome;
         }
-        centro = `<div class="bk-centro-top" style="left:${x0}px; top:${first.top - 40}px; width:${BW}px;">FINAL INTERESCOLAR</div>
-          <div class="bk-trofeu" style="left:${x0}px; top:${last.top + BH + 14}px; width:${BW}px;">🏆<div>${campeao ? 'CAMPEÃO<br><b>' + esc(campeao) + '</b>' : 'CAMPEÃO DOS JOGOS'}</div></div>`;
+        centro = `<div class="bk-centro-top" style="left:${x0}px; top:${first.top - 42}px; width:${BW}px;">FINAL INTERESCOLAR</div>
+          <div class="bk-trofeu" style="left:${x0}px; top:${last.top + BH + 16}px; width:${BW}px;">🏆<div>${campeao ? 'CAMPEÃO<br><b>' + esc(campeao) + '</b>' : 'CAMPEÃO DOS JOGOS'}</div></div>`;
       } else {
         centro = `<div class="bk-trofeu" style="left:${x0}px; top:${TOP + H / 2 - 50}px; width:${BW}px;">🏆<div>Final Interescolar<br>em breve</div></div>`;
       }
@@ -1124,7 +1129,6 @@
       wrap.innerHTML = `<div class="bk-scroll"><div class="bk-canvas" style="width:${W}px; height:${totalH}px;">
         <svg class="bk-lines" width="${W}" height="${totalH}">${paths}</svg>${headers}${centro}${boxes}</div></div>`;
     }
-
     function renderPublico() {
       renderProgramacaoGeral();
       renderChavePublica();

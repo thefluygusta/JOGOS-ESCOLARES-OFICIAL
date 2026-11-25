@@ -1018,19 +1018,11 @@
                   <option value="Final">Final</option>
                 </select>
               </div>
-              <div class="form-group">
+<div class="form-group">
                 <label>Chave</label>
-                <select id="partChave">
-                  <option value="">— sem chave —</option>
-                  <option value="Chave A">Chave A</option>
-                  <option value="Chave B">Chave B</option>
-                  <option value="Chave C">Chave C</option>
-                  <option value="Chave D">Chave D</option>
-                  <option value="Chave E">Chave E</option>
-                  <option value="Chave F">Chave F</option>
-                  <option value="Chave G">Chave G</option>
-                  <option value="Chave H">Chave H</option>
-                </select>
+               <select id="partChave">
+  <option value="">– sem chave –</option>
+</select>
               </div>
               <div class="form-group">
                 <label>Chave / Rodada: nº do jogo na chave</label>
@@ -1653,29 +1645,50 @@ const SUPABASE_URL = 'https://rqbcqpewvyjplqnjbkxd.supabase.co';
       ).join('');
     }
 
-    function populateSelects() {
+   function populateSelects() {
       popularLocais();
       const curJog = $('jogEquipe').value;
       const curVinc = $('vincEquipeId').value;
       const curPrem = $('premEquipe').value;
       const curGrupo = $('vincGrupoId').value;
+      const curChave = $('partChave').value;
 
       const eqOpts = state.equipes.map(e => {
         const info = escolaInfo(escolaDe(e));
-        return `<option value="${e.id}">${esc(e.nome)} (${e.modalidade || 'Futsal'} • ${e.categoria || 'Masculino'} • ${esc(info ? info.curta : escolaDe(e))})</option>`;
+        return `<option value="${e.id}">${esc(e.name)} (${e.modalidade || 'Futsal'} • ${e.categoria || 'Masculino'} • ${esc(info ? info.sigla : '')})</option>`;
       }).join('');
 
       $('jogEquipe').innerHTML = eqOpts || '<option value="">Cadastre uma equipe primeiro</option>';
       $('vincEquipeId').innerHTML = eqOpts;
       $('premEquipe').innerHTML = '<option value="">Nenhuma / Geral</option>' + eqOpts;
-      $('vincGrupoId').innerHTML = state.grupos.map(g => `<option value="${g.id}">${esc(g.nome)}</option>`).join('');
+      $('vincGrupoId').innerHTML = state.grupos.map(g => `<option value="${g.id}">${esc(g.name)}</option>`).join('');
+
+      const eqMap = Object.fromEntries(state.equipes.map(e => [e.id, e]));
+      const chavesDinamicas = state.grupos.map(g => {
+        const eqsDoGrupo = (state.grupoEquipes || [])
+          .filter(ge => ge.grupo_id == g.id)
+          .map(ge => eqMap[ge.equipe_id])
+          .filter(Boolean);
+        const mods = [...new Set(eqsDoGrupo.map(e => e.modalidade).filter(Boolean))].join('/');
+        const cats = [...new Set(eqsDoGrupo.map(e => e.categoria).filter(Boolean))].join('/');
+        const nomesEq = eqsDoGrupo.map(e => e.name).join(', ');
+        const meta = [mods, cats].filter(Boolean).join(' • ');
+        const detalhes = [meta, nomesEq].filter(Boolean).join(' — ');
+        const label = detalhes ? `${g.name} (${detalhes})` : g.name;
+        return `<option value="${esc(g.name)}">${esc(label)}</option>`;
+      });
+
+      const nomesExistentes = new Set(state.grupos.map(g => g.name));
+      const chavesPadrao = ['Chave A', 'Chave B', 'Chave C', 'Chave D', 'Chave E', 'Chave F', 'Chave G', 'Chave H']
+        .filter(c => !nomesExistentes.has(c))
+        .map(c => `<option value="${c}">${c}</option>`);
+
+      $('partChave').innerHTML = '<option value="">– sem chave –</option>' + chavesDinamicas.join('') + chavesPadrao.join('');
 
       const manter = (id, val) => { if (val && [...$(id).options].some(o => o.value === val)) $(id).value = val; };
       manter('jogEquipe', curJog); manter('vincEquipeId', curVinc);
       manter('premEquipe', curPrem); manter('vincGrupoId', curGrupo);
-
-      filtrarEquipesPartida();
-      if (!$('partEditId').value && !$('partOrdem').value) $('partOrdem').value = proximaOrdem();
+      manter('partChave', curChave);
     }
 
     // =========================================================================

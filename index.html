@@ -42,24 +42,23 @@
       overflow-x: hidden;
     }
 
-    body::before {
+body::before {
       content: "";
       position: fixed;
       top: 52%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: min(78vw, 560px);
-      height: min(78vw, 560px);
-      background-image: url('./istockphoto-1440837734-612x612.jpg');
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: contain;
+      width: min(88vw, 760px);
+      height: min(46vw, 380px);
+      background-image: url('./1001394888.jpg'), url('./1001394901.jpg');
+      background-repeat: no-repeat, no-repeat;
+      background-position: 18% center, 82% center;
+      background-size: contain, contain;
       opacity: 0.075;
       filter: drop-shadow(0 0 35px rgba(59, 130, 246, 0.45));
       pointer-events: none;
       z-index: 0;
     }
-
     .container {
       width: 100%;
       max-width: 1180px;

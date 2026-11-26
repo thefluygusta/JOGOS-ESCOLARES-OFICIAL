@@ -625,6 +625,11 @@
       <section id="tab-dashboard" class="tab-pane active">
         <div class="stats-grid">
           <div class="stat-box">
+  <div style="color:var(--muted); font-size:0.82rem;">👁️ Acessos no Portal</div>
+  <div class="stat-num" id="admTotalAcessos" style="color:var(--cyan);">0</div>
+  <div style="font-size:0.78rem; color:var(--muted);">Visitas no site público</div>
+</div>
+          <div class="stat-box">
             <div style="color:var(--muted); font-size:0.82rem;">Equipes Cadastradas</div>
             <div class="stat-num" id="statEquipes">0</div>
             <div style="font-size:0.78rem; color:var(--cyan);" id="statMissOk">0 com Miss cadastrada</div>
@@ -3427,6 +3432,16 @@ ${css}
     atualizarCamposMiss();
     popularLocais();
     initAuth();
+  // CARREGA TOTAL DE ACESSOS NO ADM
+(async function carregarAcessosAdm() {
+  try {
+    const { data } = await supabaseClient.from('site_acessos').select('total').eq('id', 1).single();
+    const el = document.getElementById('admTotalAcessos');
+    if (el && data) el.textContent = Number(data.total).toLocaleString('pt-BR');
+  } catch (e) {
+    console.warn('Erro ao carregar acessos:', e);
+  }
+})();
   </script>
 </body>
 </html>

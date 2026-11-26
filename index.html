@@ -655,6 +655,9 @@ body::before {
       <div style="font-weight:800; font-size:0.95rem;">JOGOS ESCOLARES — E. E. Profª Isaura Baia / E. E. Benedita Marilda da Silva Braga</div>
       <div style="color:var(--muted); font-size:0.82rem; margin-top:4px;">Mocajuba - Pará • Futsal • Handebol • Vôlei</div>
       <div class="creator-sign">⚡ Plataforma criada por <strong>Gustavo Nunes</strong></div>
+      <div id="boxContadorPublico" style="margin-top:8px; font-size:0.85rem; color:var(--muted);">
+      👁️ <strong id="lblAcessosPublico">...</strong> acessos ao portal
+    </div>
     </div>
   </footer>
 
@@ -1290,4 +1293,27 @@ body::before {
         carregarDadosPublicos();
       }
     }, 15000);
-  </script>
+ // CONTADOR DE ACESSOS DO PORTAL
+(async function iniciarContadorAcessos() {
+  try {
+    const jaContou = sessionStorage.getItem('je_acesso_contado');
+    let totalAtual = 0;
+
+    if (!jaContou) {
+      const { data, error } = await db.rpc('registrar_acesso');
+      if (!error && data !== null) {
+        totalAtual = data;
+        sessionStorage.setItem('je_acesso_contado', '1');
+      }
+    } else {
+      const { data } = await db.from('site_acessos').select('total').eq('id', 1).single();
+      if (data) totalAtual = data.total;
+    }
+
+    const lbl = document.getElementById('lblAcessosPublico');
+    if (lbl) lbl.textContent = Number(totalAtual).toLocaleString('pt-BR');
+  } catch (e) {
+    console.warn('Erro no contador:', e);
+  }
+})();
+</script>

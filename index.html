@@ -1014,10 +1014,15 @@ body::before {
       document.getElementById('lblChaveFiltro').textContent = `${pubState.mod} • ${pubState.cat}`;
       const eqMap = Object.fromEntries(pubState.todasEquipes.map(e => [e.id, e]));
       const cleanRef = (o) => String(o).replace(/^(venc|perd):/, '');
+
       const all = pubState.todasPartidas.filter(p =>
         (p.modalidade || 'Futsal') === pubState.mod && (p.categoria || 'Masculino') === pubState.cat &&
-        (p.origem_casa || p.origem_fora || pubState.todasPartidas.some(x => (x.origem_casa && cleanRef(x.origem_casa) === String(p.id)) || (x.origem_fora && cleanRef(x.origem_fora) === String(p.id))) || escolaPartida(p, pubState.todasEquipes) === ESCOLA_FINAL)
+        (p.origem_casa || p.origem_fora || pubState.todasPartidas.some(x =>
+          (x.origem_casa && cleanRef(x.origem_casa) === String(p.id)) ||
+          (x.origem_fora && cleanRef(x.origem_fora) === String(p.id))
+        ) || escolaPartida(p, pubState.todasEquipes) === ESCOLA_FINAL)
       );
+
       if (!all.length) {
         wrap.innerHTML = '<p style="color:var(--muted); padding:16px;">O chaveamento desta modalidade e categoria ainda não foi publicado.</p>';
         return;
@@ -1025,114 +1030,103 @@ body::before {
 
       const byId = {};
       all.forEach(p => { byId[String(p.id)] = p; });
-      const BW = 250, BH = 74, GAP = 56, COLW = BW + GAP, SLOT = BH + 36, TOP = 88;
       const srcIds = (p, ids) => [p.origem_casa, p.origem_fora].filter(Boolean)
         .map(cleanRef).filter(id => ids.has(id));
 
-      function layout(list) {
-        const ids = new Set(list.map(p => String(p.id)));
-        const referenced = new Set();
-        list.forEach(p => srcIds(p, ids).forEach(s => referenced.add(s)));
-        const info = {};
-        const visiting = new Set();
-        let leaf = 0;
-        function visit(p) {
-          const k = String(p.id);
-          if (info[k]) return info[k];
-          if (visiting.has(k)) return { round: 1, y: 0 };
-          visiting.add(k);
-          const ss = srcIds(p, ids).map(id => visit(byId[id]));
-          let r, y;
-          if (!ss.length) { r = 1; y = leaf++; }
-          else { r = 1 + Math.max(...ss.map(s => s.round)); y = ss.reduce((a, s) => a + s.y, 0) / ss.length; }
-          visiting.delete(k);
-          return (info[k] = { p, round: r, y });
-        }
-        const ordered = ordenarPartidas(list);
-        ordered.filter(p => !referenced.has(String(p.id))).forEach(visit);
-        ordered.forEach(visit);
-        const maxR = Math.max(1, ...Object.values(info).map(i => i.round));
-        return { info, leaves: leaf, maxR };
+      const ids = new Set(all.map(p => String(p.id)));
+      const info = {};
+      const visiting = new Set();
+
+      function calcRound(p) {
+        const k = String(p.id);
+        if (info[k] !== undefined) return info[k];
+        if (visiting.has(k)) return 1;
+        visiting.add(k);
+        const ss = srcIds(p, ids).map(id => calcRound(byId[id]));
+        const r = ss.length ? 1 + Math.max(...ss) : 1;
+        visiting.delete(k);
+        info[k] = r;
+        return r;
       }
 
-      const sides = ESCOLAS.map(es => layout(all.filter(p => escolaPartida(p, pubState.todasEquipes) === es.nome)));
-      const finals = ordenarPartidas(all.filter(p => escolaPartida(p, pubState.todasEquipes) === ESCOLA_FINAL));
-      const Rmax = Math.max(1, sides[0].maxR, sides[1].maxR);
-      const Lmax = Math.max(1, sides[0].leaves, sides[1].leaves);
-      const H = Lmax * SLOT;
-      const x0 = Rmax * COLW;
-      const startR = x0 + BW + GAP;
-      const W = startR + (Rmax - 1) * COLW + BW + 16;
-      const totalH = TOP + H + 160;
+      const ordered = ordenarPartidas(all);
+      ordered.forEach(calcRound);
+      const maxR = Math.max(1, ...Object.values(info));
 
-      const pos = {};
-      sides.forEach((s, si) => {
-        const off = (H - Math.max(1, s.leaves) * SLOT) / 2;
-        Object.values(s.info).forEach(i => {
-          const d = s.maxR - i.round;
-          const x = si === 0 ? (Rmax - 1 - d) * COLW : startR + d * COLW;
-          const cy = TOP + off + (i.y + 0.5) * SLOT;
-          pos[String(i.p.id)] = { x, top: cy - BH / 2, p: i.p, final: false };
-        });
-      });
-      finals.forEach((p, k) => {
-        const cy = TOP + H / 2 + (k - (finals.length - 1) / 2) * SLOT;
-        pos[String(p.id)] = { x: x0, top: cy - BH / 2, p, final: true };
-      });
+      const roundTitles = (r, total) => {
+        if (total === 1) return '🏆 Grande Final';
+        if (total === 2) return r === 1 ? '🔥 Semifinal' : '🏆 Grande Final';
+        if (total === 3) return r === 1 ? '📋 Semi de Grupo / Chaves' : r === 2 ? '🔥 Semifinal' : '🏆 Grande Final';
+        if (r === total) return '🏆 Grande Final';
+        if (r === total - 1) return '🔥 Semifinal';
+        if (r === total - 2) return '⚡ Semi de Grupo';
+        return '📋 Chaves / Classificatória';
+      };
 
-      let paths = '';
-      Object.values(pos).forEach(m => {
-        [[m.p.origem_casa, 0.25], [m.p.origem_fora, 0.75]].forEach(([og, frac]) => {
-          if (!og) return;
-          const s = pos[cleanRef(og)];
-          if (!s) return;
-          const y1 = s.top + BH / 2, y2 = m.top + BH * frac;
-          const x1 = s.x < m.x ? s.x + BW : s.x;
-          const x2 = s.x < m.x ? m.x : m.x + BW;
-          const xm = (x1 + x2) / 2;
-          paths += `<path d="M${x1} ${y1} H${xm} V${y2} H${x2}" />`;
-        });
-      });
+      const colsHtml = [];
+      for (let r = 1; r <= maxR; r++) {
+        const jogosRodada = ordered.filter(p => info[String(p.id)] === r);
+        if (!jogosRodada.length) continue;
 
-      const boxes = Object.values(pos).map(m => {
-        const p = m.p;
-        const fin = p.status === 'finalizada';
-        const gc = p.gols_casa ?? 0, gf = p.gols_fora ?? 0;
-        const win = fin ? (gc > gf ? 'casa' : gf > gc ? 'fora' : '') : '';
-        const row = (lado) => {
-          const x = ladoInfo(p, lado, eqMap, false, pubState.todasPartidas, pubState.todasEquipes);
-          const sc = (fin || p.status === 'ao_vivo') ? (lado === 'casa' ? gc : gf) : '';
-          return `<div class="bk-row ${x.tbd ? 'bk-tbd' : ''} ${win === lado ? 'bk-win' : ''}" style="font-size:0.92rem;"><span class="bk-n" title="${esc(x.nome)}">${esc(x.nome)}</span><b class="bk-s">${sc}</b></div>`;
-        };
-        const d = toBelemDate(p.data_hora);
-        const tag = `${p.ordem_jogo ? p.ordem_jogo + 'º Jogo' : 'Jogo'}${p.turno ? ' • ' + p.turno : ''}${d ? ' • ' + fmtDiaCurto(d) + ' ' + fmtHora(d) : ''}`;
-        return `<div class="bk-box ${m.final ? 'bk-final' : ''}" style="left:${m.x}px; top:${m.top}px; width:${BW}px; height:${BH}px;"><div class="bk-tag" style="font-size:0.76rem; top:-19px;">${esc(tag)}</div>${row('casa')}${row('fora')}</div>`;
-      }).join('');
+        const isFinalCol = (r === maxR && maxR > 1);
+        const cardsHtml = jogosRodada.map(p => {
+          const fin = p.status === 'finalizada';
+          const gc = p.gols_casa ?? 0, gf = p.gols_fora ?? 0;
+          const win = fin ? (gc > gf ? 'casa' : gf > gc ? 'fora' : '') : '';
+          const isWO = fin && ((gc === 3 && gf === 0) || (gc === 0 && gf === 3));
 
-      const headers = ESCOLAS.map((es, si) => {
-        const left = si === 0 ? 0 : startR;
-        const width = si === 0 ? x0 - GAP : W - startR;
-        return `<div class="bk-head" style="left:${left}px; width:${width}px; font-size:0.95rem;"><img src="${es.brasao}" alt="" onerror="this.style.display='none'"><span>${esc(es.nome)}</span></div>`;
-      }).join('');
+          const row = (lado) => {
+            const x = ladoInfo(p, lado, eqMap, false, pubState.todasPartidas, pubState.todasEquipes);
+            const sc = (fin || p.status === 'ao_vivo') ? (lado === 'casa' ? gc : gf) : '';
+            return `
+              <div class="bk-row ${x.tbd ? 'bk-tbd' : ''} ${win === lado ? 'bk-win' : ''}" style="font-size:0.9rem;">
+                <span class="bk-n" title="${esc(x.nome)}">${esc(x.nome)}</span>
+                <b class="bk-s">${sc}</b>
+              </div>`;
+          };
 
-      let centro;
-      if (finals.length) {
-        const first = pos[String(finals[0].id)], last = pos[String(finals[finals.length - 1].id)];
-        const f0 = finals[0];
-        let campeao = '';
-        if (f0.status === 'finalizada') {
-          const wid = (f0.gols_casa ?? 0) > (f0.gols_fora ?? 0) ? f0.equipe_casa_id
-            : (f0.gols_fora ?? 0) > (f0.gols_casa ?? 0) ? f0.equipe_fora_id : null;
-          if (wid && eqMap[wid]) campeao = eqMap[wid].nome;
-        }
-        centro = `<div class="bk-centro-top" style="left:${x0}px; top:${first.top - 42}px; width:${BW}px;">FINAL INTERESCOLAR</div>
-          <div class="bk-trofeu" style="left:${x0}px; top:${last.top + BH + 16}px; width:${BW}px;">🏆<div>${campeao ? 'CAMPEÃO<br><b>' + esc(campeao) + '</b>' : 'CAMPEÃO DOS JOGOS'}</div></div>`;
-      } else {
-        centro = `<div class="bk-trofeu" style="left:${x0}px; top:${TOP + H / 2 - 50}px; width:${BW}px;">🏆<div>Final Interescolar<br>em breve</div></div>`;
+          const d = toBelemDate(p.data_hora);
+          const tag = `${p.ordem_jogo ? p.ordem_jogo + 'º Jogo' : 'Jogo'}${p.turno ? ' • ' + p.turno : ''}${d ? ' • ' + fmtDiaCurto(d) + ' ' + fmtHora(d) : ''}`;
+          const woBadge = isWO ? `<span style="background:rgba(245,158,11,0.18); color:#fbbf24; border:1px solid rgba(245,158,11,0.45); padding:1px 6px; border-radius:999px; font-size:0.68rem; font-weight:700; margin-left:6px;">W.O.</span>` : '';
+
+          let campeaoBanner = '';
+          if (isFinalCol && fin && win) {
+            const wid = win === 'casa' ? p.equipe_casa_id : p.equipe_fora_id;
+            const nomeCamp = wid && eqMap[wid] ? eqMap[wid].nome : '';
+            if (nomeCamp) {
+              campeaoBanner = `<div style="margin-top:8px; padding:6px 10px; border-radius:8px; background:linear-gradient(135deg, rgba(250,204,21,0.2), rgba(245,158,11,0.1)); border:1px solid rgba(250,204,21,0.45); color:#fde047; font-size:0.8rem; font-weight:800; text-align:center;">🏆 CAMPEÃO: ${esc(nomeCamp)}</div>`;
+            }
+          }
+
+          return `
+            <div style="background:var(--bg-panel, #0d1224); border:1px solid ${isFinalCol ? 'rgba(250,204,21,0.45)' : 'rgba(255,255,255,0.09)'}; border-radius:12px; padding:10px 12px; box-shadow:0 4px 14px rgba(0,0,0,0.25);">
+              <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.73rem; color:var(--muted); margin-bottom:6px;">
+                <span>${esc(tag)}</span>
+                ${woBadge}
+              </div>
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                ${row('casa')}
+                ${row('fora')}
+              </div>
+              ${campeaoBanner}
+            </div>`;
+        }).join('');
+
+        colsHtml.push(`
+          <div style="min-width:270px; flex:1 1 270px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.07); border-radius:14px; padding:12px; display:flex; flex-direction:column; gap:10px;">
+            <div style="font-weight:800; font-size:0.9rem; color:var(--gold, #facc15); padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.08); text-transform:uppercase; letter-spacing:0.4px;">
+              ${roundTitles(r, maxR)}
+            </div>
+            ${cardsHtml}
+          </div>
+        `);
       }
 
-      wrap.innerHTML = `<div class="bk-scroll"><div class="bk-canvas" style="width:${W}px; height:${totalH}px;">
-        <svg class="bk-lines" width="${W}" height="${totalH}">${paths}</svg>${headers}${centro}${boxes}</div></div>`;
+      wrap.innerHTML = `
+        <div style="display:flex; gap:16px; overflow-x:auto; align-items:flex-start; padding:6px 2px 12px;">
+          ${colsHtml.join('')}
+        </div>
+      `;
     }
     function renderPublico() {
       renderProgramacaoGeral();

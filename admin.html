@@ -1347,6 +1347,10 @@
           <label id="lblFora">Visitante</label>
           <input type="number" id="editGolsFora" min="0" value="0" oninput="togglePenaltis()" />
         </div>
+        <div style="display:flex; gap:8px; margin:10px 0 14px; flex-wrap:wrap;">
+          <button type="button" class="btn btn-ghost btn-sm" style="flex:1; border-color:#f59e0b; color:#fbbf24;" onclick="aplicarWO('casa')">⚠️ W.O. Casa (3x0)</button>
+          <button type="button" class="btn btn-ghost btn-sm" style="flex:1; border-color:#f59e0b; color:#fbbf24;" onclick="aplicarWO('fora')">⚠️ W.O. Fora (0x3)</button>
+        </div>
         <div class="form-group">
           <label>Status do Jogo</label>
           <select id="editPartStatus" onchange="togglePenaltis()">
@@ -2438,6 +2442,18 @@ alter table noticias add column if not exists pdf_url text;`;
       $('editPartStatus').value = p.status || 'finalizada';
       togglePenaltis();
       openModal('modalPlacar');
+    }
+    function aplicarWO(lado) {
+      if (lado === 'casa') {
+        $('editGolsCasa').value = 3;
+        $('editGolsFora').value = 0;
+      } else {
+        $('editGolsCasa').value = 0;
+        $('editGolsFora').value = 3;
+      }
+      $('editPartStatus').value = 'finalizada';
+      togglePenaltis();
+      toast('Placar de W.O. (3x0) preenchido! Clique em Salvar para confirmar.');
     }
 
     function togglePenaltis() {

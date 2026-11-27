@@ -921,8 +921,11 @@ body::before {
               ${mostrarBadgesGerais ? `<span class="badge ${isBenedita ? 'b-benedita' : 'b-teal'}">${escObj ? `<img src="${escObj.brasao}" class="brasao-mini" onerror="this.style.display='none'">` : ''}${esc(escCurta)}</span>` : ''}
               ${p.turno ? `<span class="badge ${p.turno === 'Tarde' ? 'b-purple' : 'b-blue'}">${p.turno === 'Tarde' ? '🌇' : '🌅'} ${esc(p.turno)}</span>` : ''}
             </div>
-            <span class="badge ${p.status === 'finalizada' ? 'b-green' : p.status === 'ao_vivo' ? 'b-red' : 'b-blue'}">${esc(p.status)}</span>
-          </div>
+<div style="display:flex; gap:6px; align-items:center;">
+              <span class="badge ${p.status === 'finalizada' ? 'b-green' : p.status === 'ao_vivo' ? 'b-red' : 'b-blue'}">${esc(p.status || 'agendada')}</span>
+              ${(p.status === 'finalizada' && ((Number(p.gols_casa) === 3 && Number(p.gols_fora) === 0) || (Number(p.gols_casa) === 0 && Number(p.gols_fora) === 3))) ? '<span class="badge b-gold">⚠️ W.O.</span>' : ''}
+            </div>
+            </div>
           <div style="font-size:0.76rem; color:var(--muted); margin-top:8px;">
             ${mostrarBadgesGerais ? `<strong style="color:var(--cyan);">${esc(p.modalidade || 'Futsal')} • ${esc(p.categoria || 'Masculino')}</strong> • ` : ''}
             ${esc((p.fase === 'Fase de Grupos' ? 'Classificatória' : p.fase) || 'Classificatória')}${p.chave ? ' • ' + esc(p.chave) + (p.jogo_chave ? ' / ' + p.jogo_chave + 'º jogo' : '') : ''}
